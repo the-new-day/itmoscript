@@ -76,7 +76,7 @@ TEST(BranchTestSuite, OneLineIfTest) {
 
 TEST(LoopTestSuit, ForLoop) {
     std::string code = R"(
-        for i in range(5)
+        for i in range(0,5,1)
             print(i)
         end for
     )";
