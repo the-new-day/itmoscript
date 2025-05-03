@@ -19,6 +19,9 @@ public:
     // Checks if ch can be a part of an identifier (not the beginning!)
     static bool IsIdentifierChar(char ch);
 
+    // Checks if ch can be a beginning of an identifier
+    static bool IsIdentifierBegin(char ch);
+
     // If word is a keyword, returns it with a corresponding TokenType.
     // Otherwise, returns word with TokeyType::kIdentifier type
     static Token LookupIdentifier(const std::string& word);

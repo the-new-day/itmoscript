@@ -12,24 +12,24 @@ enum class TokenType {
 
     kIdentifier,
 
-    // literals
+    // Literals
     kInt,
     kFloat,
 
-    // assignment operators
+    // Assignment operators
     kAssing,
     kPlusAssign,
     kMinusAssign,
     kAsteriskAssign,
     kSlashAssign,
 
-    // ariphmetic operators
+    // Ariphmetic operators
     kPlus,
     kMinus,
     kAsterisk,
     kSlash,
 
-    // logical operators
+    // Logical operators
     kLess,
     kGreater,
     kBang,
@@ -38,7 +38,7 @@ enum class TokenType {
     kEqual,
     kNotEqual,
 
-    // punctuation
+    // Punctuation
     kPoint,
     kComma,
     kLParen,
@@ -46,7 +46,7 @@ enum class TokenType {
     kLBracket,
     kRBracket,
 
-    // keywords
+    // Keywords
     kFunction,
     kEnd,
     kReturn,
@@ -58,7 +58,7 @@ enum class TokenType {
     kFor,
     kWhile,
 
-    // keywords-literals
+    // Keywords-literals
     kTrue,
     kFalse,
     kNil,
@@ -75,7 +75,7 @@ struct Token {
     }
 };
 
-const std::map<char, TokenType> kOneCharTokens{
+static const std::map<char, TokenType> kOneCharTokens{
     {'=', TokenType::kAssing},
     {'+', TokenType::kPlus},
     {'-', TokenType::kMinus},
@@ -93,11 +93,11 @@ const std::map<char, TokenType> kOneCharTokens{
     {EOF, TokenType::kEOF},
 };
 
-const std::set<char> kCompoundOpStarters = {
+static const std::set<char> kCompoundOpStarters = {
     '=', '+', '-', '*', '/', '<', '>', '!'
 };
 
-const std::map<std::string, TokenType> kCompoundOperators{
+static const std::map<std::string, TokenType> kCompoundOperators{
     {"==", TokenType::kEqual},
     {"+=", TokenType::kPlusAssign},
     {"-=", TokenType::kMinusAssign},
@@ -108,7 +108,7 @@ const std::map<std::string, TokenType> kCompoundOperators{
     {"!=", TokenType::kNotEqual},
 };
 
-const std::map<std::string, TokenType> kKeywords{
+static const std::map<std::string, TokenType> kKeywords{
     {"function", TokenType::kFunction},
     {"end", TokenType::kEnd},
     {"nil", TokenType::kNil},
@@ -122,6 +122,64 @@ const std::map<std::string, TokenType> kKeywords{
     {"else", TokenType::kElse},
     {"for", TokenType::kFor},
     {"while", TokenType::kWhile},
+};
+
+static const std::map<TokenType, std::string> kTokenTypeNames = {
+    {TokenType::kIllegal, "ILLEGAL"},
+    {TokenType::kEOF, "EOF"},
+
+    {TokenType::kIdentifier, "IDENTIFIER"},
+
+    // Literals
+    {TokenType::kInt, "INT"},
+    {TokenType::kFloat, "FLOAT"},
+
+    // Assignment operators
+    {TokenType::kAssing, "="},
+    {TokenType::kPlusAssign, "+="},
+    {TokenType::kMinusAssign, "-="},
+    {TokenType::kAsteriskAssign, "*="},
+    {TokenType::kSlashAssign, "/="},
+
+    // Ariphmetic operators
+    {TokenType::kPlus, "+"},
+    {TokenType::kMinus, "-"},
+    {TokenType::kAsterisk, "*"},
+    {TokenType::kSlash, "/"},
+
+    // Logical operators
+    {TokenType::kLess, "<"},
+    {TokenType::kGreater, ">"},
+    {TokenType::kBang, "!"},
+    {TokenType::kLessOrEqual, "<="},
+    {TokenType::kGreaterOrEqual, ">="},
+    {TokenType::kEqual, "=="},
+    {TokenType::kNotEqual, "!="},
+
+    // Punctuation
+    {TokenType::kPoint, "."},
+    {TokenType::kComma, ","},
+    {TokenType::kLParen, "("},
+    {TokenType::kRParen, ")"},
+    {TokenType::kLBracket, "["},
+    {TokenType::kRBracket, "]"},
+
+    // Keywords
+    {TokenType::kFunction, "FUNCTION"},
+    {TokenType::kEnd, "END"},
+    {TokenType::kReturn, "RETURN"},
+    {TokenType::kOr, "OR"},
+    {TokenType::kAnd, "AND"},
+    {TokenType::kNot, "NOT"},
+    {TokenType::kIf, "IF"},
+    {TokenType::kElse, "ELSE"},
+    {TokenType::kFor, "FOR"},
+    {TokenType::kWhile, "WHILE"},
+
+    // Keywords-literals
+    {TokenType::kTrue, "TRUE"},
+    {TokenType::kFalse, "FALSE"},
+    {TokenType::kNil, "NIL"}
 };
 
 } // namespace ItmoScript

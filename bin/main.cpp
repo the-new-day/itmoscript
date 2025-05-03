@@ -4,24 +4,12 @@
 #include <lib/interpreter.hpp>
 
 int main(int argc, char** argv) {
-    std::string code = R"(
-        incr = function(value)
-            // 239 239 end end 42
-            return value + 1
-        end function // 239 239
-    )";
+    std::cout << "ITMOScript super-duper-mega language." << std::endl;
+    std::cout << "Interactive mode. Yes." << std::endl;
 
-    ItmoScript::Lexer lexer{code};
+    ItmoScript::REPL repl;
+    repl.Start(std::cin, std::cout);
 
-    std::vector<ItmoScript::Token> tokens;
-    
-    while (lexer.HasNextToken()) {
-        tokens.push_back(lexer.GetNextToken());
-    }
-
-    for (const auto& token : tokens) {
-        std::cout << static_cast<int>(token.type) << ": " << token.literal << std::endl;
-    }
-
+    std::cout << std::endl << "FINE. I'M LEAVING." << std::endl;
     return 0;
 }

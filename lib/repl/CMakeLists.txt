@@ -1,0 +1,2 @@
+add_library(itmoscript_repl REPL.cpp)
+target_link_libraries(itmoscript_repl itmoscript_lexer)

@@ -61,13 +61,31 @@ TEST(LexerTestSuite, ReadIntAndFloat) {
     CompareTokens(lexer, expected);
 }
 
-TEST(LexerTestSuite, IdentifiersAssignment) {
-    std::string code = "number_1 = number_2";
+TEST(LexerTestSuite, OneCharIdentiriers) {
+    std::string code = "a b c d e f";
 
     ItmoScript::Lexer lexer{code};
 
     std::vector<ItmoScript::Token> expected = {
-        {TT::kIdentifier, "number_1"},
+        {TT::kIdentifier, "a"},
+        {TT::kIdentifier, "b"},
+        {TT::kIdentifier, "c"},
+        {TT::kIdentifier, "d"},
+        {TT::kIdentifier, "e"},
+        {TT::kIdentifier, "f"},
+    };
+
+    expected.push_back({.type = TT::kEOF});
+    CompareTokens(lexer, expected);
+}
+
+TEST(LexerTestSuite, IdentifiersAssignment) {
+    std::string code = "n = number_2";
+
+    ItmoScript::Lexer lexer{code};
+
+    std::vector<ItmoScript::Token> expected = {
+        {TT::kIdentifier, "n"},
         {TT::kAssing, "="},
         {TT::kIdentifier, "number_2"},
     };

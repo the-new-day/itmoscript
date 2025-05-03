@@ -22,13 +22,13 @@ Token Lexer::GetNextToken() {
         token = {.type = TokenType::kEOF};
     } else if (kOneCharTokens.contains(current)) {
         token = ReadCompoundToken();
-    } else if (std::isalpha(current)) {
+    } else if (IsIdentifierBegin(current)) {
         std::string word = ReadWord();
         token = LookupIdentifier(word);
     } else if (std::isdigit(current)) {
         token = Token{.type = TokenType::kInt, .literal = ReadNumber()};
     } else {
-        token = Token{.type = TokenType::kIllegal};
+        token = Token{.type = TokenType::kIllegal, .literal = std::string{current}};
     }
 
     last_token_ = token;
@@ -80,10 +80,6 @@ void Lexer::SkipComments() {
 }
 
 std::string Lexer::ReadWord() {
-    if (!HasNextToken()) {
-        return std::string{};
-    }
-
     auto next_nonalnum = std::find_if(
         code_.begin() + read_pos_, 
         code_.end(), 
@@ -96,10 +92,6 @@ std::string Lexer::ReadWord() {
 }
 
 std::string Lexer::ReadNumber() {
-    if (!HasNextToken()) {
-        return std::string{};
-    }
-
     auto next_nondigit = std::find_if(
         code_.begin() + read_pos_, 
         code_.end(), 
@@ -122,6 +114,10 @@ Token Lexer::LookupIdentifier(const std::string& word) {
 
 bool Lexer::IsIdentifierChar(char ch) {
     return std::isalnum(ch) || ch == '_';
+}
+
+bool Lexer::IsIdentifierBegin(char ch) {
+    return std::isalpha(ch) || ch == '_';
 }
 
 } // namespace ItmoScript
