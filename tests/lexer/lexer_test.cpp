@@ -158,3 +158,32 @@ TEST(LexerTestSuite, BasicOperatorsUsage) {
 
     CompareTokens(lexer, expected);
 }
+
+TEST(LexerTestSuite, IgnoringComments) {
+    std::string code = R"(
+        incr = function(value)
+            // 239 239 end end 42
+            return value + 1
+        end function // 239 239
+    )";
+
+    ItmoScript::Lexer lexer{code};
+
+    std::vector<ItmoScript::Token> expected = {
+        {TT::kIdentifier, "incr"},
+        {TT::kAssing, "="},
+        {TT::kFunction, "function"},
+        {TT::kLParen, "("},
+        {TT::kIdentifier, "value"},
+        {TT::kRParen, ")"},
+        {TT::kReturn, "return"},
+        {TT::kIdentifier, "value"},
+        {TT::kPlus, "+"},
+        {TT::kInt, "1"},
+        {TT::kEnd, "end"},
+        {TT::kFunction, "function"},
+        {TT::kEOF, ""}
+    };
+
+    CompareTokens(lexer, expected);
+}

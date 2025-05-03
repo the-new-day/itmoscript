@@ -38,6 +38,7 @@ enum class TokenType {
     kEqual,
     kNotEqual,
 
+    // punctuation
     kPoint,
     kComma,
     kLParen,
@@ -66,8 +67,12 @@ enum class TokenType {
 struct Token {
     TokenType type;
     std::string literal;
+    size_t line;
+    size_t column;
 
-    bool operator==(const Token& other) const = default;
+    bool operator==(const Token& other) const {
+        return type == other.type && literal == other.literal;
+    }
 };
 
 const std::map<char, TokenType> kOneCharTokens{

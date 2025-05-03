@@ -5,22 +5,27 @@
 namespace ItmoScript {
 
 Token Lexer::GetNextToken() {
-    char last_char = ' ';
+    char current = ReadChar();
 
-    while (std::isspace(last_char)) {
-        last_char = ReadChar();
+    while (std::isspace(current)) {
+        current = ReadChar();
+    }
+
+    if (current == '/' && PeekChar() == '/') {
+        SkipComments();
+        return GetNextToken();
     }
 
     Token token;
 
-    if (last_char == EOF) {
+    if (current == EOF) {
         token = {.type = TokenType::kEOF};
-    } else if (kOneCharTokens.contains(last_char)) {
-        token = ReadOperator();
-    } else if (std::isalpha(last_char)) {
+    } else if (kOneCharTokens.contains(current)) {
+        token = ReadCompoundToken();
+    } else if (std::isalpha(current)) {
         std::string word = ReadWord();
         token = LookupIdentifier(word);
-    } else if (std::isdigit(last_char)) {
+    } else if (std::isdigit(current)) {
         token = Token{.type = TokenType::kInt, .literal = ReadNumber()};
     } else {
         token = Token{.type = TokenType::kIllegal};
@@ -48,22 +53,30 @@ char Lexer::PeekChar() const {
     return code_[read_pos_];
 }
 
-Token Lexer::ReadOperator() {
-    char last_char = code_[read_pos_ - 1];
+Token Lexer::ReadCompoundToken() {
+    char current = code_[read_pos_ - 1];
 
-    if (HasNextToken() && kCompoundOpStarters.contains(last_char)) {
+    if (HasNextToken() && kCompoundOpStarters.contains(current)) {
         char next_char = code_[read_pos_];
-        std::string op = std::string{last_char, next_char};
+        std::string op = std::string{current, next_char};
 
         if (kCompoundOperators.contains(op)) {
             ++read_pos_;
             return Token{.type = kCompoundOperators.at(op), .literal = op};
         }
 
-        return Token{.type = kOneCharTokens.at(last_char), .literal = std::string{last_char}};
+        return Token{.type = kOneCharTokens.at(current), .literal = std::string{current}};
     }
 
-    return Token{.type = kOneCharTokens.at(last_char), .literal = std::string{last_char}};
+    return Token{.type = kOneCharTokens.at(current), .literal = std::string{current}};
+}
+
+void Lexer::SkipComments() {
+    while (PeekChar() != '\n' && PeekChar() != EOF) {
+        ReadChar();
+    }
+
+    if (PeekChar() == '\n') ReadChar();
 }
 
 std::string Lexer::ReadWord() {

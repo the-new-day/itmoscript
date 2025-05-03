@@ -6,8 +6,9 @@
 int main(int argc, char** argv) {
     std::string code = R"(
         incr = function(value)
+            // 239 239 end end 42
             return value + 1
-        end function
+        end function // 239 239
     )";
 
     ItmoScript::Lexer lexer{code};
@@ -18,8 +19,8 @@ int main(int argc, char** argv) {
         tokens.push_back(lexer.GetNextToken());
     }
 
-    for (const auto& [type, literal] : tokens) {
-        std::cout << literal << std::endl;
+    for (const auto& token : tokens) {
+        std::cout << static_cast<int>(token.type) << ": " << token.literal << std::endl;
     }
 
     return 0;
