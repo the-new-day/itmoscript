@@ -6,11 +6,10 @@
 
 namespace ItmoScript {
 
-const std::string kReplPrompt = ">> ";
+const std::string kReplPrompt = ">>> ";
 
 class REPL {
 public:
-
     void Start(std::istream& input, std::ostream& output);
 
 private:

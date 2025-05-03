@@ -1,32 +1,4 @@
-#include <lib/lexer/Lexer.hpp>
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-
-#include <sstream>
-
-using TT = ItmoScript::TokenType;
-
-void CompareTokens(ItmoScript::Lexer& lexer, const std::vector<ItmoScript::Token>& expected) {
-    std::vector<ItmoScript::Token> tokens;
-
-    while (lexer.HasNextToken()) {
-        tokens.push_back(lexer.GetNextToken());
-    }
-
-    if (!tokens.empty() && tokens.back().type != TT::kEOF) {
-        tokens.push_back({.type = TT::kEOF});
-    }
-    
-    ASSERT_EQ(tokens.size(), expected.size());
-
-    for (size_t i = 0; i < tokens.size(); ++i) {
-        ItmoScript::Token real_token = tokens[i];
-        ItmoScript::Token expected_token = expected[i];
-
-        ASSERT_EQ(real_token.type, expected_token.type);
-        ASSERT_EQ(real_token.literal, expected_token.literal);
-    }
-}
+#include "lexer_test.hpp"
 
 TEST(LexerTestSuite, OneCharToken) {
     std::string code;
@@ -42,22 +14,6 @@ TEST(LexerTestSuite, OneCharToken) {
 
     expected.push_back({.type = TT::kEOF});
     ItmoScript::Lexer lexer{code};
-    CompareTokens(lexer, expected);
-}
-
-TEST(LexerTestSuite, ReadIntAndFloat) {
-    std::string code = "123 9.1 33.091234 900";
-
-    ItmoScript::Lexer lexer{code};
-
-    std::vector<ItmoScript::Token> expected = {
-        {TT::kInt, "123"},
-        {TT::kFloat, "9.1"},
-        {TT::kFloat, "33.091234"},
-        {TT::kInt, "900"}
-    };
-
-    expected.push_back({.type = TT::kEOF});
     CompareTokens(lexer, expected);
 }
 
@@ -179,6 +135,8 @@ TEST(LexerTestSuite, BasicOperatorsUsage) {
 
 TEST(LexerTestSuite, IgnoringComments) {
     std::string code = R"(
+        // very important function
+        // very-very important function!!
         incr = function(value)
             // 239 239 end end 42
             return value + 1

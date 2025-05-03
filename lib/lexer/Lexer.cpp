@@ -12,7 +12,7 @@ Token Lexer::GetNextToken() {
     }
 
     if (current == '/' && PeekChar() == '/') {
-        SkipComments();
+        SkipComment();
         return GetNextToken();
     }
 
@@ -26,7 +26,7 @@ Token Lexer::GetNextToken() {
         std::string word = ReadWord();
         token = LookupIdentifier(word);
     } else if (std::isdigit(current)) {
-        token = Token{.type = TokenType::kInt, .literal = ReadNumber()};
+        token = ReadNumber();
     } else {
         token = Token{.type = TokenType::kIllegal, .literal = std::string{current}};
     }
@@ -71,7 +71,7 @@ Token Lexer::ReadCompoundToken() {
     return Token{.type = kOneCharTokens.at(current), .literal = std::string{current}};
 }
 
-void Lexer::SkipComments() {
+void Lexer::SkipComment() {
     while (PeekChar() != '\n' && PeekChar() != EOF) {
         ReadChar();
     }
@@ -91,17 +91,33 @@ std::string Lexer::ReadWord() {
     return word;
 }
 
-std::string Lexer::ReadNumber() {
-    auto next_nondigit = std::find_if(
+Token Lexer::ReadNumber() {
+    auto not_digit = [](char ch) { return !std::isdigit(ch); };
+
+    auto next_token_char = std::find_if(
         code_.begin() + read_pos_, 
         code_.end(), 
-        [](char ch) { return !std::isdigit(ch); }
+        not_digit
     );
 
-    std::string word = std::string(code_.begin() + read_pos_ - 1, next_nondigit);
+    std::string word = std::string(code_.begin() + read_pos_ - 1, next_token_char);
     read_pos_ += word.size() - 1;
 
-    return word;
+    TokenType type = TokenType::kInt;
+
+    if (next_token_char != code_.end() && *next_token_char == '.') {
+        next_token_char = std::find_if(
+            code_.begin() + read_pos_ + 1, 
+            code_.end(), 
+            not_digit
+        );
+
+        word += std::string(code_.begin() + read_pos_, next_token_char);
+        read_pos_ += word.size() - 1;
+        type = TokenType::kFloat;
+    }
+
+    return {.type = type, .literal = word};
 }
 
 Token Lexer::LookupIdentifier(const std::string& word) {

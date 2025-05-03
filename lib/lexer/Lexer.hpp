@@ -34,13 +34,13 @@ private:
     char ReadChar();
     char PeekChar() const;
     std::string ReadWord();
-    std::string ReadNumber();
+    Token ReadNumber();
 
     // If last read character was a compound operator starter, tries to read compound operator and return it as a token.
     // If fails, returns the last read character as a token.
     Token ReadCompoundToken();
 
-    void SkipComments();
+    void SkipComment();
 };
     
 } // namespace ItmoScript

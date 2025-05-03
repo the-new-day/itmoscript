@@ -10,6 +10,5 @@ int main(int argc, char** argv) {
     ItmoScript::REPL repl;
     repl.Start(std::cin, std::cout);
 
-    std::cout << std::endl << "FINE. I'M LEAVING." << std::endl;
     return 0;
 }

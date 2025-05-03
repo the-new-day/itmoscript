@@ -135,34 +135,34 @@ static const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kFloat, "FLOAT"},
 
     // Assignment operators
-    {TokenType::kAssing, "="},
-    {TokenType::kPlusAssign, "+="},
-    {TokenType::kMinusAssign, "-="},
-    {TokenType::kAsteriskAssign, "*="},
-    {TokenType::kSlashAssign, "/="},
+    {TokenType::kAssing, "ASSIGN"},
+    {TokenType::kPlusAssign, "PLUS_ASSIGN"},
+    {TokenType::kMinusAssign, "MINUS_ASSIGN"},
+    {TokenType::kAsteriskAssign, "ASTERISK_ASSIGN"},
+    {TokenType::kSlashAssign, "SLASH_ASSIGN"},
 
     // Ariphmetic operators
-    {TokenType::kPlus, "+"},
-    {TokenType::kMinus, "-"},
-    {TokenType::kAsterisk, "*"},
-    {TokenType::kSlash, "/"},
+    {TokenType::kPlus, "PLUS"},
+    {TokenType::kMinus, "MINUS"},
+    {TokenType::kAsterisk, "ASTERISK"},
+    {TokenType::kSlash, "SLASH"},
 
     // Logical operators
-    {TokenType::kLess, "<"},
-    {TokenType::kGreater, ">"},
-    {TokenType::kBang, "!"},
-    {TokenType::kLessOrEqual, "<="},
-    {TokenType::kGreaterOrEqual, ">="},
-    {TokenType::kEqual, "=="},
-    {TokenType::kNotEqual, "!="},
+    {TokenType::kLess, "LESS"},
+    {TokenType::kGreater, "GREATER"},
+    {TokenType::kBang, "BANG"},
+    {TokenType::kLessOrEqual, "LESS_OR_EQUAL"},
+    {TokenType::kGreaterOrEqual, "GREATER_OR_EQUAL"},
+    {TokenType::kEqual, "EQUAL"},
+    {TokenType::kNotEqual, "NOT_EQUAL"},
 
     // Punctuation
-    {TokenType::kPoint, "."},
-    {TokenType::kComma, ","},
-    {TokenType::kLParen, "("},
-    {TokenType::kRParen, ")"},
-    {TokenType::kLBracket, "["},
-    {TokenType::kRBracket, "]"},
+    {TokenType::kPoint, "POINT"},
+    {TokenType::kComma, "COMMA"},
+    {TokenType::kLParen, "L_PAREN"},
+    {TokenType::kRParen, "R_PAREN"},
+    {TokenType::kLBracket, "L_BRACKET"},
+    {TokenType::kRBracket, "R_BRACKET"},
 
     // Keywords
     {TokenType::kFunction, "FUNCTION"},

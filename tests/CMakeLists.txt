@@ -19,6 +19,7 @@ add_executable(
   loop_and_branch_test.cpp
   illegal_ops_test.cpp
   lexer/lexer_test.cpp
+  lexer/numbers_parsing_test.cpp
 )
 
 target_link_libraries(
