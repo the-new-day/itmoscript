@@ -4,37 +4,17 @@
 
 #include <sstream>
 
-TEST(LexerTestSuite, OneCharToken) {
-    std::string code = "=+()[],";
+using TT = ItmoScript::TokenType;
 
-    ItmoScript::Lexer lexer{code};
-
-    ASSERT_EQ(lexer.GetNextToken().type, ItmoScript::TokenType::kAssing);
-    ASSERT_EQ(lexer.GetNextToken().type, ItmoScript::TokenType::kPlus);
-    ASSERT_EQ(lexer.GetNextToken().type, ItmoScript::TokenType::kLParen);
-    ASSERT_EQ(lexer.GetNextToken().type, ItmoScript::TokenType::kRParen);
-    ASSERT_EQ(lexer.GetNextToken().type, ItmoScript::TokenType::kLBracket);
-    ASSERT_EQ(lexer.GetNextToken().type, ItmoScript::TokenType::kRBracket);
-    ASSERT_EQ(lexer.GetNextToken().type, ItmoScript::TokenType::kComma);
-}
-
-TEST(LexerTestSuite, ReadIntAndFloat) {
-    std::string code = "123 9.1 33.091234 900";
-
-    ItmoScript::Lexer lexer{code};
-    using TT = ItmoScript::TokenType;
-
-    std::vector<ItmoScript::Token> expected = {
-        {TT::kInt, "123"},
-        {TT::kFloat, "9.1"},
-        {TT::kFloat, "33.091234"},
-        {TT::kInt, "900"}
-    };
-
+void CompareTokens(ItmoScript::Lexer& lexer, const std::vector<ItmoScript::Token>& expected) {
     std::vector<ItmoScript::Token> tokens;
 
     while (lexer.HasNextToken()) {
         tokens.push_back(lexer.GetNextToken());
+    }
+
+    if (!tokens.empty() && tokens.back().type != TT::kEOF) {
+        tokens.push_back({.type = TT::kEOF});
     }
     
     ASSERT_EQ(tokens.size(), expected.size());
@@ -48,23 +28,52 @@ TEST(LexerTestSuite, ReadIntAndFloat) {
     }
 }
 
+TEST(LexerTestSuite, OneCharToken) {
+    std::string code;
+    std::vector<ItmoScript::Token> expected;
+
+    for (const auto& [token, type] : ItmoScript::kOneCharTokens) {
+        if (type == TT::kEOF) continue;
+
+        expected.push_back({.type = type, .literal = std::string{token}});
+        code += token;
+        code += ' ';
+    }
+
+    expected.push_back({.type = TT::kEOF});
+    ItmoScript::Lexer lexer{code};
+    CompareTokens(lexer, expected);
+}
+
+TEST(LexerTestSuite, ReadIntAndFloat) {
+    std::string code = "123 9.1 33.091234 900";
+
+    ItmoScript::Lexer lexer{code};
+
+    std::vector<ItmoScript::Token> expected = {
+        {TT::kInt, "123"},
+        {TT::kFloat, "9.1"},
+        {TT::kFloat, "33.091234"},
+        {TT::kInt, "900"}
+    };
+
+    expected.push_back({.type = TT::kEOF});
+    CompareTokens(lexer, expected);
+}
+
 TEST(LexerTestSuite, IdentifiersAssignment) {
     std::string code = "number_1 = number_2";
 
     ItmoScript::Lexer lexer{code};
 
-    ItmoScript::Token token1 = lexer.GetNextToken();
-    ItmoScript::Token token2 = lexer.GetNextToken();
-    ItmoScript::Token token3 = lexer.GetNextToken();
+    std::vector<ItmoScript::Token> expected = {
+        {TT::kIdentifier, "number_1"},
+        {TT::kAssing, "="},
+        {TT::kIdentifier, "number_2"},
+    };
 
-    ASSERT_EQ(token1.type, ItmoScript::TokenType::kIdentifier);
-    ASSERT_EQ(token1.literal, "number_1");
-
-    ASSERT_EQ(token2.type, ItmoScript::TokenType::kAssing);
-    ASSERT_EQ(token2.literal, "=");
-
-    ASSERT_EQ(token3.type, ItmoScript::TokenType::kIdentifier);
-    ASSERT_EQ(token3.literal, "number_2");
+    expected.push_back({.type = TT::kEOF});
+    CompareTokens(lexer, expected);
 }
 
 TEST(LexerTestSuite, FunctionCreation) {
@@ -73,8 +82,6 @@ TEST(LexerTestSuite, FunctionCreation) {
             return value + 1
         end function
     )";
-
-    using TT = ItmoScript::TokenType;
 
     ItmoScript::Lexer lexer{code};
 
@@ -94,19 +101,60 @@ TEST(LexerTestSuite, FunctionCreation) {
         {TT::kEOF, ""}
     };
 
-    std::vector<ItmoScript::Token> tokens;
+    CompareTokens(lexer, expected);
+}
 
-    while (lexer.HasNextToken()) {
-        tokens.push_back(lexer.GetNextToken());
+TEST(LexerTestSuite, KeywordsRecognition) {
+    std::string code;
+    std::vector<ItmoScript::Token> expected;
+
+    for (const auto& [keyword, type] : ItmoScript::kKeywords) {
+        code += keyword;
+        code += ' ';
+        expected.push_back({.type = type, .literal = keyword});
     }
-    
-    ASSERT_EQ(tokens.size(), expected.size());
 
-    for (size_t i = 0; i < tokens.size(); ++i) {
-        ItmoScript::Token real_token = tokens[i];
-        ItmoScript::Token expected_token = expected[i];
+    expected.push_back({TT::kEOF, ""});
+    ItmoScript::Lexer lexer{code};
+    CompareTokens(lexer, expected);
+}
 
-        ASSERT_EQ(real_token.type, expected_token.type);
-        ASSERT_EQ(real_token.literal, expected_token.literal);
-    }
+TEST(LexerTestSuite, BasicOperatorsUsage) {
+    std::string code = R"(
+        5 < 10
+        5 > 10
+        !true == false
+        !false == true
+
+        5 >= 3
+        3 <= 40
+    )";
+
+    ItmoScript::Lexer lexer{code};
+
+    std::vector<ItmoScript::Token> expected = {
+        {TT::kInt, "5"},
+        {TT::kLess, "<"},
+        {TT::kInt, "10"},
+        {TT::kInt, "5"},
+        {TT::kGreater, ">"},
+        {TT::kInt, "10"},
+        {TT::kBang, "!"},
+        {TT::kTrue, "true"},
+        {TT::kEqual, "=="},
+        {TT::kFalse, "false"},
+        {TT::kBang, "!"},
+        {TT::kFalse, "false"},
+        {TT::kEqual, "=="},
+        {TT::kTrue, "true"},
+        {TT::kInt, "5"},
+        {TT::kGreaterOrEqual, ">="},
+        {TT::kInt, "3"},
+        {TT::kInt, "3"},
+        {TT::kLessOrEqual, "<="},
+        {TT::kInt, "40"},
+        {TT::kEOF, ""}
+    };
+
+    CompareTokens(lexer, expected);
 }

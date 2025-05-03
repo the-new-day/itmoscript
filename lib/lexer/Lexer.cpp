@@ -15,8 +15,8 @@ Token Lexer::GetNextToken() {
 
     if (last_char == EOF) {
         token = {.type = TokenType::kEOF};
-    } else if (kSmallTokenMap.contains(last_char)) {
-        token = Token{.type = kSmallTokenMap.at(last_char), .literal = std::string{last_char}};
+    } else if (kOneCharTokens.contains(last_char)) {
+        token = ReadOperator();
     } else if (std::isalpha(last_char)) {
         std::string word = ReadWord();
         token = LookupIdentifier(word);
@@ -35,13 +35,35 @@ bool Lexer::HasNextToken() const {
 }
 
 char Lexer::ReadChar() {
+    char ch = PeekChar();
+    ++read_pos_;
+    return ch;
+}
+
+char Lexer::PeekChar() const {
     if (!HasNextToken()) {
         return EOF;
     }
 
-    char ch = code_[read_pos_];
-    ++read_pos_;
-    return ch;
+    return code_[read_pos_];
+}
+
+Token Lexer::ReadOperator() {
+    char last_char = code_[read_pos_ - 1];
+
+    if (HasNextToken() && kCompoundOpStarters.contains(last_char)) {
+        char next_char = code_[read_pos_];
+        std::string op = std::string{last_char, next_char};
+
+        if (kCompoundOperators.contains(op)) {
+            ++read_pos_;
+            return Token{.type = kCompoundOperators.at(op), .literal = op};
+        }
+
+        return Token{.type = kOneCharTokens.at(last_char), .literal = std::string{last_char}};
+    }
+
+    return Token{.type = kOneCharTokens.at(last_char), .literal = std::string{last_char}};
 }
 
 std::string Lexer::ReadWord() {

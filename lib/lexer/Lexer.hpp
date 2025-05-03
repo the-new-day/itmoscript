@@ -29,8 +29,12 @@ private:
     Token last_token_{.type = TokenType::kIllegal};
 
     char ReadChar();
+    char PeekChar() const;
     std::string ReadWord();
     std::string ReadNumber();
+
+    // If last read character was a compound operator started
+    Token ReadOperator();
 };
     
 } // namespace ItmoScript
