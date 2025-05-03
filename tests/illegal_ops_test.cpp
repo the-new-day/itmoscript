@@ -1,7 +1,8 @@
 #include <string>
 #include <vector>
+#include <sstream>
 
-#include <lib/interpreter.h>
+#include <lib/interpreter.hpp>
 #include <gtest/gtest.h>
 
 
@@ -19,13 +20,13 @@ TEST(IllegalOperationsSuite, TypeMixing) {
 
     for (int a = 0; a < values.size(); ++a) {
         for (int b = a + 1; b < values.size(); ++b) {
-            std::istringstream input;
+            std::stringstream input;
             input << "a = " << values[a] << "\n";
             input << "b = " << values[b] << "\n";
             input << "c = a + b" << "\n";
             input << "print(239) // unreachable" << "\n";
 
-            std::ostringstream output;
+            std::stringstream output;
 
             ASSERT_FALSE(interpret(input, output));
             ASSERT_FALSE(output.str().ends_with(kUnreachable));

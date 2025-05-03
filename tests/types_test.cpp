@@ -1,4 +1,4 @@
-#include <lib/interpreter.h>
+#include <lib/interpreter.hpp>
 #include <gtest/gtest.h>
 
 
