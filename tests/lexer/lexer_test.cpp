@@ -44,7 +44,7 @@ TEST(LexerTestSuite, IdentifiersAssignment) {
 
     std::vector<ItmoScript::Token> expected = {
         {TT::kIdentifier, "n"},
-        {TT::kAssing, "="},
+        {TT::kAssign, "="},
         {TT::kIdentifier, "number_2"},
     };
 
@@ -63,7 +63,7 @@ TEST(LexerTestSuite, FunctionCreation) {
 
     std::vector<ItmoScript::Token> expected = {
         {TT::kIdentifier, "incr"},
-        {TT::kAssing, "="},
+        {TT::kAssign, "="},
         {TT::kFunction, "function"},
         {TT::kLParen, "("},
         {TT::kIdentifier, "value"},
@@ -149,7 +149,7 @@ TEST(LexerTestSuite, IgnoringComments) {
 
     std::vector<ItmoScript::Token> expected = {
         {TT::kIdentifier, "incr"},
-        {TT::kAssing, "="},
+        {TT::kAssign, "="},
         {TT::kFunction, "function"},
         {TT::kLParen, "("},
         {TT::kIdentifier, "value"},

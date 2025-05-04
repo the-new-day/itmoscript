@@ -1,0 +1,2 @@
+add_library(itmoscript_parser Parser.cpp)
+target_link_libraries(itmoscript_parser itmoscript_lexer itmoscript_ast)

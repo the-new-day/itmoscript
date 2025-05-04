@@ -20,6 +20,7 @@ add_executable(
   illegal_ops_test.cpp
   lexer/lexer_test.cpp
   lexer/numbers_parsing_test.cpp
+  parser/statements_test.cpp
 )
 
 target_link_libraries(

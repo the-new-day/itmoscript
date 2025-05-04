@@ -25,7 +25,7 @@ void REPL::Start(std::istream& input, std::ostream& output) {
 
 void REPL::PrintToken(std::ostream& output, const Token& token) {
     output << std::format(
-        "Ln {}, Col {} [Type: {}, Literal: \"{}\"]",
+        "Ln {}, Col {} [{}(\"{}\")]",
         token.line,
         token.column,
         kTokenTypeNames.at(token.type),
@@ -34,4 +34,3 @@ void REPL::PrintToken(std::ostream& output, const Token& token) {
 }
 
 } // namespace ItmoScript
-

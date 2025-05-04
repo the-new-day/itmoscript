@@ -17,17 +17,21 @@ enum class TokenType {
     kFloat,
 
     // Assignment operators
-    kAssing,
+    kAssign,
     kPlusAssign,
     kMinusAssign,
     kAsteriskAssign,
     kSlashAssign,
+    kPercentAssign,
+    kPowAssign,
 
     // Ariphmetic operators
     kPlus,
     kMinus,
     kAsterisk,
     kSlash,
+    kPercent,
+    kPow,
 
     // Logical operators
     kLess,
@@ -45,6 +49,7 @@ enum class TokenType {
     kRParen,
     kLBracket,
     kRBracket,
+    kColon,
 
     // Keywords
     kFunction,
@@ -62,6 +67,9 @@ enum class TokenType {
     kTrue,
     kFalse,
     kNil,
+
+    // AAAA
+    kScoreResOperator,
 };
 
 struct Token {
@@ -76,7 +84,7 @@ struct Token {
 };
 
 static const std::map<char, TokenType> kOneCharTokens{
-    {'=', TokenType::kAssing},
+    {'=', TokenType::kAssign},
     {'+', TokenType::kPlus},
     {'-', TokenType::kMinus},
     {'*', TokenType::kAsterisk},
@@ -90,11 +98,14 @@ static const std::map<char, TokenType> kOneCharTokens{
     {')', TokenType::kRParen},
     {'[', TokenType::kLBracket},
     {']', TokenType::kRBracket},
+    {':', TokenType::kColon},
+    {'%', TokenType::kPercent},
+    {'^', TokenType::kPow},
     {EOF, TokenType::kEOF},
 };
 
 static const std::set<char> kCompoundOpStarters = {
-    '=', '+', '-', '*', '/', '<', '>', '!'
+    '=', '+', '-', '*', '/', '%', '^', '<', '>', '!', ':',
 };
 
 static const std::map<std::string, TokenType> kCompoundOperators{
@@ -103,9 +114,12 @@ static const std::map<std::string, TokenType> kCompoundOperators{
     {"-=", TokenType::kMinusAssign},
     {"*=", TokenType::kAsteriskAssign},
     {"/=", TokenType::kSlashAssign},
+    {"%=", TokenType::kPercentAssign},
+    {"^=", TokenType::kPowAssign},
     {"<=", TokenType::kLessOrEqual},
     {">=", TokenType::kGreaterOrEqual},
     {"!=", TokenType::kNotEqual},
+    {"::", TokenType::kScoreResOperator},
 };
 
 static const std::map<std::string, TokenType> kKeywords{
@@ -135,17 +149,21 @@ static const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kFloat, "FLOAT"},
 
     // Assignment operators
-    {TokenType::kAssing, "ASSIGN"},
+    {TokenType::kAssign, "ASSIGN"},
     {TokenType::kPlusAssign, "PLUS_ASSIGN"},
     {TokenType::kMinusAssign, "MINUS_ASSIGN"},
     {TokenType::kAsteriskAssign, "ASTERISK_ASSIGN"},
     {TokenType::kSlashAssign, "SLASH_ASSIGN"},
+    {TokenType::kPercentAssign, "PERCENT_ASSIGN"},
+    {TokenType::kPowAssign, "POW_ASSIGN"},
 
     // Ariphmetic operators
     {TokenType::kPlus, "PLUS"},
     {TokenType::kMinus, "MINUS"},
     {TokenType::kAsterisk, "ASTERISK"},
     {TokenType::kSlash, "SLASH"},
+    {TokenType::kPercent, "PERCENT"},
+    {TokenType::kPow, "POW"},
 
     // Logical operators
     {TokenType::kLess, "LESS"},
@@ -163,6 +181,7 @@ static const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kRParen, "R_PAREN"},
     {TokenType::kLBracket, "L_BRACKET"},
     {TokenType::kRBracket, "R_BRACKET"},
+    {TokenType::kColon, "COLON"},
 
     // Keywords
     {TokenType::kFunction, "FUNCTION"},
@@ -179,7 +198,10 @@ static const std::map<TokenType, std::string> kTokenTypeNames = {
     // Keywords-literals
     {TokenType::kTrue, "TRUE"},
     {TokenType::kFalse, "FALSE"},
-    {TokenType::kNil, "NIL"}
+    {TokenType::kNil, "NIL"},
+
+    // AAA
+    {TokenType::kScoreResOperator, "SCOPE"},
 };
 
 } // namespace ItmoScript

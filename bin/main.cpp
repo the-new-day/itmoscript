@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include <lib/interpreter.hpp>
+#include "lib/interpreter.hpp"
 
 int main(int argc, char** argv) {
     std::cout << "ITMOScript super-duper-mega language." << std::endl;

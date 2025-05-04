@@ -13,6 +13,12 @@ public:
     Lexer(std::string code)
         : code_(std::move(code)) {}
 
+    Lexer(const Lexer&) = delete;
+    Lexer(Lexer&&) = delete;
+    Lexer& operator=(const Lexer&) = delete;
+    Lexer& operator=(Lexer&&) = delete;
+    ~Lexer() = default;
+
     Token GetNextToken();
     bool HasNextToken() const;
 
