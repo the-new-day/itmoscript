@@ -62,18 +62,22 @@ TEST(LexerTestSuite, FunctionCreation) {
     ItmoScript::Lexer lexer{code};
 
     std::vector<ItmoScript::Token> expected = {
+        {TT::kNewLine, "\n"},
         {TT::kIdentifier, "incr"},
         {TT::kAssign, "="},
         {TT::kFunction, "function"},
         {TT::kLParen, "("},
         {TT::kIdentifier, "value"},
         {TT::kRParen, ")"},
+        {TT::kNewLine, "\n"},
         {TT::kReturn, "return"},
         {TT::kIdentifier, "value"},
         {TT::kPlus, "+"},
         {TT::kInt, "1"},
+        {TT::kNewLine, "\n"},
         {TT::kEnd, "end"},
         {TT::kFunction, "function"},
+        {TT::kNewLine, "\n"},
         {TT::kEOF, ""}
     };
 
@@ -109,26 +113,34 @@ TEST(LexerTestSuite, BasicOperatorsUsage) {
     ItmoScript::Lexer lexer{code};
 
     std::vector<ItmoScript::Token> expected = {
+        {TT::kNewLine, "\n"},
         {TT::kInt, "5"},
         {TT::kLess, "<"},
         {TT::kInt, "10"},
+        {TT::kNewLine, "\n"},
         {TT::kInt, "5"},
         {TT::kGreater, ">"},
         {TT::kInt, "10"},
+        {TT::kNewLine, "\n"},
         {TT::kBang, "!"},
         {TT::kTrue, "true"},
         {TT::kEqual, "=="},
         {TT::kFalse, "false"},
+        {TT::kNewLine, "\n"},
         {TT::kBang, "!"},
         {TT::kFalse, "false"},
         {TT::kEqual, "=="},
         {TT::kTrue, "true"},
+        {TT::kNewLine, "\n"},
+        {TT::kNewLine, "\n"},
         {TT::kInt, "5"},
         {TT::kGreaterOrEqual, ">="},
         {TT::kInt, "3"},
+        {TT::kNewLine, "\n"},
         {TT::kInt, "3"},
         {TT::kLessOrEqual, "<="},
         {TT::kInt, "40"},
+        {TT::kNewLine, "\n"},
         {TT::kEOF, ""}
     };
 
@@ -148,16 +160,19 @@ TEST(LexerTestSuite, IgnoringComments) {
     ItmoScript::Lexer lexer{code};
 
     std::vector<ItmoScript::Token> expected = {
+        {TT::kNewLine, "\n"},
         {TT::kIdentifier, "incr"},
         {TT::kAssign, "="},
         {TT::kFunction, "function"},
         {TT::kLParen, "("},
         {TT::kIdentifier, "value"},
         {TT::kRParen, ")"},
+        {TT::kNewLine, "\n"},
         {TT::kReturn, "return"},
         {TT::kIdentifier, "value"},
         {TT::kPlus, "+"},
         {TT::kInt, "1"},
+        {TT::kNewLine, "\n"},
         {TT::kEnd, "end"},
         {TT::kFunction, "function"},
         {TT::kEOF, ""}

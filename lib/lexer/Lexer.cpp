@@ -26,7 +26,7 @@ Token Lexer::GetNextToken() {
     Token token;
 
     if (current == EOF) {
-        token = {.type = TokenType::kEOF};
+        token.type = TokenType::kEOF;
     } else if (kOneCharTokens.contains(current)) {
         token = ReadCompoundToken();
     } else if (IsIdentifierBegin(current)) {
@@ -37,10 +37,8 @@ Token Lexer::GetNextToken() {
     } else if (current == '\n') {
         token.type = TokenType::kNewLine;
     } else {
-        token = Token{
-            .type = TokenType::kIllegal,
-            .literal = std::string{current}
-        };
+        token.type = TokenType::kIllegal;
+        token.literal = std::string{current};
     }
 
     SetTokenPosition(token);

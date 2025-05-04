@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <format>
+
 #include "lib/lexer/Lexer.hpp"
 
 using TT = ItmoScript::TokenType;
@@ -11,7 +13,8 @@ static void CompareTokens(ItmoScript::Lexer& lexer, const std::vector<ItmoScript
     std::vector<ItmoScript::Token> tokens;
 
     while (lexer.HasNextToken()) {
-        tokens.push_back(lexer.GetNextToken());
+        ItmoScript::Token token = lexer.GetNextToken();
+        tokens.push_back(std::move(token));
     }
 
     if (!tokens.empty() && tokens.back().type != TT::kEOF) {
@@ -24,7 +27,14 @@ static void CompareTokens(ItmoScript::Lexer& lexer, const std::vector<ItmoScript
         ItmoScript::Token real_token = tokens[i];
         ItmoScript::Token expected_token = expected[i];
 
-        ASSERT_EQ(real_token.type, expected_token.type);
+        ASSERT_EQ(real_token.type, expected_token.type) 
+            << std::format(
+                "expected {}, got {} for token {}\n", 
+                ItmoScript::kTokenTypeNames.at(expected_token.type),
+                ItmoScript::kTokenTypeNames.at(real_token.type),
+                i
+            );
+            
         ASSERT_EQ(real_token.literal, expected_token.literal);
     }
 }
