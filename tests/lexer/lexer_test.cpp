@@ -1,5 +1,7 @@
 #include "lexer_test.hpp"
 
+// TODO: add tests for Ln, Col
+
 TEST(LexerTestSuite, OneCharToken) {
     std::string code;
     std::vector<ItmoScript::Token> expected;

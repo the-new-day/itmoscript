@@ -22,14 +22,13 @@ public:
     // Checks if ch can be a beginning of an identifier
     static bool IsIdentifierBegin(char ch);
 
-    // If word is a keyword, returns it with a corresponding TokenType.
-    // Otherwise, returns word with TokeyType::kIdentifier type
-    static Token LookupIdentifier(const std::string& word);
-
 private:
     std::string code_;
     size_t read_pos_{0};
     Token last_token_{.type = TokenType::kIllegal};
+
+    size_t current_line_{0};
+    size_t current_col_{0};
 
     char ReadChar();
     char PeekChar() const;
@@ -41,6 +40,13 @@ private:
     Token ReadCompoundToken();
 
     void SkipComment();
+
+    // Fills token's line and column fields
+    void SetTokenPosition(Token& token) const;
+
+    // If word is a keyword, returns it with a corresponding TokenType.
+    // Otherwise, returns word with TokeyType::kIdentifier type
+    Token LookupIdentifier(const std::string& word) const;
 };
     
 } // namespace ItmoScript

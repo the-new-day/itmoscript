@@ -8,6 +8,12 @@ Token Lexer::GetNextToken() {
     char current = ReadChar();
 
     while (std::isspace(current)) {
+        if (current == '\n') {
+            ++current_line_;
+            current_col_ = 0;
+        }
+
+        ++current_col_;
         current = ReadChar();
     }
 
@@ -28,10 +34,16 @@ Token Lexer::GetNextToken() {
     } else if (std::isdigit(current)) {
         token = ReadNumber();
     } else {
-        token = Token{.type = TokenType::kIllegal, .literal = std::string{current}};
+        token = Token{
+            .type = TokenType::kIllegal,
+            .literal = std::string{current}
+        };
     }
 
+    SetTokenPosition(token);
     last_token_ = token;
+
+    current_col_ += token.literal.size();
     return token;
 }
 
@@ -55,6 +67,7 @@ char Lexer::PeekChar() const {
 
 Token Lexer::ReadCompoundToken() {
     char current = code_[read_pos_ - 1];
+    Token token;
 
     if (HasNextToken() && kCompoundOpStarters.contains(current)) {
         char next_char = code_[read_pos_];
@@ -62,13 +75,21 @@ Token Lexer::ReadCompoundToken() {
 
         if (kCompoundOperators.contains(op)) {
             ++read_pos_;
-            return Token{.type = kCompoundOperators.at(op), .literal = op};
+            token.type = kCompoundOperators.at(op);
+            token.literal = std::move(op);
+        } else {
+            token.type = kOneCharTokens.at(current);
+            token.literal = std::string{current};
         }
 
-        return Token{.type = kOneCharTokens.at(current), .literal = std::string{current}};
+        return token;
     }
+    
+    token.type = kOneCharTokens.at(current);
+    token.literal = std::string{current};
 
-    return Token{.type = kOneCharTokens.at(current), .literal = std::string{current}};
+    SetTokenPosition(token);
+    return token;
 }
 
 void Lexer::SkipComment() {
@@ -77,6 +98,13 @@ void Lexer::SkipComment() {
     }
 
     if (PeekChar() == '\n') ReadChar();
+    ++current_line_;
+    current_col_ = 0;
+}
+
+void Lexer::SetTokenPosition(Token& token) const {
+    token.line = current_line_;
+    token.column = current_col_;
 }
 
 std::string Lexer::ReadWord() {
@@ -117,15 +145,21 @@ Token Lexer::ReadNumber() {
         type = TokenType::kFloat;
     }
 
-    return {.type = type, .literal = word};
+    return {.type = type, .literal = word, .line = current_line_, .column = current_col_};
 }
 
-Token Lexer::LookupIdentifier(const std::string& word) {
+Token Lexer::LookupIdentifier(const std::string& word) const {
+    Token token;
+    SetTokenPosition(token);
+
     if (kKeywords.contains(word)) {
-        return Token{.type = kKeywords.at(word), .literal = word};
+        token.type = kKeywords.at(word);
+    } else {
+        token.type = TokenType::kIdentifier;
     }
 
-    return Token{.type = TokenType::kIdentifier, .literal = word};
+    token.literal = word;
+    return token;
 }
 
 bool Lexer::IsIdentifierChar(char ch) {
