@@ -40,8 +40,8 @@ Program Parser::ParseProgram() {
     Program program;
 
     while (!IsCurrentToken(TokenType::kEOF)) {
-        if (IsCurrentToken(TokenType::kIllegal)) {
-            // TODO: finish with error
+        if (IsCurrentToken(TokenType::kIllegal) || IsCurrentToken(TokenType::kNewLine)) {
+            // TODO: 
             ReadNextToken();
             continue;
         }

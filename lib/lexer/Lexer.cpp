@@ -11,6 +11,7 @@ Token Lexer::GetNextToken() {
         if (current == '\n') {
             ++current_line_;
             current_col_ = 0;
+            break;
         }
 
         ++current_col_;
@@ -33,6 +34,8 @@ Token Lexer::GetNextToken() {
         token = LookupIdentifier(word);
     } else if (std::isdigit(current)) {
         token = ReadNumber();
+    } else if (current == '\n') {
+        token.type = TokenType::kNewLine;
     } else {
         token = Token{
             .type = TokenType::kIllegal,

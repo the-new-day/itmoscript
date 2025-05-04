@@ -14,7 +14,7 @@ TEST(ParserTestSuite, SimpleExpressionStringTest) {
     ItmoScript::Parser parser{lexer};
     ItmoScript::Program program = parser.ParseProgram();
 
-    ASSERT_EQ(program.String(), "x1 = x2\n");
+    ASSERT_EQ(program.String(), "x1 = x2");
 }
 
 TEST(ParserTestSuite, IdentifierExpressionTest) {

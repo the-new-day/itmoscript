@@ -23,9 +23,10 @@ void Program::AddStatement(std::unique_ptr<Statement> statement) {
 std::string Program::String() const {
     std::string result;
 
-    for (const auto& stmt : statements_) {
-        result += stmt->String();
-        result += '\n';
+    for (size_t i = 0; i < statements_.size(); ++i) {
+        result += statements_[i]->String();
+        if (i != statements_.size() - 1)
+            result += '\n';
     }
 
     return result;
