@@ -1,9 +1,4 @@
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-
-#include "lib/interpreter.hpp"
-
-using TT = ItmoScript::TokenType;
+#include "parser_test.hpp"
 
 TEST(ParserTestSuite, SimpleExpressionStringTest) {
     std::string code = R"(
@@ -52,12 +47,5 @@ TEST(ParserTestSuite, IntLiteralExpressionTest) {
     ASSERT_NE(expr_stmt, nullptr);
     ASSERT_NE(expr_stmt->expr, nullptr);
 
-    std::string str_value = expr_stmt->String();
-    ASSERT_EQ(str_value, "100500");
-
-    auto* integer_literal = dynamic_cast<ItmoScript::IntegerLiteral*>(expr_stmt->expr.get());
-    ASSERT_NE(integer_literal, nullptr);
-
-    int64_t int_value = integer_literal->value;
-    ASSERT_EQ(int_value, 100500);
+    TestIntegerLiteral(expr_stmt->expr, 100500);
 }

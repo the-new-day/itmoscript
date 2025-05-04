@@ -10,13 +10,13 @@
 namespace ItmoScript {
 
 enum class Precedence {
-    kLowest = 0,
-    kEquals = 1,      // ==
-    kLessGreater = 2, // < or >
-    kSum = 3,         // +
-    kProduct = 4,     // *
-    kPrefix = 5,      // -x or !x
-    kCall = 6,        // func(x)
+    kLowest = 1,
+    kEquals = 2,      // ==
+    kLessGreater = 3, // < or >
+    kSum = 4,         // +
+    kProduct = 5,     // *
+    kPrefix = 6,      // -x or !x
+    kCall = 7,        // func(x)
 };
 
 const std::map<TokenType, Precedence> kPrecedences{

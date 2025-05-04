@@ -43,11 +43,7 @@ TEST(ParserTestSuite, SimplePrefixOperatorsTest) {
 
         ASSERT_EQ(prefix_expr->oper, test_expr.oper);
 
-        auto* integer_literal = dynamic_cast<ItmoScript::IntegerLiteral*>(prefix_expr->right.get());
-        ASSERT_NE(integer_literal, nullptr);
-
-        int64_t int_value = integer_literal->value;
-        ASSERT_EQ(int_value, test_expr.value);
+        TestIntegerLiteral(prefix_expr->right, test_expr.value);
     }
 }
 
@@ -77,21 +73,7 @@ TEST(ParserTestSuite, SimpleInfixOperatorsTest) {
         ASSERT_NE(expr_stmt, nullptr);
         ASSERT_NE(expr_stmt->expr, nullptr);
 
-        auto* infix_expr = dynamic_cast<ItmoScript::InfixExpression*>(expr_stmt->expr.get());
-        ASSERT_NE(infix_expr, nullptr);
-        ASSERT_NE(infix_expr->right, nullptr);
-        ASSERT_NE(infix_expr->left, nullptr);
-
-        ASSERT_EQ(infix_expr->oper, test_expr.oper);
-
-        auto* left_integer_literal = dynamic_cast<ItmoScript::IntegerLiteral*>(infix_expr->left.get());
-        ASSERT_NE(left_integer_literal, nullptr);
-
-        auto* right_integer_literal = dynamic_cast<ItmoScript::IntegerLiteral*>(infix_expr->right.get());
-        ASSERT_NE(right_integer_literal, nullptr);
-
-        ASSERT_EQ(right_integer_literal->value, test_expr.right_value);
-        ASSERT_EQ(left_integer_literal->value, test_expr.left_value);
+        TestInfixExpression(expr_stmt->expr, test_expr.left_value, test_expr.oper, test_expr.right_value);
     }
 }
 
@@ -100,6 +82,7 @@ TEST(ParserTestSuite, OperatorPrecedenceParsingTest) {
     std::vector<std::pair<std::string, std::string>> tests{
         {"-a * b", "((-a) * b)"},
         {"!-a", "(!(-a))"},
+        {"a + -c", "(a + (-c))"},
         {"a + b + c", "((a + b) + c)"},
         {"a + b - c", "((a + b) - c)"},
         {"a * b * c", "((a * b) * c)"},
