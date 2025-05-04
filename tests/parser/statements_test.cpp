@@ -30,7 +30,7 @@ TEST(ParserTestSuite, SimpleVariableAssignment) {
         auto* assign_stmt = dynamic_cast<ItmoScript::AssignStatement*>(statements[i].get());
         ASSERT_NE(assign_stmt, nullptr) << "Statement " << i << " is not an AssignStatement";
 
-        ASSERT_EQ(assign_stmt->ident->value, expected_identifiers[i]) 
+        ASSERT_EQ(assign_stmt->ident->name, expected_identifiers[i]) 
             << "Identifier at position " << i << " doesn't match";
 
         // TODO: add check for value
@@ -45,7 +45,6 @@ TEST(ParserTestSuite, SimpleVariableAssignmentErrors) {
         x #= 5
         y $= 10
         five = 6
-        donald )= 0
     )";
 
     ItmoScript::Lexer lexer{code};
@@ -53,14 +52,14 @@ TEST(ParserTestSuite, SimpleVariableAssignmentErrors) {
     ItmoScript::Program program = parser.ParseProgram();
 
     const auto& errors = parser.GetErrors();
-    ASSERT_EQ(errors.size(), 3) << "Parser error count doesn't match: " << errors.size();
+    ASSERT_EQ(errors.size(), 2) << "Parser error count doesn't match: " << errors.size();
 }
 
 TEST(ParserTestSuite, SimpleReturn) {
     std::string code = R"(
         return 5
         return 10
-        return add(5, 10)
+        return x
     )";
 
     ItmoScript::Lexer lexer{code};

@@ -1,5 +1,7 @@
 #include "Node.hpp"
 
+#include <format>
+
 namespace ItmoScript {
 
 std::string Program::GetTokenLiteral() const {
@@ -16,6 +18,41 @@ const std::vector<std::unique_ptr<Statement>>& Program::GetStatements() const {
 
 void Program::AddStatement(std::unique_ptr<Statement> statement) {
     statements_.push_back(std::move(statement));
+}
+
+std::string Program::String() const {
+    std::string result;
+
+    for (const auto& stmt : statements_) {
+        result += stmt->String();
+        result += '\n';
+    }
+
+    return result;
+}
+
+std::string AssignStatement::String() const {
+    return std::format("{} = {}", ident->name, expr->String());
+}
+
+std::string ReturnStatement::String() const {
+    return std::format("return {}", expr->String());
+}
+
+std::string ExpressionStatement::String() const {
+    return expr->String();
+}
+
+std::string Identifier::String() const {
+    return name;
+}
+
+std::string Statement::String() const {
+    return token.literal;
+}
+
+std::string Expression::String() const {
+    return token.literal;
 }
 
 } // namespace ItmoScript
