@@ -14,6 +14,21 @@ Parser::Parser(Lexer& lexer)
 
     prefix_parse_funcs_[TokenType::kIdentifier] = [this]() { return this->ParseIdentifier(); };
     prefix_parse_funcs_[TokenType::kInt] = [this]() { return this->ParseIntegerLiteral(); };
+    prefix_parse_funcs_[TokenType::kBang] = [this]() { return this->ParsePrefixExpression(); };
+    prefix_parse_funcs_[TokenType::kMinus] = [this]() { return this->ParsePrefixExpression(); };
+
+    auto infix_parser = [this](std::unique_ptr<Expression> expr) {
+        return this->ParseInfixExpression(std::move(expr));
+    };
+
+    infix_parse_funcs_[TokenType::kPlus] = infix_parser;
+    infix_parse_funcs_[TokenType::kMinus] = infix_parser;
+    infix_parse_funcs_[TokenType::kSlash] = infix_parser;
+    infix_parse_funcs_[TokenType::kAsterisk] = infix_parser;
+    infix_parse_funcs_[TokenType::kEqual] = infix_parser;
+    infix_parse_funcs_[TokenType::kNotEqual] = infix_parser;
+    infix_parse_funcs_[TokenType::kLess] = infix_parser;
+    infix_parse_funcs_[TokenType::kGreater] = infix_parser;
 }
 
 void Parser::ReadNextToken() {
@@ -25,6 +40,12 @@ Program Parser::ParseProgram() {
     Program program;
 
     while (!IsCurrentToken(TokenType::kEOF)) {
+        if (IsCurrentToken(TokenType::kIllegal)) {
+            // TODO: finish with error
+            ReadNextToken();
+            continue;
+        }
+
         auto statement = ParseStatement();
         if (statement != nullptr) {
             program.AddStatement(std::move(statement));
@@ -80,12 +101,23 @@ std::unique_ptr<ExpressionStatement> Parser::ParseExpressionStatement() {
 }
 
 std::unique_ptr<Expression> Parser::ParseExpression(Precedence precedence) {
-    // TODO: remove
     if (!prefix_parse_funcs_.contains(current_token_.type)) {
+        AddNoPrefixFuncError(current_token_.type);
         return nullptr;
     }
 
-    return std::invoke(prefix_parse_funcs_.at(current_token_.type));
+    std::unique_ptr<Expression> left = std::invoke(prefix_parse_funcs_.at(current_token_.type));
+
+    while (!IsEndOfExpression(peek_token_.type) && precedence < PeekPrecedence()) {
+        if (!infix_parse_funcs_.contains(peek_token_.type)) {
+            return left;
+        }
+
+        ReadNextToken();
+        left = std::invoke(infix_parse_funcs_.at(current_token_.type), std::move(left));
+    }
+
+    return left;
 }
 
 bool Parser::IsCurrentToken(TokenType type) const {
@@ -129,6 +161,33 @@ void Parser::PeekError(TokenType expected_type) {
     ));
 }
 
+void Parser::AddNoPrefixFuncError(TokenType type) {
+    AddError(std::format(
+        "no prefix parse function for {} found",
+        kTokenTypeNames.at(type)
+    ));
+}
+
+bool Parser::IsEndOfExpression(TokenType type) {
+    return type == TokenType::kNewLine || type == TokenType::kEOF;
+}
+
+Precedence Parser::PeekPrecedence() const {
+    if (kPrecedences.contains(peek_token_.type)) {
+        return kPrecedences.at(peek_token_.type);
+    } else {
+        return Precedence::kLowest;
+    }
+}
+
+Precedence Parser::GetCurrentPrecedence() const {
+    if (kPrecedences.contains(current_token_.type)) {
+        return kPrecedences.at(current_token_.type);
+    } else {
+        return Precedence::kLowest;
+    }
+}
+
 std::unique_ptr<Identifier> Parser::ParseIdentifier() {
     auto ident = std::make_unique<Identifier>(current_token_);
     ident->name = current_token_.literal;
@@ -145,6 +204,27 @@ std::unique_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
     auto int_literal = std::make_unique<IntegerLiteral>(current_token_);
     int_literal->value = parsing_result.value();
     return int_literal;
+}
+
+std::unique_ptr<PrefixExpression> Parser::ParsePrefixExpression() {
+    auto expr = std::make_unique<PrefixExpression>(current_token_);
+    expr->oper = current_token_.literal;
+    ReadNextToken();
+
+    expr->right = ParseExpression(Precedence::kPrefix);
+    return expr;
+}
+
+std::unique_ptr<InfixExpression> Parser::ParseInfixExpression(std::unique_ptr<Expression> left) {
+    auto infix_expr = std::make_unique<InfixExpression>(current_token_);
+    infix_expr->oper = current_token_.literal;
+    infix_expr->left = std::move(left);
+
+    Precedence precedence = GetCurrentPrecedence();
+    ReadNextToken();
+    infix_expr->right = ParseExpression(precedence);
+
+    return infix_expr;
 }
 
 const std::vector<std::string>& Parser::GetErrors() const {

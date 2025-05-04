@@ -55,4 +55,12 @@ std::string Expression::String() const {
     return token.literal;
 }
 
+std::string PrefixExpression::String() const {
+    return std::format("({}{})", oper, right->String());
+}
+
+std::string InfixExpression::String() const {
+    return std::format("({} {} {})", left->String(), oper, right->String());
+}
+
 } // namespace ItmoScript

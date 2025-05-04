@@ -19,6 +19,19 @@ enum class Precedence {
     kCall = 6,        // func(x)
 };
 
+const std::map<TokenType, Precedence> kPrecedences{
+    {TokenType::kEqual, Precedence::kEquals},
+    {TokenType::kNotEqual, Precedence::kEquals},
+    {TokenType::kLess, Precedence::kLessGreater},
+    // {TokenType::kLessOrEqual, Precedence::kLessGreater},
+    {TokenType::kGreater, Precedence::kLessGreater},
+    // {TokenType::kGreaterOrEqual, Precedence::kLessGreater},
+    {TokenType::kPlus, Precedence::kSum},
+    {TokenType::kMinus, Precedence::kSum},
+    {TokenType::kAsterisk, Precedence::kProduct},
+    {TokenType::kSlash, Precedence::kProduct},
+};
+
 class Parser {
 public:
     Parser(Lexer& lexer);
@@ -55,6 +68,12 @@ private:
     void AddError(std::string&& msg);
     void AddUnknownTokenError();
     void PeekError(TokenType expected_type);
+    void AddNoPrefixFuncError(TokenType type);
+
+    bool IsEndOfExpression(TokenType type);
+
+    Precedence PeekPrecedence() const;
+    Precedence GetCurrentPrecedence() const;
 
     using PrefixParseFunc = std::function<std::unique_ptr<Expression>(void)>;
     using InfixParseFunc = std::function<std::unique_ptr<Expression>(std::unique_ptr<Expression>)>;
@@ -64,7 +83,8 @@ private:
 
     std::unique_ptr<Identifier> ParseIdentifier();
     std::unique_ptr<IntegerLiteral> ParseIntegerLiteral();
+    std::unique_ptr<PrefixExpression> ParsePrefixExpression();
+    std::unique_ptr<InfixExpression> ParseInfixExpression(std::unique_ptr<Expression> left);
 };
     
 } // namespace ItmoScript
-

@@ -64,6 +64,23 @@ struct IntegerLiteral : public Expression {
     int64_t value;
 };
 
+struct PrefixExpression : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+
+    std::string oper;
+    std::unique_ptr<Expression> right;
+};
+
+struct InfixExpression : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+
+    std::string oper;
+    std::unique_ptr<Expression> right;
+    std::unique_ptr<Expression> left;
+};
+
 class Program {
 public:
     std::string GetTokenLiteral() const;

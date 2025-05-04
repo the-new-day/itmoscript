@@ -50,6 +50,7 @@ enum class TokenType {
     kLBracket,
     kRBracket,
     kColon,
+    kNewLine,
 
     // Keywords
     kFunction,
@@ -101,6 +102,7 @@ static const std::map<char, TokenType> kOneCharTokens{
     {':', TokenType::kColon},
     {'%', TokenType::kPercent},
     {'^', TokenType::kPow},
+    {'\n', TokenType::kNewLine},
     {EOF, TokenType::kEOF},
 };
 
@@ -182,6 +184,7 @@ static const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kLBracket, "L_BRACKET"},
     {TokenType::kRBracket, "R_BRACKET"},
     {TokenType::kColon, "COLON"},
+    {TokenType::kNewLine, "NEW_LINE"},
 
     // Keywords
     {TokenType::kFunction, "FUNCTION"},

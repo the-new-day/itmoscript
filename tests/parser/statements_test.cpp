@@ -1,9 +1,4 @@
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-
-#include "lib/interpreter.hpp"
-
-using TT = ItmoScript::TokenType;
+#include "parser_test.hpp"
 
 TEST(ParserTestSuite, SimpleVariableAssignment) {
     std::string code = R"(
@@ -51,8 +46,7 @@ TEST(ParserTestSuite, SimpleVariableAssignmentErrors) {
     ItmoScript::Parser parser{lexer};
     ItmoScript::Program program = parser.ParseProgram();
 
-    const auto& errors = parser.GetErrors();
-    ASSERT_EQ(errors.size(), 2) << "Parser error count doesn't match: " << errors.size();
+    ASSERT_EQ(parser.GetErrors().size(), 2);
 }
 
 TEST(ParserTestSuite, SimpleReturn) {

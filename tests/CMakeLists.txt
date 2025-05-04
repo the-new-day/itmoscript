@@ -21,7 +21,8 @@ add_executable(
   lexer/lexer_test.cpp
   lexer/numbers_parsing_test.cpp
   parser/statements_test.cpp
-  parser/expressions_test.cpp
+  parser/basic_expressions_test.cpp
+  parser/prefix_and_infix_ops_test.cpp
 )
 
 target_link_libraries(
