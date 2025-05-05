@@ -1,6 +1,6 @@
 #include "parser_test.hpp"
 
-TEST(ParserTestSuite, IfExpressionTest) {
+TEST(ParserTestSuite, SimpleIfExpressionTest) {
     std::string code = R"(
         if foobar > fizzbuzz then 
             aboba 
@@ -40,7 +40,7 @@ TEST(ParserTestSuite, IfExpressionTest) {
     ASSERT_EQ(if_expr->alternative, nullptr);
 }
 
-TEST(ParserTestSuite, IfElseExpressionTest) {
+TEST(ParserTestSuite, SimpleIfElseExpressionTest) {
     std::string code = R"(
         if foobar > fizzbuzz then 
             aboba 

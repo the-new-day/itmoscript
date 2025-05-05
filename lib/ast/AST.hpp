@@ -123,5 +123,13 @@ struct IfExpression : public Expression {
     std::unique_ptr<BlockStatement> consequence;
     std::unique_ptr<BlockStatement> alternative;
 };
+
+struct FunctionLiteral : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+
+    std::vector<std::unique_ptr<Identifier>> parameters;
+    std::unique_ptr<BlockStatement> body;
+};
     
 } // namespace ItmoScript

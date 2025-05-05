@@ -26,6 +26,7 @@ add_executable(
   parser/basic_expressions_test.cpp
   parser/prefix_and_infix_ops_test.cpp
   parser/branch_test.cpp
+  parser/functions_test.cpp
 )
 
 target_link_libraries(

@@ -70,6 +70,7 @@ private:
     //void AddError(std::string&& msg);
     void AddUnknownTokenError();
     void PeekError(TokenType expected_type);
+    //void CurrentTokenError(TokenType expected_type);
     void AddNoPrefixFuncError(TokenType type);
 
     Precedence PeekPrecedence() const;
@@ -89,6 +90,9 @@ private:
     std::unique_ptr<Expression> ParseGroupedExpression();
     std::unique_ptr<IfExpression> ParseIfExpression();
     std::unique_ptr<BlockStatement> ParseBlockStatement();
+    std::unique_ptr<FunctionLiteral> ParseFunctionLiteral();
+
+    std::optional<std::vector<std::unique_ptr<Identifier>>> ParseFunctionParameters();
 };
     
 } // namespace ItmoScript

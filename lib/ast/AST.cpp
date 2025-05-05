@@ -98,6 +98,7 @@ std::string IfExpression::String() const {
     result += condition->String();
     result += " then ";
     result += consequence->String();
+    result += "\n";
 
     if (alternative != nullptr) {
         result += " else ";
@@ -105,6 +106,22 @@ std::string IfExpression::String() const {
     }
 
     result += " end if";
+    return result;
+}
+
+std::string FunctionLiteral::String() const {
+    std::string result;
+    result += token.literal;
+    result += "(";
+
+    for (size_t i = 0; i < parameters.size(); ++i) {
+        result += parameters[i]->String();
+        if (i != parameters.size() - 1) result += ", ";
+    }
+
+    result += ") ";
+    result += body->String();
+    result += " end function";
     return result;
 }
 

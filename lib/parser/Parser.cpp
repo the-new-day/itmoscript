@@ -20,6 +20,7 @@ Parser::Parser(Lexer& lexer)
     prefix_parse_funcs_[TokenType::kFalse] = [this]() { return this->ParseBooleanLiteral(); };
     prefix_parse_funcs_[TokenType::kLParen] = [this]() { return this->ParseGroupedExpression(); };
     prefix_parse_funcs_[TokenType::kIf] = [this]() { return this->ParseIfExpression(); };
+    prefix_parse_funcs_[TokenType::kFunction] = [this]() { return this->ParseFunctionLiteral(); };
 
     auto infix_parser = [this](std::unique_ptr<Expression> expr) {
         return this->ParseInfixExpression(std::move(expr));
@@ -259,6 +260,27 @@ std::unique_ptr<Expression> Parser::ParseGroupedExpression() {
     }
 }
 
+std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
+    auto block = std::make_unique<BlockStatement>(current_token_);
+    AdvanceToken();
+
+    while (!IsCurrentTokenEndOfBlock() && !IsCurrentToken(TokenType::kEOF)) {
+        if (IsCurrentToken(TokenType::kNewLine)) {
+            AdvanceToken();
+            continue;
+        }
+
+        auto statement = ParseStatement();
+        if (statement != nullptr) {
+            block->AddStatement(std::move(statement));
+        }
+
+        AdvanceToken();
+    }
+
+    return block;
+}
+
 std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
     auto expr = std::make_unique<IfExpression>(current_token_);
     AdvanceToken();
@@ -291,25 +313,65 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
     return expr;
 }
 
-std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
-    auto block = std::make_unique<BlockStatement>(current_token_);
-    AdvanceToken();
+std::unique_ptr<FunctionLiteral> Parser::ParseFunctionLiteral() {
+    auto function_lit = std::make_unique<FunctionLiteral>(current_token_);
 
-    while (!IsCurrentTokenEndOfBlock() && !IsCurrentToken(TokenType::kEOF)) {
-        if (IsCurrentToken(TokenType::kNewLine)) {
-            AdvanceToken();
-            continue;
-        }
+    if (!ExpectPeek(TokenType::kLParen)) {
+        return nullptr;
+    }
 
-        auto statement = ParseStatement();
-        if (statement != nullptr) {
-            block->AddStatement(std::move(statement));
+    auto params = ParseFunctionParameters();
+    if (!params.has_value()) {
+        return nullptr;
+    }
+
+    function_lit->parameters = std::move(params.value());
+    function_lit->body = ParseBlockStatement();
+    if (function_lit->body == nullptr) {
+        return nullptr;
+    }
+
+    // TODO: join for all block types (if, function, while etc.)
+    if (!ExpectPeek(TokenType::kFunction)) {
+        return nullptr;
+    }
+
+    return function_lit;
+}
+
+std::optional<std::vector<std::unique_ptr<Identifier>>> Parser::ParseFunctionParameters() {
+    std::vector<std::unique_ptr<Identifier>> identifiers;
+
+    if (IsPeekToken(TokenType::kRParen)) {
+        AdvanceToken();
+        return identifiers;
+    }
+
+    if (!ExpectPeek(TokenType::kIdentifier)) {
+        return std::nullopt;
+    }
+
+    auto ident = ParseIdentifier();
+    identifiers.push_back(std::move(ident));
+
+    while (IsPeekToken(TokenType::kComma)) {
+        if (!IsCurrentToken(TokenType::kIdentifier)) {
+            PeekError(TokenType::kIdentifier);
+            return std::nullopt;
         }
 
         AdvanceToken();
+        AdvanceToken();
+
+        ident = ParseIdentifier();
+        identifiers.push_back(std::move(ident));
     }
 
-    return block;
+    if (!ExpectPeek(TokenType::kRParen)) {
+        return std::nullopt;
+    }
+
+    return identifiers;
 }
 
 const std::vector<std::string>& Parser::GetErrors() const {
