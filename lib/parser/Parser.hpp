@@ -45,6 +45,8 @@ public:
 
     const std::vector<std::string>& GetErrors() const;
 
+    static bool IsEndOfExpression(TokenType type);
+
 private:
     Lexer& lexer_;
     Token current_token_;
@@ -59,16 +61,16 @@ private:
     std::unique_ptr<Expression> ParseExpression(Precedence precedence);
 
     bool IsCurrentToken(TokenType type) const;
+    bool IsCurrentTokenBlock() const;
     bool IsPeekToken(TokenType type) const;
     bool ExpectPeek(TokenType type);
+    bool IsCurrentTokenEndOfBlock() const;
 
     void AddError(const std::string& msg);
-    void AddError(std::string&& msg);
+    //void AddError(std::string&& msg);
     void AddUnknownTokenError();
     void PeekError(TokenType expected_type);
     void AddNoPrefixFuncError(TokenType type);
-
-    bool IsEndOfExpression(TokenType type);
 
     Precedence PeekPrecedence() const;
     Precedence GetCurrentPrecedence() const;
@@ -85,6 +87,8 @@ private:
     std::unique_ptr<PrefixExpression> ParsePrefixExpression();
     std::unique_ptr<InfixExpression> ParseInfixExpression(std::unique_ptr<Expression> left);
     std::unique_ptr<Expression> ParseGroupedExpression();
+    std::unique_ptr<IfExpression> ParseIfExpression();
+    std::unique_ptr<BlockStatement> ParseBlockStatement();
 };
     
 } // namespace ItmoScript

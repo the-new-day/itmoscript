@@ -22,7 +22,7 @@ struct InfixOpExpr {
     R right_value;
 };
 
-static void CheckParserErrors(ItmoScript::Parser& parser) {
+static std::string GetPrintableParserErrors(ItmoScript::Parser& parser) {
     const auto& errors = parser.GetErrors();
 
     std::ostringstream msg;
@@ -34,7 +34,12 @@ static void CheckParserErrors(ItmoScript::Parser& parser) {
         }
     }
 
-    ASSERT_TRUE(errors.empty()) << msg.str();
+    return msg.str();
+}
+
+static void CheckParserErrors(ItmoScript::Parser& parser, int expected_amount = 0) {
+    std::string errors = GetPrintableParserErrors(parser);
+    ASSERT_EQ(parser.GetErrors().size(), expected_amount) << errors;
 }
 
 static void TestIntegerLiteral(std::unique_ptr<ItmoScript::Expression>& int_literal_expr, int64_t expected_value) {
@@ -68,7 +73,7 @@ template<typename T>
 void TestLiteralExpression(std::unique_ptr<ItmoScript::Expression>& expr, T expected) {
     if constexpr (std::is_same_v<T, int64_t>) {
         TestIntegerLiteral(expr, expected);
-    } else if constexpr (std::is_same_v<T, std::string>) {
+    } else if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, const char*>) {
         TestIdentifier(expr, expected);
     } else if constexpr (std::is_same_v<T, bool>) {
         TestBooleanLiteral(expr, expected);

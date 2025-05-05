@@ -32,6 +32,26 @@ std::string Program::String() const {
     return result;
 }
 
+const std::vector<std::unique_ptr<Statement>>& BlockStatement::GetStatements() const {
+    return statements_;
+}
+
+void BlockStatement::AddStatement(std::unique_ptr<Statement> statement) {
+    statements_.push_back(std::move(statement));
+}
+
+std::string BlockStatement::String() const {
+    std::string result;
+
+    for (size_t i = 0; i < statements_.size(); ++i) {
+        result += statements_[i]->String();
+        if (i != statements_.size() - 1)
+            result += '\n';
+    }
+
+    return result;
+}
+
 std::string AssignStatement::String() const {
     return std::format("{} = {}", ident->name, expr->String());
 }
@@ -70,6 +90,22 @@ std::string IntegerLiteral::String() const {
 
 std::string BooleanLiteral::String() const {
     return token.literal;
+}
+
+std::string IfExpression::String() const {
+    std::string result;
+    result += "if ";
+    result += condition->String();
+    result += " then ";
+    result += consequence->String();
+
+    if (alternative != nullptr) {
+        result += " else ";
+        result += alternative->String();
+    }
+
+    result += " end if";
+    return result;
 }
 
 } // namespace ItmoScript

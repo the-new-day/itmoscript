@@ -19,6 +19,7 @@ Parser::Parser(Lexer& lexer)
     prefix_parse_funcs_[TokenType::kTrue] = [this]() { return this->ParseBooleanLiteral(); };
     prefix_parse_funcs_[TokenType::kFalse] = [this]() { return this->ParseBooleanLiteral(); };
     prefix_parse_funcs_[TokenType::kLParen] = [this]() { return this->ParseGroupedExpression(); };
+    prefix_parse_funcs_[TokenType::kIf] = [this]() { return this->ParseIfExpression(); };
 
     auto infix_parser = [this](std::unique_ptr<Expression> expr) {
         return this->ParseInfixExpression(std::move(expr));
@@ -43,8 +44,11 @@ Program Parser::ParseProgram() {
     Program program;
 
     while (!IsCurrentToken(TokenType::kEOF)) {
-        if (IsCurrentToken(TokenType::kIllegal) || IsCurrentToken(TokenType::kNewLine)) {
-            // TODO: 
+        if (IsCurrentToken(TokenType::kNewLine)) {
+            AdvanceToken();
+            continue;
+        } else if (IsCurrentToken(TokenType::kIllegal)) {
+            AddUnknownTokenError();
             AdvanceToken();
             continue;
         }
@@ -127,6 +131,10 @@ bool Parser::IsCurrentToken(TokenType type) const {
     return current_token_.type == type;
 }
 
+bool Parser::IsCurrentTokenBlock() const {
+    return kBlockTypes.contains(current_token_.type);
+}
+
 bool Parser::IsPeekToken(TokenType type) const {
     return peek_token_.type == type;
 }
@@ -142,11 +150,9 @@ bool Parser::ExpectPeek(TokenType type) {
 }
 
 void Parser::AddError(const std::string& msg) {
-    errors_.push_back(msg);
-}
-
-void Parser::AddError(std::string&& msg) {
-    errors_.push_back(std::move(msg));
+    errors_.push_back(
+        std::format("Ln {}, Col {}: {}", current_token_.line, current_token_.column, msg)
+    );
 }
 
 void Parser::AddUnknownTokenError() {
@@ -172,7 +178,13 @@ void Parser::AddNoPrefixFuncError(TokenType type) {
 }
 
 bool Parser::IsEndOfExpression(TokenType type) {
-    return type == TokenType::kNewLine || type == TokenType::kEOF;
+    return type == TokenType::kNewLine 
+        || type == TokenType::kEOF;
+}
+
+bool Parser::IsCurrentTokenEndOfBlock() const {
+    return IsCurrentToken(TokenType::kEnd)
+        || IsCurrentToken(TokenType::kElse);
 }
 
 Precedence Parser::PeekPrecedence() const {
@@ -245,6 +257,54 @@ std::unique_ptr<Expression> Parser::ParseGroupedExpression() {
     } else {
         return nullptr;
     }
+}
+
+std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
+    auto expr = std::make_unique<IfExpression>(current_token_);
+    AdvanceToken();
+
+    expr->condition = ParseExpression(Precedence::kLowest);
+    if (expr->condition == nullptr) {
+        return nullptr;
+    }
+
+    if (!ExpectPeek(TokenType::kThen)) {
+        return nullptr;
+    }
+
+    expr->consequence = ParseBlockStatement();
+    if (expr->consequence == nullptr) {
+        return nullptr;
+    }
+
+    if (IsCurrentToken(TokenType::kElse)) {
+        expr->alternative = ParseBlockStatement();
+        if (expr->alternative == nullptr) {
+            return nullptr;
+        }
+    }
+
+    if (!ExpectPeek(TokenType::kIf)) {
+        return nullptr;
+    }
+
+    return expr;
+}
+
+std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
+    auto block = std::make_unique<BlockStatement>(current_token_);
+    AdvanceToken();
+
+    while (!IsCurrentTokenEndOfBlock() && !IsCurrentToken(TokenType::kEOF)) {
+        auto statement = ParseStatement();
+        if (statement != nullptr) {
+            block->AddStatement(std::move(statement));
+        }
+
+        AdvanceToken();
+    }
+
+    return block;
 }
 
 const std::vector<std::string>& Parser::GetErrors() const {

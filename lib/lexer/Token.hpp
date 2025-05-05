@@ -63,6 +63,7 @@ enum class TokenType {
     kElse,
     kFor,
     kWhile,
+    kThen,
 
     // Keywords-literals
     kTrue,
@@ -138,6 +139,15 @@ static const std::map<std::string, TokenType> kKeywords{
     {"else", TokenType::kElse},
     {"for", TokenType::kFor},
     {"while", TokenType::kWhile},
+    {"then", TokenType::kThen},
+};
+
+static const std::set<TokenType> kBlockTypes {
+    TokenType::kIf,
+    TokenType::kFor,
+    TokenType::kWhile,
+    TokenType::kFunction,
+    TokenType::kElse,
 };
 
 static const std::map<TokenType, std::string> kTokenTypeNames = {
@@ -197,6 +207,7 @@ static const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kElse, "ELSE"},
     {TokenType::kFor, "FOR"},
     {TokenType::kWhile, "WHILE"},
+    {TokenType::kThen, "THEN"},
 
     // Keywords-literals
     {TokenType::kTrue, "TRUE"},

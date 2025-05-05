@@ -30,6 +30,18 @@ struct Expression : public Node {
     std::string String() const override;
 };
 
+class Program {
+public:
+    std::string GetTokenLiteral() const;
+    const std::vector<std::unique_ptr<Statement>>& GetStatements() const;
+    void AddStatement(std::unique_ptr<Statement> statement);
+
+    std::string String() const;
+
+private:
+    std::vector<std::unique_ptr<Statement>> statements_;
+};
+
 struct ExpressionStatement : public Statement {
     using Statement::Statement;
     std::string String() const override;
@@ -76,18 +88,6 @@ struct InfixExpression : public Expression {
     std::unique_ptr<Expression> left;
 };
 
-class Program {
-public:
-    std::string GetTokenLiteral() const;
-    const std::vector<std::unique_ptr<Statement>>& GetStatements() const;
-    void AddStatement(std::unique_ptr<Statement> statement);
-
-    std::string String() const;
-
-private:
-    std::vector<std::unique_ptr<Statement>> statements_;
-};
-
 struct IntegerLiteral : public Expression {
     using Expression::Expression;
     std::string String() const override;
@@ -100,6 +100,28 @@ struct BooleanLiteral : public Expression {
     std::string String() const override;
     
     bool value;
+};
+
+class BlockStatement : public Statement {
+public:
+    using Statement::Statement;
+    std::string GetTokenLiteral() const;
+    const std::vector<std::unique_ptr<Statement>>& GetStatements() const;
+    void AddStatement(std::unique_ptr<Statement> statement);
+
+    std::string String() const;
+    
+private:
+    std::vector<std::unique_ptr<Statement>> statements_;
+};
+
+struct IfExpression : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+
+    std::unique_ptr<Expression> condition;
+    std::unique_ptr<BlockStatement> consequence;
+    std::unique_ptr<BlockStatement> alternative;
 };
     
 } // namespace ItmoScript

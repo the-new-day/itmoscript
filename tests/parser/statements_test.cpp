@@ -31,8 +31,7 @@ TEST(ParserTestSuite, SimpleVariableAssignment) {
         // TODO: add check for value
     }
 
-    const auto& errors = parser.GetErrors();
-    ASSERT_TRUE(errors.empty()) << "Parser has errors: " << errors[0];
+    CheckParserErrors(parser);
 }
 
 TEST(ParserTestSuite, SimpleVariableAssignmentErrors) {
@@ -46,7 +45,7 @@ TEST(ParserTestSuite, SimpleVariableAssignmentErrors) {
     ItmoScript::Parser parser{lexer};
     ItmoScript::Program program = parser.ParseProgram();
 
-    ASSERT_EQ(parser.GetErrors().size(), 2);
+    CheckParserErrors(parser, 4);
 }
 
 TEST(ParserTestSuite, SimpleReturn) {
@@ -70,7 +69,6 @@ TEST(ParserTestSuite, SimpleReturn) {
 
         // TODO: add check for value
     }
-
-    const auto& errors = parser.GetErrors();
-    ASSERT_TRUE(errors.empty()) << "Parser has errors: " << errors[0];
+    
+    CheckParserErrors(parser);
 }
