@@ -296,6 +296,11 @@ std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
     AdvanceToken();
 
     while (!IsCurrentTokenEndOfBlock() && !IsCurrentToken(TokenType::kEOF)) {
+        if (IsCurrentToken(TokenType::kNewLine)) {
+            AdvanceToken();
+            continue;
+        }
+
         auto statement = ParseStatement();
         if (statement != nullptr) {
             block->AddStatement(std::move(statement));

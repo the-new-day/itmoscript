@@ -1,7 +1,11 @@
 #include "parser_test.hpp"
 
 TEST(ParserTestSuite, IfExpressionTest) {
-    std::string code = "if foobar > fizzbuzz then aboba end if";
+    std::string code = R"(
+        if foobar > fizzbuzz then 
+            aboba 
+        end if
+    )";
 
     ItmoScript::Lexer lexer{code};
     ItmoScript::Parser parser{lexer};
@@ -38,7 +42,11 @@ TEST(ParserTestSuite, IfExpressionTest) {
 
 TEST(ParserTestSuite, IfElseExpressionTest) {
     std::string code = R"(
-        if foobar > fizzbuzz then aboba else bibaboba end if
+        if foobar > fizzbuzz then 
+            aboba 
+        else 
+            bibaboba 
+        end if
     )";
 
     ItmoScript::Lexer lexer{code};
