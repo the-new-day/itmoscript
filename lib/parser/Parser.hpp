@@ -40,7 +40,7 @@ public:
     Parser& operator=(Parser&&) = delete;
     ~Parser() = default;
 
-    void ReadNextToken();
+    void AdvanceToken();
     Program ParseProgram();
 
     const std::vector<std::string>& GetErrors() const;
@@ -84,6 +84,7 @@ private:
     std::unique_ptr<BooleanLiteral> ParseBooleanLiteral();
     std::unique_ptr<PrefixExpression> ParsePrefixExpression();
     std::unique_ptr<InfixExpression> ParseInfixExpression(std::unique_ptr<Expression> left);
+    std::unique_ptr<Expression> ParseGroupedExpression();
 };
     
 } // namespace ItmoScript

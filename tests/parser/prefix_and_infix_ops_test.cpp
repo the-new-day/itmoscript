@@ -1,6 +1,6 @@
 #include "parser_test.hpp"
 
-TEST(ParserTestSuite, SimplePrefixOperatorsTest) {
+TEST(ParserTestSuite, IntPrefixOperatorsTest) {
     std::vector<PrefixOpExpr<int64_t>> expressions{
         {"!5", "!", 5},
         {"!50234", "!", 50234},
@@ -13,7 +13,16 @@ TEST(ParserTestSuite, SimplePrefixOperatorsTest) {
     TestPrefixLiteralsExpressions<int64_t>(expressions);
 }
 
-TEST(ParserTestSuite, SimpleInfixOperatorsTest) {
+TEST(ParserTestSuite, BooleanPrefixOperatorsTest) {
+    std::vector<PrefixOpExpr<bool>> expressions{
+        {"!true", "!", true},
+        {"!false", "!", false},
+    };
+
+    TestPrefixLiteralsExpressions<bool>(expressions);
+}
+
+TEST(ParserTestSuite, IntInfixOperatorsTest) {
     std::vector<InfixOpExpr<int64_t>> expressions{
         {"5 + 5", "+", 5, 5},
         {"5 - 5", "-", 5, 5},
@@ -28,7 +37,7 @@ TEST(ParserTestSuite, SimpleInfixOperatorsTest) {
     TestInfixLiteralsExpressions<int64_t>(expressions);
 }
 
-TEST(ParserTestSuite, InfixOperatorsWithBooleanTest) {
+TEST(ParserTestSuite, BooleanInfixOperatorsTest) {
     std::vector<InfixOpExpr<bool>> expressions{
         {"true == false", "==", true, false},
         {"true == true", "==", true, true},
@@ -59,6 +68,14 @@ TEST(ParserTestSuite, OperatorPrecedenceParsingTest) {
         {"5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"},
         {"3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"},
         {"3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"},
+
+        // grouped expressions
+        {"1 + (2 + 3) + 4", "((1 + (2 + 3)) + 4)"},
+        {"(5 + 5) * 2", "((5 + 5) * 2)"},
+        {"2 / (5 + 5)", "(2 / (5 + 5))"},
+        {"-(5 + 5)", "(-(5 + 5))"},
+        {"!(true == false)", "(!(true == false))"},
+        {"(3 * (2 - 7) / x == 5 / (1 + 1) - (9 + 0))", "(((3 * (2 - 7)) / x) == ((5 / (1 + 1)) - (9 + 0)))"}
     };
 
     for (const auto& [input, expected] : tests) {
@@ -66,7 +83,7 @@ TEST(ParserTestSuite, OperatorPrecedenceParsingTest) {
         ItmoScript::Parser parser{lexer};
         ItmoScript::Program program = parser.ParseProgram();
 
-        PrintParserErrors(parser);
+        CheckParserErrors(parser);
         ASSERT_EQ(program.String(), expected);
     }
 }

@@ -20,7 +20,7 @@ TEST(ParserTestSuite, IdentifierExpressionTest) {
     ItmoScript::Lexer lexer{code};
     ItmoScript::Parser parser{lexer};
     ItmoScript::Program program = parser.ParseProgram();
-    PrintParserErrors(parser);
+    CheckParserErrors(parser);
 
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 1);
@@ -40,7 +40,7 @@ TEST(ParserTestSuite, IntLiteralExpressionTest) {
     ItmoScript::Lexer lexer{code};
     ItmoScript::Parser parser{lexer};
     ItmoScript::Program program = parser.ParseProgram();
-    PrintParserErrors(parser);
+    CheckParserErrors(parser);
 
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 1);
@@ -61,7 +61,7 @@ TEST(ParserTestSuite, BooleanLiteralExpressionTest) {
     ItmoScript::Lexer lexer{code};
     ItmoScript::Parser parser{lexer};
     ItmoScript::Program program = parser.ParseProgram();
-    PrintParserErrors(parser);
+    CheckParserErrors(parser);
 
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 2);

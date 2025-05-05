@@ -9,8 +9,8 @@ Parser::Parser(Lexer& lexer)
     : lexer_(lexer) 
 {
     // set current_token_ and peek_token_
-    ReadNextToken();
-    ReadNextToken();
+    AdvanceToken();
+    AdvanceToken();
 
     prefix_parse_funcs_[TokenType::kIdentifier] = [this]() { return this->ParseIdentifier(); };
     prefix_parse_funcs_[TokenType::kInt] = [this]() { return this->ParseIntegerLiteral(); };
@@ -18,6 +18,7 @@ Parser::Parser(Lexer& lexer)
     prefix_parse_funcs_[TokenType::kMinus] = [this]() { return this->ParsePrefixExpression(); };
     prefix_parse_funcs_[TokenType::kTrue] = [this]() { return this->ParseBooleanLiteral(); };
     prefix_parse_funcs_[TokenType::kFalse] = [this]() { return this->ParseBooleanLiteral(); };
+    prefix_parse_funcs_[TokenType::kLParen] = [this]() { return this->ParseGroupedExpression(); };
 
     auto infix_parser = [this](std::unique_ptr<Expression> expr) {
         return this->ParseInfixExpression(std::move(expr));
@@ -33,7 +34,7 @@ Parser::Parser(Lexer& lexer)
     infix_parse_funcs_[TokenType::kGreater] = infix_parser;
 }
 
-void Parser::ReadNextToken() {
+void Parser::AdvanceToken() {
     current_token_ = peek_token_;
     peek_token_ = lexer_.GetNextToken();
 }
@@ -44,7 +45,7 @@ Program Parser::ParseProgram() {
     while (!IsCurrentToken(TokenType::kEOF)) {
         if (IsCurrentToken(TokenType::kIllegal) || IsCurrentToken(TokenType::kNewLine)) {
             // TODO: 
-            ReadNextToken();
+            AdvanceToken();
             continue;
         }
 
@@ -53,7 +54,7 @@ Program Parser::ParseProgram() {
             program.AddStatement(std::move(statement));
         }
 
-        ReadNextToken();
+        AdvanceToken();
     }
 
     return program;
@@ -81,8 +82,8 @@ std::unique_ptr<AssignStatement> Parser::ParseAssignStatement() {
     statement->ident->name = current_token_.literal;
 
     // TODO: parse expression
-    ReadNextToken();
-    ReadNextToken();
+    AdvanceToken();
+    AdvanceToken();
     statement->expr = std::make_unique<Expression>(current_token_);
 
     return statement;
@@ -92,7 +93,7 @@ std::unique_ptr<ReturnStatement> Parser::ParseReturnStatement() {
     auto statement = std::make_unique<ReturnStatement>(current_token_);
     // TODO: parse expression
     statement->expr = std::make_unique<Expression>();
-    ReadNextToken();
+    AdvanceToken();
     return statement;
 }
 
@@ -115,7 +116,7 @@ std::unique_ptr<Expression> Parser::ParseExpression(Precedence precedence) {
             return left;
         }
 
-        ReadNextToken();
+        AdvanceToken();
         left = std::invoke(infix_parse_funcs_.at(current_token_.type), std::move(left));
     }
 
@@ -132,7 +133,7 @@ bool Parser::IsPeekToken(TokenType type) const {
 
 bool Parser::ExpectPeek(TokenType type) {
     if (IsPeekToken(type)) {
-        ReadNextToken();
+        AdvanceToken();
         return true;
     } else {
         PeekError(type);
@@ -217,7 +218,7 @@ std::unique_ptr<BooleanLiteral> Parser::ParseBooleanLiteral() {
 std::unique_ptr<PrefixExpression> Parser::ParsePrefixExpression() {
     auto expr = std::make_unique<PrefixExpression>(current_token_);
     expr->oper = current_token_.literal;
-    ReadNextToken();
+    AdvanceToken();
 
     expr->right = ParseExpression(Precedence::kPrefix);
     return expr;
@@ -229,10 +230,21 @@ std::unique_ptr<InfixExpression> Parser::ParseInfixExpression(std::unique_ptr<Ex
     infix_expr->left = std::move(left);
 
     Precedence precedence = GetCurrentPrecedence();
-    ReadNextToken();
+    AdvanceToken();
     infix_expr->right = ParseExpression(precedence);
 
     return infix_expr;
+}
+
+std::unique_ptr<Expression> Parser::ParseGroupedExpression() {
+    AdvanceToken();
+    auto expr = ParseExpression(Precedence::kLowest);
+
+    if (ExpectPeek(TokenType::kRParen)) {
+        return expr;
+    } else {
+        return nullptr;
+    }
 }
 
 const std::vector<std::string>& Parser::GetErrors() const {

@@ -22,7 +22,7 @@ struct InfixOpExpr {
     R right_value;
 };
 
-static void PrintParserErrors(ItmoScript::Parser& parser) {
+static void CheckParserErrors(ItmoScript::Parser& parser) {
     const auto& errors = parser.GetErrors();
 
     std::ostringstream msg;
@@ -96,7 +96,7 @@ void TestInfixLiteralsExpressions(const std::vector<InfixOpExpr<L, R>>& expressi
         ItmoScript::Parser parser{lexer};
         ItmoScript::Program program = parser.ParseProgram();
         
-        PrintParserErrors(parser);
+        CheckParserErrors(parser);
 
         const auto& statements = program.GetStatements();
         ASSERT_EQ(statements.size(), 1) << "parser returned more than 1 statement, got " << statements.size() << '\n';
@@ -116,7 +116,7 @@ void TestPrefixLiteralsExpressions(const std::vector<PrefixOpExpr<L>>& expressio
         ItmoScript::Parser parser{lexer};
         ItmoScript::Program program = parser.ParseProgram();
         
-        PrintParserErrors(parser);
+        CheckParserErrors(parser);
 
         const auto& statements = program.GetStatements();
         ASSERT_EQ(statements.size(), 1);
