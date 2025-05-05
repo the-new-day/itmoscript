@@ -81,6 +81,7 @@ private:
 
     std::unique_ptr<Identifier> ParseIdentifier();
     std::unique_ptr<IntegerLiteral> ParseIntegerLiteral();
+    std::unique_ptr<BooleanLiteral> ParseBooleanLiteral();
     std::unique_ptr<PrefixExpression> ParsePrefixExpression();
     std::unique_ptr<InfixExpression> ParseInfixExpression(std::unique_ptr<Expression> left);
 };

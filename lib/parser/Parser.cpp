@@ -16,6 +16,8 @@ Parser::Parser(Lexer& lexer)
     prefix_parse_funcs_[TokenType::kInt] = [this]() { return this->ParseIntegerLiteral(); };
     prefix_parse_funcs_[TokenType::kBang] = [this]() { return this->ParsePrefixExpression(); };
     prefix_parse_funcs_[TokenType::kMinus] = [this]() { return this->ParsePrefixExpression(); };
+    prefix_parse_funcs_[TokenType::kTrue] = [this]() { return this->ParseBooleanLiteral(); };
+    prefix_parse_funcs_[TokenType::kFalse] = [this]() { return this->ParseBooleanLiteral(); };
 
     auto infix_parser = [this](std::unique_ptr<Expression> expr) {
         return this->ParseInfixExpression(std::move(expr));
@@ -204,6 +206,12 @@ std::unique_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
     auto int_literal = std::make_unique<IntegerLiteral>(current_token_);
     int_literal->value = parsing_result.value();
     return int_literal;
+}
+
+std::unique_ptr<BooleanLiteral> Parser::ParseBooleanLiteral() {
+    auto bool_literal = std::make_unique<BooleanLiteral>(current_token_);
+    bool_literal->value = IsCurrentToken(TokenType::kTrue);
+    return bool_literal;
 }
 
 std::unique_ptr<PrefixExpression> Parser::ParsePrefixExpression() {
