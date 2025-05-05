@@ -1,20 +1,7 @@
 #include "parser_test.hpp"
 
-struct PrefixOpExpr {
-    std::string input;
-    std::string oper;
-    int64_t value;
-};
-
-struct InfixOpExpr {
-    std::string input;
-    std::string oper;
-    int64_t left_value;
-    int64_t right_value;
-};
-
 TEST(ParserTestSuite, SimplePrefixOperatorsTest) {
-    std::vector<PrefixOpExpr> expressions{
+    std::vector<PrefixOpExpr<int64_t>> expressions{
         {"!5", "!", 5},
         {"!50234", "!", 50234},
         {"!33", "!", 33},
@@ -23,32 +10,11 @@ TEST(ParserTestSuite, SimplePrefixOperatorsTest) {
         {"-22223333", "-", 22223333},
     };
 
-    for (const auto& test_expr : expressions) {
-        ItmoScript::Lexer lexer{test_expr.input};
-        ItmoScript::Parser parser{lexer};
-        ItmoScript::Program program = parser.ParseProgram();
-        
-        PrintParserErrors(parser);
-
-        const auto& statements = program.GetStatements();
-        ASSERT_EQ(statements.size(), 1);
-
-        auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[0].get());
-        ASSERT_NE(expr_stmt, nullptr);
-        ASSERT_NE(expr_stmt->expr, nullptr);
-
-        auto* prefix_expr = dynamic_cast<ItmoScript::PrefixExpression*>(expr_stmt->expr.get());
-        ASSERT_NE(prefix_expr, nullptr);
-        ASSERT_NE(prefix_expr->right, nullptr);
-
-        ASSERT_EQ(prefix_expr->oper, test_expr.oper);
-
-        TestIntegerLiteral(prefix_expr->right, test_expr.value);
-    }
+    TestPrefixLiteralsExpressions<int64_t>(expressions);
 }
 
 TEST(ParserTestSuite, SimpleInfixOperatorsTest) {
-    std::vector<InfixOpExpr> expressions{
+    std::vector<InfixOpExpr<int64_t>> expressions{
         {"5 + 5", "+", 5, 5},
         {"5 - 5", "-", 5, 5},
         {"5 * 5", "*", 5, 5},
@@ -59,27 +25,26 @@ TEST(ParserTestSuite, SimpleInfixOperatorsTest) {
         {"5 != 5", "!=", 5, 5},
     };
 
-    for (const auto& test_expr : expressions) {
-        ItmoScript::Lexer lexer{test_expr.input};
-        ItmoScript::Parser parser{lexer};
-        ItmoScript::Program program = parser.ParseProgram();
-        
-        PrintParserErrors(parser);
+    TestInfixLiteralsExpressions<int64_t>(expressions);
+}
 
-        const auto& statements = program.GetStatements();
-        ASSERT_EQ(statements.size(), 1);
-
-        auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[0].get());
-        ASSERT_NE(expr_stmt, nullptr);
-        ASSERT_NE(expr_stmt->expr, nullptr);
-
-        TestInfixExpression(expr_stmt->expr, test_expr.left_value, test_expr.oper, test_expr.right_value);
-    }
+TEST(ParserTestSuite, InfixOperatorsWithBooleanTest) {
+    std::vector<InfixOpExpr<bool>> expressions{
+        {"true == false", "==", true, false},
+        {"true == true", "==", true, true},
+        {"true != false", "!=", true, false},
+    };
+    
+    TestInfixLiteralsExpressions<bool>(expressions);
 }
 
 TEST(ParserTestSuite, OperatorPrecedenceParsingTest) {
     // <input, expected>
     std::vector<std::pair<std::string, std::string>> tests{
+        {"true", "true"},
+        {"false", "false"},
+        {"3 > 5 == false", "((3 > 5) == false)"},
+        {"3 < 5 == true", "((3 < 5) == true)"},
         {"-a * b", "((-a) * b)"},
         {"!-a", "(!(-a))"},
         {"a + -c", "(a + (-c))"},

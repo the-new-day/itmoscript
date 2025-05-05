@@ -20,6 +20,7 @@ TEST(ParserTestSuite, IdentifierExpressionTest) {
     ItmoScript::Lexer lexer{code};
     ItmoScript::Parser parser{lexer};
     ItmoScript::Program program = parser.ParseProgram();
+    PrintParserErrors(parser);
 
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 1);
@@ -39,6 +40,7 @@ TEST(ParserTestSuite, IntLiteralExpressionTest) {
     ItmoScript::Lexer lexer{code};
     ItmoScript::Parser parser{lexer};
     ItmoScript::Program program = parser.ParseProgram();
+    PrintParserErrors(parser);
 
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 1);
@@ -48,4 +50,30 @@ TEST(ParserTestSuite, IntLiteralExpressionTest) {
     ASSERT_NE(expr_stmt->expr, nullptr);
 
     TestIntegerLiteral(expr_stmt->expr, 100500);
+}
+
+TEST(ParserTestSuite, BooleanLiteralExpressionTest) {
+    std::string code = R"(
+        true
+        false
+    )";
+
+    ItmoScript::Lexer lexer{code};
+    ItmoScript::Parser parser{lexer};
+    ItmoScript::Program program = parser.ParseProgram();
+    PrintParserErrors(parser);
+
+    const auto& statements = program.GetStatements();
+    ASSERT_EQ(statements.size(), 2);
+
+    auto* expr_stmt1 = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[0].get());
+    ASSERT_NE(expr_stmt1, nullptr);
+    ASSERT_NE(expr_stmt1->expr, nullptr);
+
+    auto* expr_stmt2 = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[1].get());
+    ASSERT_NE(expr_stmt2, nullptr);
+    ASSERT_NE(expr_stmt2->expr, nullptr);
+
+    TestBooleanLiteral(expr_stmt1->expr, true);
+    TestBooleanLiteral(expr_stmt2->expr, false);
 }
