@@ -4,34 +4,43 @@ TEST(ParserTestSuite, SimpleVariableAssignment) {
     std::string code = R"(
         x = 5
         y = 10
-        foobar = 100500
+        foobar = 100 + 500
+        z = x
+        a = b + c * 3
     )";
-
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-
-    const auto& statements = program.GetStatements();
-
-    ASSERT_EQ(statements.size(), 3);
 
     std::vector<std::string> expected_identifiers = {
         "x",
         "y",
-        "foobar"
+        "foobar",
+        "z",
+        "a",
     };
+
+    std::vector<std::string> expected_expressions = {
+        "5",
+        "10",
+        "(100 + 500)",
+        "x",
+        "(b + (c * 3))",
+    };
+
+    ItmoScript::Lexer lexer{code};
+    ItmoScript::Parser parser{lexer};
+    ItmoScript::Program program = parser.ParseProgram();
+    CheckParserErrors(parser);
+
+    const auto& statements = program.GetStatements();
+
+    ASSERT_EQ(statements.size(), expected_identifiers.size());
 
     for (size_t i = 0; i < statements.size(); ++i) {
         auto* assign_stmt = dynamic_cast<ItmoScript::AssignStatement*>(statements[i].get());
         ASSERT_NE(assign_stmt, nullptr) << "Statement " << i << " is not an AssignStatement";
 
-        ASSERT_EQ(assign_stmt->ident->name, expected_identifiers[i]) 
-            << "Identifier at position " << i << " doesn't match";
-
-        // TODO: add check for value
+        ASSERT_EQ(assign_stmt->ident->name, expected_identifiers[i]);
+        ASSERT_EQ(assign_stmt->expr->String(), expected_expressions[i]);
     }
-
-    CheckParserErrors(parser);
 }
 
 TEST(ParserTestSuite, SimpleVariableAssignmentErrors) {
@@ -63,11 +72,12 @@ TEST(ParserTestSuite, SimpleReturn) {
 
     ASSERT_EQ(statements.size(), 3);
 
+    std::vector<std::string> expected_exprs = {"5", "10", "x"};
+
     for (size_t i = 0; i < statements.size(); ++i) {
         auto* return_stmt = dynamic_cast<ItmoScript::ReturnStatement*>(statements[i].get());
         ASSERT_NE(return_stmt, nullptr) << "Statement " << i << " is not a ReturnStatement";
-
-        // TODO: add check for value
+        ASSERT_EQ(return_stmt->expr->String(), expected_exprs[i]);
     }
     
     CheckParserErrors(parser);

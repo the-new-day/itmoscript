@@ -89,19 +89,19 @@ std::unique_ptr<AssignStatement> Parser::ParseAssignStatement() {
     statement->ident = std::make_unique<Identifier>(current_token_);
     statement->ident->name = current_token_.literal;
 
-    // TODO: parse expression
-    AdvanceToken();
-    AdvanceToken();
-    statement->expr = std::make_unique<Expression>(current_token_);
+    if (!ExpectPeek(TokenType::kAssign)) {
+        return nullptr;
+    }
 
+    AdvanceToken();
+    statement->expr = ParseExpression(Precedence::kLowest);
     return statement;
 }
 
 std::unique_ptr<ReturnStatement> Parser::ParseReturnStatement() {
     auto statement = std::make_unique<ReturnStatement>(current_token_);
-    // TODO: parse expression
-    statement->expr = std::make_unique<Expression>();
     AdvanceToken();
+    statement->expr = ParseExpression(Precedence::kLowest);
     return statement;
 }
 
