@@ -148,4 +148,14 @@ struct WhileStatement : public Statement {
     std::unique_ptr<BlockStatement> body;
 };
 
+struct BreakStatement : public Statement {
+    using Statement::Statement;
+    std::string String() const override;
+};
+
+struct ContinueStatement : public Statement {
+    using Statement::Statement;
+    std::string String() const override;
+};
+
 } // namespace ItmoScript

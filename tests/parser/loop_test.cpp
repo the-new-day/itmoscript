@@ -4,6 +4,8 @@ TEST(ParserTestSuite, SimpleWhileTest) {
     std::string code = R"(
         while i < 10
             i = i + 1
+            continue
+            break
         end while
     )";
 
@@ -22,15 +24,17 @@ TEST(ParserTestSuite, SimpleWhileTest) {
 
     TestInfixExpression(while_stmt->condition, "i", "<", 10);
 
-    ASSERT_EQ(while_stmt->body->GetStatements().size(), 1);
-
     auto* body_block = dynamic_cast<ItmoScript::BlockStatement*>(while_stmt->body.get());
     ASSERT_NE(body_block, nullptr);
 
-    const auto& block_statements = body_block->GetStatements();
-    ASSERT_EQ(block_statements.size(), 1);
+    std::vector<std::string> expected = {
+        "i = (i + 1)", "continue", "break"
+    };
 
-    auto* body = dynamic_cast<ItmoScript::AssignStatement*>(block_statements[0].get());
-    ASSERT_NE(body, nullptr);
-    ASSERT_EQ(body->String(), "i = (i + 1)");
+    const auto& block_statements = body_block->GetStatements();
+    ASSERT_EQ(block_statements.size(), expected.size());
+
+    TestStatement<ItmoScript::AssignStatement>(block_statements[0], expected[0]);
+    TestStatement<ItmoScript::ContinueStatement>(block_statements[1], expected[1]);
+    TestStatement<ItmoScript::BreakStatement>(block_statements[2], expected[2]);
 }

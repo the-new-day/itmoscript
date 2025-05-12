@@ -139,3 +139,10 @@ void TestPrefixLiteralsExpressions(const std::vector<PrefixOpExpr<L>>& expressio
         TestLiteralExpression(prefix_expr->right, test_expr.value);
     }
 }
+
+template<typename T>
+void TestStatement(const std::unique_ptr<ItmoScript::Statement>& stmt, const std::string& expected) {
+    auto* body = dynamic_cast<T*>(stmt.get());
+    ASSERT_NE(body, nullptr);
+    ASSERT_EQ(body->String(), expected);
+}

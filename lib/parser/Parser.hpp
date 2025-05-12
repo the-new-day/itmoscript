@@ -55,11 +55,16 @@ private:
 
     std::vector<std::string> errors_;
 
+    template<typename T>
+    std::unique_ptr<T> MakeNode();
+
     std::unique_ptr<Statement> ParseStatement();
     std::unique_ptr<AssignStatement> ParseAssignStatement();
     std::unique_ptr<ReturnStatement> ParseReturnStatement();
     std::unique_ptr<ExpressionStatement> ParseExpressionStatement();
     std::unique_ptr<WhileStatement> ParseWhileStatement();
+    std::unique_ptr<BreakStatement> ParseBreakStatement();
+    std::unique_ptr<ContinueStatement> ParseContinueStatement();
 
     bool IsCurrentToken(TokenType type) const;
     bool IsCurrentTokenBlock() const;
@@ -99,4 +104,9 @@ private:
     std::optional<std::vector<std::unique_ptr<Expression>>> ParseCallArguments();
 };
     
+template<typename T>
+std::unique_ptr<T> Parser::MakeNode() {
+    return std::make_unique<T>(current_token_);
+}
+
 } // namespace ItmoScript

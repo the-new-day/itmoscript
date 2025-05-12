@@ -156,4 +156,12 @@ std::string WhileStatement::String() const {
     return result;
 }
 
+std::string BreakStatement::String() const {
+    return token.literal;
+}
+
+std::string ContinueStatement::String() const {
+    return token.literal;
+}
+
 } // namespace ItmoScript

@@ -69,6 +69,8 @@ Program Parser::ParseProgram() {
 }
 
 std::unique_ptr<Statement> Parser::ParseStatement() {
+    // TODO: remove this if-spagetti
+
     if (IsCurrentToken(TokenType::kIdentifier)) {
         if (IsPeekToken(TokenType::kAssign)) {
             return ParseAssignStatement();
@@ -77,6 +79,10 @@ std::unique_ptr<Statement> Parser::ParseStatement() {
         return ParseReturnStatement();
     } else if (IsCurrentToken(TokenType::kWhile)) {
         return ParseWhileStatement();
+    } else if (IsCurrentToken(TokenType::kBreak)) {
+        return ParseBreakStatement();
+    } else if (IsCurrentToken(TokenType::kContinue)) {
+        return ParseContinueStatement();
     } else if (IsCurrentToken(TokenType::kIllegal)) {
         AddUnknownTokenError();
         return nullptr;
@@ -86,9 +92,9 @@ std::unique_ptr<Statement> Parser::ParseStatement() {
 }
 
 std::unique_ptr<AssignStatement> Parser::ParseAssignStatement() {
-    auto statement = std::make_unique<AssignStatement>(current_token_);
+    auto statement = MakeNode<AssignStatement>();
 
-    statement->ident = std::make_unique<Identifier>(current_token_);
+    statement->ident = MakeNode<Identifier>();
     statement->ident->name = current_token_.literal;
 
     if (!ExpectPeek(TokenType::kAssign)) {
@@ -101,14 +107,14 @@ std::unique_ptr<AssignStatement> Parser::ParseAssignStatement() {
 }
 
 std::unique_ptr<ReturnStatement> Parser::ParseReturnStatement() {
-    auto statement = std::make_unique<ReturnStatement>(current_token_);
+    auto statement = MakeNode<ReturnStatement>();
     AdvanceToken();
     statement->expr = ParseExpression();
     return statement;
 }
 
 std::unique_ptr<ExpressionStatement> Parser::ParseExpressionStatement() {
-    auto statement = std::make_unique<ExpressionStatement>(current_token_);
+    auto statement = MakeNode<ExpressionStatement>();
     statement->expr = ParseExpression();
     return statement;
 }
@@ -210,7 +216,7 @@ Precedence Parser::GetCurrentPrecedence() const {
 }
 
 std::unique_ptr<Identifier> Parser::ParseIdentifier() {
-    auto ident = std::make_unique<Identifier>(current_token_);
+    auto ident = MakeNode<Identifier>();
     ident->name = current_token_.literal;
     return ident;
 }
@@ -222,19 +228,19 @@ std::unique_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
         return nullptr;
     }
 
-    auto int_literal = std::make_unique<IntegerLiteral>(current_token_);
+    auto int_literal = MakeNode<IntegerLiteral>();
     int_literal->value = parsing_result.value();
     return int_literal;
 }
 
 std::unique_ptr<BooleanLiteral> Parser::ParseBooleanLiteral() {
-    auto bool_literal = std::make_unique<BooleanLiteral>(current_token_);
+    auto bool_literal = MakeNode<BooleanLiteral>();
     bool_literal->value = IsCurrentToken(TokenType::kTrue);
     return bool_literal;
 }
 
 std::unique_ptr<PrefixExpression> Parser::ParsePrefixExpression() {
-    auto expr = std::make_unique<PrefixExpression>(current_token_);
+    auto expr = MakeNode<PrefixExpression>();
     expr->oper = current_token_.literal;
     AdvanceToken();
 
@@ -243,7 +249,7 @@ std::unique_ptr<PrefixExpression> Parser::ParsePrefixExpression() {
 }
 
 std::unique_ptr<InfixExpression> Parser::ParseInfixExpression(std::unique_ptr<Expression> left) {
-    auto infix_expr = std::make_unique<InfixExpression>(current_token_);
+    auto infix_expr = MakeNode<InfixExpression>();
     infix_expr->oper = current_token_.literal;
     infix_expr->left = std::move(left);
 
@@ -266,7 +272,7 @@ std::unique_ptr<Expression> Parser::ParseGroupedExpression() {
 }
 
 std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
-    auto block = std::make_unique<BlockStatement>(current_token_);
+    auto block = MakeNode<BlockStatement>();
     AdvanceToken();
 
     while (!IsCurrentTokenEndOfBlock() && !IsCurrentToken(TokenType::kEOF)) {
@@ -287,7 +293,7 @@ std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
 }
 
 std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
-    auto expr = std::make_unique<IfExpression>(current_token_);
+    auto expr = MakeNode<IfExpression>();
     AdvanceToken();
 
     expr->condition = ParseExpression();
@@ -319,7 +325,7 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
 }
 
 std::unique_ptr<FunctionLiteral> Parser::ParseFunctionLiteral() {
-    auto function_lit = std::make_unique<FunctionLiteral>(current_token_);
+    auto function_lit = MakeNode<FunctionLiteral>();
 
     if (!ExpectPeek(TokenType::kLParen)) {
         return nullptr;
@@ -345,7 +351,7 @@ std::unique_ptr<FunctionLiteral> Parser::ParseFunctionLiteral() {
 }
 
 std::unique_ptr<CallExpression> Parser::ParseCallExpression(std::unique_ptr<Expression> function) {
-    auto expr = std::make_unique<CallExpression>(current_token_);
+    auto expr = MakeNode<CallExpression>();
     expr->function = std::move(function);
     auto args = ParseCallArguments();
 
@@ -382,7 +388,7 @@ std::optional<std::vector<std::unique_ptr<Expression>>> Parser::ParseCallArgumen
 }
 
 std::unique_ptr<WhileStatement> Parser::ParseWhileStatement() {
-    auto stmt = std::make_unique<WhileStatement>(current_token_);
+    auto stmt = MakeNode<WhileStatement>();
     AdvanceToken();
 
     stmt->condition = ParseExpression();
@@ -399,6 +405,18 @@ std::unique_ptr<WhileStatement> Parser::ParseWhileStatement() {
         return nullptr;
     }
 
+    return stmt;
+}
+
+std::unique_ptr<BreakStatement> Parser::ParseBreakStatement() {
+    auto stmt = MakeNode<BreakStatement>();
+    AdvanceToken();
+    return stmt;
+}
+
+std::unique_ptr<ContinueStatement> Parser::ParseContinueStatement() {
+    auto stmt = MakeNode<ContinueStatement>();
+    AdvanceToken();
     return stmt;
 }
 
