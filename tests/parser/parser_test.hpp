@@ -71,10 +71,10 @@ static void TestBooleanLiteral(std::unique_ptr<ItmoScript::Expression>& int_lite
 
 template<typename T>
 void TestLiteralExpression(std::unique_ptr<ItmoScript::Expression>& expr, T expected) {
-    if constexpr (std::is_same_v<T, int64_t>) {
-        TestIntegerLiteral(expr, expected);
-    } else if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, const char*>) {
+    if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, const char*>) {
         TestIdentifier(expr, expected);
+    } else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, int>) {
+        TestIntegerLiteral(expr, expected);
     } else if constexpr (std::is_same_v<T, bool>) {
         TestBooleanLiteral(expr, expected);
     } else {

@@ -28,6 +28,7 @@ const std::map<TokenType, Precedence> kPrecedences{
     {TokenType::kMinus, Precedence::kSum},
     {TokenType::kAsterisk, Precedence::kProduct},
     {TokenType::kSlash, Precedence::kProduct},
+    {TokenType::kLParen, Precedence::kCall},
 };
 
 class Parser {
@@ -91,6 +92,8 @@ private:
     std::unique_ptr<IfExpression> ParseIfExpression();
     std::unique_ptr<BlockStatement> ParseBlockStatement();
     std::unique_ptr<FunctionLiteral> ParseFunctionLiteral();
+    std::unique_ptr<CallExpression> ParseCallExpression(std::unique_ptr<Expression> function);
+    std::optional<std::vector<std::unique_ptr<Expression>>> ParseCallArguments();
 
     std::optional<std::vector<std::unique_ptr<Identifier>>> ParseFunctionParameters();
 };

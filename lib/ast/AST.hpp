@@ -131,5 +131,13 @@ struct FunctionLiteral : public Expression {
     std::vector<std::unique_ptr<Identifier>> parameters;
     std::unique_ptr<BlockStatement> body;
 };
-    
+
+struct CallExpression : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+
+    std::unique_ptr<Expression> function; // Identifier or FunctionLiteral
+    std::vector<std::unique_ptr<Expression>> arguments;
+};
+
 } // namespace ItmoScript

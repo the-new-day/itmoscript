@@ -125,4 +125,18 @@ std::string FunctionLiteral::String() const {
     return result;
 }
 
+std::string CallExpression::String() const {
+    std::string result;
+    result += function->String();
+    result += "(";
+
+    for (size_t i = 0; i < arguments.size(); ++i) {
+        result += arguments[i]->String();
+        if (i != arguments.size() - 1) result += ", ";
+    }
+
+    result += ")";
+    return result;
+}
+
 } // namespace ItmoScript

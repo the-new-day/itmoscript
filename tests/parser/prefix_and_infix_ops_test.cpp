@@ -75,7 +75,12 @@ TEST(ParserTestSuite, OperatorPrecedenceParsingTest) {
         {"2 / (5 + 5)", "(2 / (5 + 5))"},
         {"-(5 + 5)", "(-(5 + 5))"},
         {"!(true == false)", "(!(true == false))"},
-        {"(3 * (2 - 7) / x == 5 / (1 + 1) - (9 + 0))", "(((3 * (2 - 7)) / x) == ((5 / (1 + 1)) - (9 + 0)))"}
+        {"(3 * (2 - 7) / x == 5 / (1 + 1) - (9 + 0))", "(((3 * (2 - 7)) / x) == ((5 / (1 + 1)) - (9 + 0)))"},
+
+        // calls
+        {"a + add(b * c) + d", "((a + add((b * c))) + d)"},
+        {"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"},
+        {"add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"},
     };
 
     for (const auto& [input, expected] : tests) {

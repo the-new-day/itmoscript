@@ -34,6 +34,9 @@ Parser::Parser(Lexer& lexer)
     infix_parse_funcs_[TokenType::kNotEqual] = infix_parser;
     infix_parse_funcs_[TokenType::kLess] = infix_parser;
     infix_parse_funcs_[TokenType::kGreater] = infix_parser;
+    infix_parse_funcs_[TokenType::kLParen] = [this](std::unique_ptr<Expression> function) { 
+        return this->ParseCallExpression(std::move(function)); 
+    };
 }
 
 void Parser::AdvanceToken() {
@@ -337,6 +340,43 @@ std::unique_ptr<FunctionLiteral> Parser::ParseFunctionLiteral() {
     }
 
     return function_lit;
+}
+
+std::unique_ptr<CallExpression> Parser::ParseCallExpression(std::unique_ptr<Expression> function) {
+    auto expr = std::make_unique<CallExpression>(current_token_);
+    expr->function = std::move(function);
+    auto args = ParseCallArguments();
+
+    if (args.has_value()) {
+        expr->arguments = std::move(args.value());
+        return expr;
+    } else {
+        return nullptr;
+    }
+}
+
+std::optional<std::vector<std::unique_ptr<Expression>>> Parser::ParseCallArguments() {
+    std::vector<std::unique_ptr<Expression>> args;
+    AdvanceToken();
+
+    if (IsCurrentToken(TokenType::kRParen)) {
+        return args;
+    }
+    
+    args.push_back(ParseExpression(Precedence::kLowest));
+
+    while (IsPeekToken(TokenType::kComma)) {
+        AdvanceToken();
+        AdvanceToken();
+
+        args.push_back(ParseExpression(Precedence::kLowest));
+    }
+
+    if (!ExpectPeek(TokenType::kRParen)) {
+        return std::nullopt;
+    }
+
+    return args;
 }
 
 std::optional<std::vector<std::unique_ptr<Identifier>>> Parser::ParseFunctionParameters() {
