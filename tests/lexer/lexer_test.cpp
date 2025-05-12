@@ -180,3 +180,32 @@ TEST(LexerTestSuite, IgnoringComments) {
 
     CompareTokens(lexer, expected);
 }
+
+TEST(LexerTestSuite, WhileLoop) {
+    std::string code = R"(
+        while i < 10
+            i += 1
+        end while
+    )";
+
+    ItmoScript::Lexer lexer{code};
+
+    std::vector<ItmoScript::Token> expected = {
+        {TT::kNewLine, "\n"},
+        {TT::kWhile, "while"},
+        {TT::kIdentifier, "i"},
+        {TT::kLess, "<"},
+        {TT::kInt, "10"},
+        {TT::kNewLine, "\n"},
+        {TT::kIdentifier, "i"},
+        {TT::kPlusAssign, "+="},
+        {TT::kInt, "1"},
+        {TT::kNewLine, "\n"},
+        {TT::kEnd, "end"},
+        {TT::kWhile, "while"},
+        {TT::kNewLine, "\n"},
+        {TT::kEOF, ""}
+    };
+
+    CompareTokens(lexer, expected);
+}

@@ -32,6 +32,8 @@ TEST(IllegalOperationsSuite, TypeMixing) {
             ASSERT_FALSE(output.str().ends_with(kUnreachable));
         }
     }
+
+    ASSERT_FALSE(true); // TODO: remove. This test had passed when interpret hadn't been implemented yet
 }
 
 
@@ -49,4 +51,6 @@ TEST(IllegalOperationsSuite, ArgumentCountMismatch) {
 
     ASSERT_FALSE(interpret(input, output));
     ASSERT_FALSE(output.str().ends_with(kUnreachable));
+
+    ASSERT_FALSE(true); // TODO: remove. This test had passed when interpret hadn't been implemented yet
 }
