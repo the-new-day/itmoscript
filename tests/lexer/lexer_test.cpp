@@ -209,3 +209,32 @@ TEST(LexerTestSuite, WhileLoop) {
 
     CompareTokens(lexer, expected);
 }
+
+TEST(LexerTestSuite, ForLoop) {
+    std::string code = R"(
+        for i in arr
+            i += 1
+        end for
+    )";
+
+    ItmoScript::Lexer lexer{code};
+
+    std::vector<ItmoScript::Token> expected = {
+        {TT::kNewLine, "\n"},
+        {TT::kFor, "for"},
+        {TT::kIdentifier, "i"},
+        {TT::kIn, "in"},
+        {TT::kIdentifier, "arr"},
+        {TT::kNewLine, "\n"},
+        {TT::kIdentifier, "i"},
+        {TT::kPlusAssign, "+="},
+        {TT::kInt, "1"},
+        {TT::kNewLine, "\n"},
+        {TT::kEnd, "end"},
+        {TT::kFor, "for"},
+        {TT::kNewLine, "\n"},
+        {TT::kEOF, ""}
+    };
+
+    CompareTokens(lexer, expected);
+}
