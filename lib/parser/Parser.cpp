@@ -69,7 +69,7 @@ Program Parser::ParseProgram() {
 }
 
 std::unique_ptr<Statement> Parser::ParseStatement() {
-    // TODO: remove this if-spagetti
+    // TODO: rewrite this spagetti
 
     if (IsCurrentToken(TokenType::kIdentifier)) {
         if (IsPeekToken(TokenType::kAssign)) {
@@ -79,6 +79,8 @@ std::unique_ptr<Statement> Parser::ParseStatement() {
         return ParseReturnStatement();
     } else if (IsCurrentToken(TokenType::kWhile)) {
         return ParseWhileStatement();
+    } else if (IsCurrentToken(TokenType::kFor)) {
+        return ParseForStatement();
     } else if (IsCurrentToken(TokenType::kBreak)) {
         return ParseBreakStatement();
     } else if (IsCurrentToken(TokenType::kContinue)) {
@@ -402,6 +404,38 @@ std::unique_ptr<WhileStatement> Parser::ParseWhileStatement() {
     }
 
     if (!ExpectPeek(TokenType::kWhile)) {
+        return nullptr;
+    }
+
+    return stmt;
+}
+
+std::unique_ptr<ForStatement> Parser::ParseForStatement() {
+    auto stmt = MakeNode<ForStatement>();
+
+    if (!ExpectPeek(TokenType::kIdentifier)) {
+        return nullptr;
+    }
+
+    stmt->iter = ParseIdentifier();
+    
+    if (!ExpectPeek(TokenType::kIn)) {
+        return nullptr;
+    }
+
+    AdvanceToken();
+    
+    stmt->range = ParseExpression();
+    if (stmt->range == nullptr) {
+        return nullptr;
+    }
+
+    stmt->body = ParseBlockStatement();
+    if (stmt->body == nullptr) {
+        return nullptr;
+    }
+
+    if (!ExpectPeek(TokenType::kFor)) {
         return nullptr;
     }
 

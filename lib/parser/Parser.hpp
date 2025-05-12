@@ -41,9 +41,7 @@ public:
     Parser& operator=(Parser&&) = delete;
     ~Parser() = default;
 
-    void AdvanceToken();
     Program ParseProgram();
-
     const std::vector<std::string>& GetErrors() const;
 
     static bool IsEndOfExpression(TokenType type);
@@ -55,6 +53,8 @@ private:
 
     std::vector<std::string> errors_;
 
+    void AdvanceToken();
+
     template<typename T>
     std::unique_ptr<T> MakeNode();
 
@@ -62,15 +62,16 @@ private:
     std::unique_ptr<AssignStatement> ParseAssignStatement();
     std::unique_ptr<ReturnStatement> ParseReturnStatement();
     std::unique_ptr<ExpressionStatement> ParseExpressionStatement();
-    std::unique_ptr<WhileStatement> ParseWhileStatement();
     std::unique_ptr<BreakStatement> ParseBreakStatement();
     std::unique_ptr<ContinueStatement> ParseContinueStatement();
+    std::unique_ptr<WhileStatement> ParseWhileStatement();
+    std::unique_ptr<ForStatement> ParseForStatement();
 
     bool IsCurrentToken(TokenType type) const;
     bool IsCurrentTokenBlock() const;
     bool IsPeekToken(TokenType type) const;
-    bool ExpectPeek(TokenType type);
     bool IsCurrentTokenEndOfBlock() const;
+    bool ExpectPeek(TokenType type);
 
     void AddError(const std::string& msg);
     //void AddError(std::string&& msg);

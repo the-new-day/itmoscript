@@ -38,3 +38,42 @@ TEST(ParserTestSuite, SimpleWhileTest) {
     TestStatement<ItmoScript::ContinueStatement>(block_statements[1], expected[1]);
     TestStatement<ItmoScript::BreakStatement>(block_statements[2], expected[2]);
 }
+
+TEST(ParserTestSuite, SimpleForTest) {
+    std::string code = R"(
+        for i in array
+            i = i + 1
+            continue
+            break
+        end for
+    )";
+
+    ItmoScript::Lexer lexer{code};
+    ItmoScript::Parser parser{lexer};
+    ItmoScript::Program program = parser.ParseProgram();
+    CheckParserErrors(parser);
+
+    const auto& statements = program.GetStatements();
+    ASSERT_EQ(statements.size(), 1);
+
+    auto* for_stmt = dynamic_cast<ItmoScript::ForStatement*>(statements[0].get());
+    ASSERT_NE(for_stmt, nullptr);
+    ASSERT_NE(for_stmt->range, nullptr);
+    ASSERT_NE(for_stmt->body, nullptr);
+
+    TestIdentifier(for_stmt->range, "array");
+
+    auto* body_block = dynamic_cast<ItmoScript::BlockStatement*>(for_stmt->body.get());
+    ASSERT_NE(body_block, nullptr);
+
+    std::vector<std::string> expected = {
+        "i = (i + 1)", "continue", "break"
+    };
+
+    const auto& block_statements = body_block->GetStatements();
+    ASSERT_EQ(block_statements.size(), expected.size());
+
+    TestStatement<ItmoScript::AssignStatement>(block_statements[0], expected[0]);
+    TestStatement<ItmoScript::ContinueStatement>(block_statements[1], expected[1]);
+    TestStatement<ItmoScript::BreakStatement>(block_statements[2], expected[2]);
+}

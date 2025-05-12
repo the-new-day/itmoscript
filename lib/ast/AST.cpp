@@ -156,6 +156,24 @@ std::string WhileStatement::String() const {
     return result;
 }
 
+std::string ForStatement::String() const {
+    std::string result;
+    result += "for ";
+    result += iter->String();
+    result += " in ";
+    result += range->String();
+
+    const auto& stmts = body->GetStatements();
+
+    for (const auto& stmt : body->GetStatements()) {
+        result += stmt->String();
+        result += ' ';
+    }
+
+    result += " end for";
+    return result;
+}
+
 std::string BreakStatement::String() const {
     return token.literal;
 }

@@ -148,6 +148,15 @@ struct WhileStatement : public Statement {
     std::unique_ptr<BlockStatement> body;
 };
 
+struct ForStatement : public Statement {
+    using Statement::Statement;
+    std::string String() const override;
+
+    std::unique_ptr<Identifier> iter;
+    std::unique_ptr<Expression> range;
+    std::unique_ptr<BlockStatement> body;
+};
+
 struct BreakStatement : public Statement {
     using Statement::Statement;
     std::string String() const override;
