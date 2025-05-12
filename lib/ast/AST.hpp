@@ -140,4 +140,12 @@ struct CallExpression : public Expression {
     std::vector<std::unique_ptr<Expression>> arguments;
 };
 
+struct WhileStatement : public Statement {
+    using Statement::Statement;
+    std::string String() const override;
+
+    std::unique_ptr<Expression> condition;
+    std::unique_ptr<BlockStatement> body;
+};
+
 } // namespace ItmoScript

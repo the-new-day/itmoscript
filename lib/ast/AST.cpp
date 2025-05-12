@@ -139,4 +139,21 @@ std::string CallExpression::String() const {
     return result;
 }
 
+std::string WhileStatement::String() const {
+    std::string result;
+    result += "while ";
+    result += condition->String();
+    result += ' ';
+
+    const auto& stmts = body->GetStatements();
+
+    for (const auto& stmt : body->GetStatements()) {
+        result += stmt->String();
+        result += ' ';
+    }
+
+    result += " end while";
+    return result;
+}
+
 } // namespace ItmoScript

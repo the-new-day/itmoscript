@@ -75,6 +75,8 @@ std::unique_ptr<Statement> Parser::ParseStatement() {
         }
     } else if (IsCurrentToken(TokenType::kReturn)) {
         return ParseReturnStatement();
+    } else if (IsCurrentToken(TokenType::kWhile)) {
+        return ParseWhileStatement();
     } else if (IsCurrentToken(TokenType::kIllegal)) {
         AddUnknownTokenError();
         return nullptr;
@@ -94,20 +96,20 @@ std::unique_ptr<AssignStatement> Parser::ParseAssignStatement() {
     }
 
     AdvanceToken();
-    statement->expr = ParseExpression(Precedence::kLowest);
+    statement->expr = ParseExpression();
     return statement;
 }
 
 std::unique_ptr<ReturnStatement> Parser::ParseReturnStatement() {
     auto statement = std::make_unique<ReturnStatement>(current_token_);
     AdvanceToken();
-    statement->expr = ParseExpression(Precedence::kLowest);
+    statement->expr = ParseExpression();
     return statement;
 }
 
 std::unique_ptr<ExpressionStatement> Parser::ParseExpressionStatement() {
     auto statement = std::make_unique<ExpressionStatement>(current_token_);
-    statement->expr = ParseExpression(Precedence::kLowest);
+    statement->expr = ParseExpression();
     return statement;
 }
 
@@ -254,7 +256,7 @@ std::unique_ptr<InfixExpression> Parser::ParseInfixExpression(std::unique_ptr<Ex
 
 std::unique_ptr<Expression> Parser::ParseGroupedExpression() {
     AdvanceToken();
-    auto expr = ParseExpression(Precedence::kLowest);
+    auto expr = ParseExpression();
 
     if (ExpectPeek(TokenType::kRParen)) {
         return expr;
@@ -288,7 +290,7 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
     auto expr = std::make_unique<IfExpression>(current_token_);
     AdvanceToken();
 
-    expr->condition = ParseExpression(Precedence::kLowest);
+    expr->condition = ParseExpression();
     if (expr->condition == nullptr) {
         return nullptr;
     }
@@ -363,13 +365,13 @@ std::optional<std::vector<std::unique_ptr<Expression>>> Parser::ParseCallArgumen
         return args;
     }
     
-    args.push_back(ParseExpression(Precedence::kLowest));
+    args.push_back(ParseExpression());
 
     while (IsPeekToken(TokenType::kComma)) {
         AdvanceToken();
         AdvanceToken();
 
-        args.push_back(ParseExpression(Precedence::kLowest));
+        args.push_back(ParseExpression());
     }
 
     if (!ExpectPeek(TokenType::kRParen)) {
@@ -377,6 +379,27 @@ std::optional<std::vector<std::unique_ptr<Expression>>> Parser::ParseCallArgumen
     }
 
     return args;
+}
+
+std::unique_ptr<WhileStatement> Parser::ParseWhileStatement() {
+    auto stmt = std::make_unique<WhileStatement>(current_token_);
+    AdvanceToken();
+
+    stmt->condition = ParseExpression();
+    if (stmt->condition == nullptr) {
+        return nullptr;
+    }
+
+    stmt->body = ParseBlockStatement();
+    if (stmt->body == nullptr) {
+        return nullptr;
+    }
+
+    if (!ExpectPeek(TokenType::kWhile)) {
+        return nullptr;
+    }
+
+    return stmt;
 }
 
 std::optional<std::vector<std::unique_ptr<Identifier>>> Parser::ParseFunctionParameters() {

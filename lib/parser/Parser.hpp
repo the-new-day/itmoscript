@@ -59,7 +59,7 @@ private:
     std::unique_ptr<AssignStatement> ParseAssignStatement();
     std::unique_ptr<ReturnStatement> ParseReturnStatement();
     std::unique_ptr<ExpressionStatement> ParseExpressionStatement();
-    std::unique_ptr<Expression> ParseExpression(Precedence precedence);
+    std::unique_ptr<WhileStatement> ParseWhileStatement();
 
     bool IsCurrentToken(TokenType type) const;
     bool IsCurrentTokenBlock() const;
@@ -83,6 +83,7 @@ private:
     std::map<TokenType, PrefixParseFunc> prefix_parse_funcs_;
     std::map<TokenType, InfixParseFunc> infix_parse_funcs_;
 
+    std::unique_ptr<Expression> ParseExpression(Precedence precedence = Precedence::kLowest);
     std::unique_ptr<Identifier> ParseIdentifier();
     std::unique_ptr<IntegerLiteral> ParseIntegerLiteral();
     std::unique_ptr<BooleanLiteral> ParseBooleanLiteral();
@@ -93,9 +94,9 @@ private:
     std::unique_ptr<BlockStatement> ParseBlockStatement();
     std::unique_ptr<FunctionLiteral> ParseFunctionLiteral();
     std::unique_ptr<CallExpression> ParseCallExpression(std::unique_ptr<Expression> function);
-    std::optional<std::vector<std::unique_ptr<Expression>>> ParseCallArguments();
 
     std::optional<std::vector<std::unique_ptr<Identifier>>> ParseFunctionParameters();
+    std::optional<std::vector<std::unique_ptr<Expression>>> ParseCallArguments();
 };
     
 } // namespace ItmoScript
