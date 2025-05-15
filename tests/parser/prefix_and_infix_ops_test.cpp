@@ -84,11 +84,7 @@ TEST(ParserTestSuite, OperatorPrecedenceParsingTest) {
     };
 
     for (const auto& [input, expected] : tests) {
-        ItmoScript::Lexer lexer{input};
-        ItmoScript::Parser parser{lexer};
-        ItmoScript::Program program = parser.ParseProgram();
-
-        CheckParserErrors(parser);
+        auto program = GetParsedProgram(input);
         ASSERT_EQ(program.String(), expected);
     }
 }

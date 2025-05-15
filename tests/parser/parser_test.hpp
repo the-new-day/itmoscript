@@ -42,6 +42,14 @@ static void CheckParserErrors(ItmoScript::Parser& parser, int expected_amount = 
     ASSERT_EQ(parser.GetErrors().size(), expected_amount) << errors;
 }
 
+static ItmoScript::Program GetParsedProgram(const std::string& code) {
+    ItmoScript::Lexer lexer{code};
+    ItmoScript::Parser parser{lexer};
+    ItmoScript::Program program = parser.ParseProgram();
+    CheckParserErrors(parser);
+    return program;
+}
+
 static void TestIntegerLiteral(std::unique_ptr<ItmoScript::Expression>& int_literal_expr, int64_t expected_value) {
     auto* integer_literal = dynamic_cast<ItmoScript::IntegerLiteral*>(int_literal_expr.get());
     ASSERT_NE(integer_literal, nullptr);
@@ -97,11 +105,7 @@ void TestInfixExpression(std::unique_ptr<ItmoScript::Expression>& expr, L left, 
 template<typename L, typename R = L>
 void TestInfixLiteralsExpressions(const std::vector<InfixOpExpr<L, R>>& expressions) {
     for (const auto& test_expr : expressions) {
-        ItmoScript::Lexer lexer{test_expr.input};
-        ItmoScript::Parser parser{lexer};
-        ItmoScript::Program program = parser.ParseProgram();
-        
-        CheckParserErrors(parser);
+        auto program = GetParsedProgram(test_expr.input);
 
         const auto& statements = program.GetStatements();
         ASSERT_EQ(statements.size(), 1) << "parser returned more than 1 statement, got " << statements.size() << '\n';
@@ -117,11 +121,7 @@ void TestInfixLiteralsExpressions(const std::vector<InfixOpExpr<L, R>>& expressi
 template<typename L>
 void TestPrefixLiteralsExpressions(const std::vector<PrefixOpExpr<L>>& expressions) {
     for (const auto& test_expr : expressions) {
-        ItmoScript::Lexer lexer{test_expr.input};
-        ItmoScript::Parser parser{lexer};
-        ItmoScript::Program program = parser.ParseProgram();
-        
-        CheckParserErrors(parser);
+        auto program = GetParsedProgram(test_expr.input);
 
         const auto& statements = program.GetStatements();
         ASSERT_EQ(statements.size(), 1);
@@ -145,4 +145,11 @@ void TestStatement(const std::unique_ptr<ItmoScript::Statement>& stmt, const std
     auto* body = dynamic_cast<T*>(stmt.get());
     ASSERT_NE(body, nullptr);
     ASSERT_EQ(body->String(), expected);
+}
+
+static ItmoScript::ExpressionStatement* GetExpressionStatement(const std::unique_ptr<ItmoScript::Statement>& stmt) {
+    auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(stmt.get());
+    EXPECT_NE(expr_stmt, nullptr);
+    EXPECT_NE(expr_stmt->expr, nullptr);
+    return expr_stmt;
 }

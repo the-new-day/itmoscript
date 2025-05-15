@@ -5,10 +5,7 @@ TEST(ParserTestSuite, SimpleExpressionStringTest) {
         x1 = x2
     )";
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-
+    auto program = GetParsedProgram(code);
     ASSERT_EQ(program.String(), "x1 = x2");
 }
 
@@ -17,16 +14,11 @@ TEST(ParserTestSuite, IdentifierExpressionTest) {
         foobar
     )";
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
-
+    auto program = GetParsedProgram(code);
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 1);
 
-    auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[0].get());
-    ASSERT_NE(expr_stmt, nullptr);
+    auto* expr_stmt = GetExpressionStatement(statements[0]);
 
     std::string ident = expr_stmt->String();
     ASSERT_EQ(ident, "foobar");
@@ -37,18 +29,11 @@ TEST(ParserTestSuite, IntLiteralExpressionTest) {
         100500
     )";
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
-
+    auto program = GetParsedProgram(code);
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 1);
 
-    auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[0].get());
-    ASSERT_NE(expr_stmt, nullptr);
-    ASSERT_NE(expr_stmt->expr, nullptr);
-
+    auto* expr_stmt = GetExpressionStatement(statements[0]);
     TestIntegerLiteral(expr_stmt->expr, 100500);
 }
 
@@ -58,11 +43,7 @@ TEST(ParserTestSuite, BooleanLiteralExpressionTest) {
         false
     )";
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
-
+    auto program = GetParsedProgram(code);
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 2);
 

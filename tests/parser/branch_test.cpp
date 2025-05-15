@@ -7,17 +7,11 @@ TEST(ParserTestSuite, SimpleIfExpressionTest) {
         end if
     )";
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
-
+    auto program = GetParsedProgram(code);
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 1);
 
-    auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[0].get());
-    ASSERT_NE(expr_stmt, nullptr);
-    ASSERT_NE(expr_stmt->expr, nullptr);
+    auto* expr_stmt = GetExpressionStatement(statements[0]);
 
     auto* if_expr = dynamic_cast<ItmoScript::IfExpression*>(expr_stmt->expr.get());
     ASSERT_NE(if_expr, nullptr);
@@ -49,17 +43,11 @@ TEST(ParserTestSuite, SimpleIfElseExpressionTest) {
         end if
     )";
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
-
+    auto program = GetParsedProgram(code);
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 1);
 
-    auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[0].get());
-    ASSERT_NE(expr_stmt, nullptr);
-    ASSERT_NE(expr_stmt->expr, nullptr);
+    auto* expr_stmt = GetExpressionStatement(statements[0]);
 
     auto* if_expr = dynamic_cast<ItmoScript::IfExpression*>(expr_stmt->expr.get());
     ASSERT_NE(if_expr, nullptr);

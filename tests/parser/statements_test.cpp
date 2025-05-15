@@ -25,11 +25,7 @@ TEST(ParserTestSuite, SimpleVariableAssignment) {
         "(b + (c * 3))",
     };
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
-
+    auto program = GetParsedProgram(code);
     const auto& statements = program.GetStatements();
 
     ASSERT_EQ(statements.size(), expected_identifiers.size());
@@ -64,10 +60,7 @@ TEST(ParserTestSuite, SimpleReturn) {
         return x
     )";
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-
+    auto program = GetParsedProgram(code);
     const auto& statements = program.GetStatements();
 
     ASSERT_EQ(statements.size(), 3);
@@ -79,6 +72,4 @@ TEST(ParserTestSuite, SimpleReturn) {
         ASSERT_NE(return_stmt, nullptr) << "Statement " << i << " is not a ReturnStatement";
         ASSERT_EQ(return_stmt->expr->String(), expected_exprs[i]);
     }
-    
-    CheckParserErrors(parser);
 }

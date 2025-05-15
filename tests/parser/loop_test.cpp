@@ -1,5 +1,31 @@
 #include "parser_test.hpp"
 
+// Code must contain only while statement
+ItmoScript::WhileStatement* GetWhileStmt(const ItmoScript::Program& program) {
+    const auto& statements = program.GetStatements();
+    EXPECT_EQ(statements.size(), 1);
+
+    auto* while_stmt = dynamic_cast<ItmoScript::WhileStatement*>(statements[0].get());
+    EXPECT_NE(while_stmt, nullptr);
+    EXPECT_NE(while_stmt->condition, nullptr);
+    EXPECT_NE(while_stmt->body, nullptr);
+
+    return while_stmt;
+}
+
+// Code must contain only for statement
+ItmoScript::ForStatement* GetForStmt(const ItmoScript::Program& program) {
+    const auto& statements = program.GetStatements();
+    EXPECT_EQ(statements.size(), 1);
+
+    auto* for_stmt = dynamic_cast<ItmoScript::ForStatement*>(statements[0].get());
+    EXPECT_NE(for_stmt, nullptr);
+    EXPECT_NE(for_stmt->range, nullptr);
+    EXPECT_NE(for_stmt->body, nullptr);
+
+    return for_stmt;
+}
+
 TEST(ParserTestSuite, SimpleWhileTest) {
     std::string code = R"(
         while i < 10
@@ -9,29 +35,15 @@ TEST(ParserTestSuite, SimpleWhileTest) {
         end while
     )";
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
-
-    const auto& statements = program.GetStatements();
-    ASSERT_EQ(statements.size(), 1);
-
-    auto* while_stmt = dynamic_cast<ItmoScript::WhileStatement*>(statements[0].get());
-    ASSERT_NE(while_stmt, nullptr);
-    ASSERT_NE(while_stmt->condition, nullptr);
-    ASSERT_NE(while_stmt->body, nullptr);
-
+    auto program = GetParsedProgram(code);
+    auto* while_stmt = GetWhileStmt(program);
     TestInfixExpression(while_stmt->condition, "i", "<", 10);
-
-    auto* body_block = dynamic_cast<ItmoScript::BlockStatement*>(while_stmt->body.get());
-    ASSERT_NE(body_block, nullptr);
 
     std::vector<std::string> expected = {
         "i = (i + 1)", "continue", "break"
     };
 
-    const auto& block_statements = body_block->GetStatements();
+    const auto& block_statements = while_stmt->body->GetStatements();
     ASSERT_EQ(block_statements.size(), expected.size());
 
     TestStatement<ItmoScript::AssignStatement>(block_statements[0], expected[0]);
@@ -48,32 +60,46 @@ TEST(ParserTestSuite, SimpleForTest) {
         end for
     )";
 
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
-
-    const auto& statements = program.GetStatements();
-    ASSERT_EQ(statements.size(), 1);
-
-    auto* for_stmt = dynamic_cast<ItmoScript::ForStatement*>(statements[0].get());
-    ASSERT_NE(for_stmt, nullptr);
-    ASSERT_NE(for_stmt->range, nullptr);
-    ASSERT_NE(for_stmt->body, nullptr);
-
+    auto program = GetParsedProgram(code);
+    auto* for_stmt = GetForStmt(program);
     TestIdentifier(for_stmt->range, "array");
-
-    auto* body_block = dynamic_cast<ItmoScript::BlockStatement*>(for_stmt->body.get());
-    ASSERT_NE(body_block, nullptr);
 
     std::vector<std::string> expected = {
         "i = (i + 1)", "continue", "break"
     };
 
-    const auto& block_statements = body_block->GetStatements();
+    const auto& block_statements = for_stmt->body->GetStatements();
     ASSERT_EQ(block_statements.size(), expected.size());
 
     TestStatement<ItmoScript::AssignStatement>(block_statements[0], expected[0]);
     TestStatement<ItmoScript::ContinueStatement>(block_statements[1], expected[1]);
     TestStatement<ItmoScript::BreakStatement>(block_statements[2], expected[2]);
+}
+
+TEST(ParserTestSuite, EmptyForTest) {
+    std::string code = R"(
+        for i in array
+        end for
+    )";
+
+    auto program = GetParsedProgram(code);
+    auto* for_stmt = GetForStmt(program);
+    TestIdentifier(for_stmt->range, "array");
+
+    const auto& block_statements = for_stmt->body->GetStatements();
+    ASSERT_EQ(block_statements.size(), 0);
+}
+
+TEST(ParserTestSuite, EmptyWhileTest) {
+    std::string code = R"(
+        while true
+        end while
+    )";
+    
+    auto program = GetParsedProgram(code);
+    auto* while_stmt = GetWhileStmt(program);
+    TestLiteralExpression(while_stmt->condition, true);
+
+    const auto& block_statements = while_stmt->body->GetStatements();
+    ASSERT_EQ(block_statements.size(), 0);
 }
