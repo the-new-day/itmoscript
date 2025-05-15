@@ -1,5 +1,23 @@
 #include "parser_test.hpp"
 
+ItmoScript::IfExpression* GetIfExpression(const ItmoScript::Program& program, bool has_alternative = false) {
+    const auto& statements = program.GetStatements();
+    EXPECT_EQ(statements.size(), 1);
+
+    auto* expr_stmt = GetExpressionStatement(statements[0]);
+
+    auto* if_expr = dynamic_cast<ItmoScript::IfExpression*>(expr_stmt->expr.get());
+    EXPECT_NE(if_expr, nullptr);
+    EXPECT_NE(if_expr->condition, nullptr);
+    EXPECT_NE(if_expr->consequence, nullptr);
+    
+    if (has_alternative) {
+        EXPECT_NE(if_expr->alternative, nullptr);
+    }
+
+    return if_expr;
+}
+
 TEST(ParserTestSuite, SimpleIfExpressionTest) {
     std::string code = R"(
         if foobar > fizzbuzz then 
@@ -8,27 +26,13 @@ TEST(ParserTestSuite, SimpleIfExpressionTest) {
     )";
 
     auto program = GetParsedProgram(code);
-    const auto& statements = program.GetStatements();
-    ASSERT_EQ(statements.size(), 1);
-
-    auto* expr_stmt = GetExpressionStatement(statements[0]);
-
-    auto* if_expr = dynamic_cast<ItmoScript::IfExpression*>(expr_stmt->expr.get());
-    ASSERT_NE(if_expr, nullptr);
-    ASSERT_NE(if_expr->condition, nullptr);
-    ASSERT_NE(if_expr->consequence, nullptr);
-
+    auto* if_expr = GetIfExpression(program);
     TestInfixExpression(if_expr->condition, "foobar", ">", "fizzbuzz");
 
-    ASSERT_EQ(if_expr->consequence->GetStatements().size(), 1);
-
-    auto* consequence_block = dynamic_cast<ItmoScript::BlockStatement*>(if_expr->consequence.get());
-    ASSERT_NE(consequence_block, nullptr);
-
-    const auto& block_statements = consequence_block->GetStatements();
+    const auto& block_statements = if_expr->consequence->GetStatements();
     ASSERT_EQ(block_statements.size(), 1);
 
-    auto* consequence = dynamic_cast<ItmoScript::ExpressionStatement*>(block_statements[0].get());
+    auto* consequence = GetExpressionStatement(block_statements[0]);
     TestIdentifier(consequence->expr, "aboba");
 
     ASSERT_EQ(if_expr->alternative, nullptr);
@@ -44,36 +48,19 @@ TEST(ParserTestSuite, SimpleIfElseExpressionTest) {
     )";
 
     auto program = GetParsedProgram(code);
-    const auto& statements = program.GetStatements();
-    ASSERT_EQ(statements.size(), 1);
-
-    auto* expr_stmt = GetExpressionStatement(statements[0]);
-
-    auto* if_expr = dynamic_cast<ItmoScript::IfExpression*>(expr_stmt->expr.get());
-    ASSERT_NE(if_expr, nullptr);
-    ASSERT_NE(if_expr->condition, nullptr);
-    ASSERT_NE(if_expr->consequence, nullptr);
-    ASSERT_NE(if_expr->alternative, nullptr);
+    auto* if_expr = GetIfExpression(program);
 
     TestInfixExpression(if_expr->condition, "foobar", ">", "fizzbuzz");
 
-    ASSERT_EQ(if_expr->consequence->GetStatements().size(), 1);
-
-    auto* consequence_block = dynamic_cast<ItmoScript::BlockStatement*>(if_expr->consequence.get());
-    ASSERT_NE(consequence_block, nullptr);
-
-    const auto& block_statements = consequence_block->GetStatements();
+    const auto& block_statements = if_expr->consequence->GetStatements();
     ASSERT_EQ(block_statements.size(), 1);
 
-    auto* consequence = dynamic_cast<ItmoScript::ExpressionStatement*>(block_statements[0].get());
+    auto* consequence = GetExpressionStatement(block_statements[0]);
     TestIdentifier(consequence->expr, "aboba");
 
-    auto* alternative_block = dynamic_cast<ItmoScript::BlockStatement*>(if_expr->alternative.get());
-    ASSERT_NE(alternative_block, nullptr);
-
-    const auto& alt_block_statements = alternative_block->GetStatements();
+    const auto& alt_block_statements = if_expr->alternative->GetStatements();
     ASSERT_EQ(alt_block_statements.size(), 1);
 
-    auto* alternative = dynamic_cast<ItmoScript::ExpressionStatement*>(alt_block_statements[0].get());
+    auto* alternative = GetExpressionStatement(alt_block_statements[0]);
     TestIdentifier(alternative->expr, "bibaboba");
 }

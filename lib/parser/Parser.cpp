@@ -298,6 +298,8 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
     auto expr = MakeNode<IfExpression>();
     AdvanceToken();
 
+    // TODO: else if
+
     expr->condition = ParseExpression();
     if (expr->condition == nullptr) {
         return nullptr;
