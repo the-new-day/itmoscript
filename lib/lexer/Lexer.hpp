@@ -5,13 +5,20 @@
 #include <string>
 #include <utility>
 #include <cstddef>
+#include <istream>
+#include <memory>
+#include <sstream>
 
 namespace ItmoScript {
 
 class Lexer {
 public:
-    Lexer(std::string code)
-        : code_(std::move(code)) {}
+    explicit Lexer(const std::string& code)
+        : owned_input_(std::make_unique<std::istringstream>(code))
+        , input_(owned_input_.get()) {}
+
+    explicit Lexer(std::istream& input)
+        : input_(&input) {}
 
     Lexer(const Lexer&) = delete;
     Lexer(Lexer&&) = delete;
@@ -29,9 +36,11 @@ public:
     static bool IsIdentifierBegin(char ch);
 
 private:
-    std::string code_;
-    size_t read_pos_{0};
+    std::unique_ptr<std::istream> owned_input_;
+    std::istream* input_;
+
     Token last_token_{.type = TokenType::kIllegal};
+    char current_char_ = 0;
 
     size_t current_line_{0};
     size_t current_col_{0};
