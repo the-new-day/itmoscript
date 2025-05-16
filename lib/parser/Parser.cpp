@@ -14,6 +14,7 @@ Parser::Parser(Lexer& lexer)
 
     prefix_parse_funcs_[TokenType::kIdentifier] = [this]() { return this->ParseIdentifier(); };
     prefix_parse_funcs_[TokenType::kInt] = [this]() { return this->ParseIntegerLiteral(); };
+    prefix_parse_funcs_[TokenType::kFloat] = [this]() { return this->ParseFloatLiteral(); };
     prefix_parse_funcs_[TokenType::kBang] = [this]() { return this->ParsePrefixExpression(); };
     prefix_parse_funcs_[TokenType::kMinus] = [this]() { return this->ParsePrefixExpression(); };
     prefix_parse_funcs_[TokenType::kTrue] = [this]() { return this->ParseBooleanLiteral(); };
@@ -229,6 +230,18 @@ std::unique_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
     auto int_literal = MakeNode<IntegerLiteral>();
     int_literal->value = parsing_result.value();
     return int_literal;
+}
+
+std::unique_ptr<FloatLiteral> Parser::ParseFloatLiteral() {
+    std::optional<double> parsing_result = ParseNumber<double>(current_token_.literal);
+    if (!parsing_result.has_value()) {
+        AddError(std::format("could not parse {} as a float", current_token_.literal));
+        return nullptr;
+    }
+
+    auto float_literal = MakeNode<FloatLiteral>();
+    float_literal->value = parsing_result.value();
+    return float_literal;
 }
 
 std::unique_ptr<BooleanLiteral> Parser::ParseBooleanLiteral() {

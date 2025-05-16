@@ -59,6 +59,14 @@ static void TestIntegerLiteral(std::unique_ptr<ItmoScript::Expression>& int_lite
     ASSERT_EQ(integer_literal->token.literal, std::to_string(expected_value));
 }
 
+static void TestFloatLiteral(std::unique_ptr<ItmoScript::Expression>& float_literal_expr, double expected_value) {
+    auto* float_literal = dynamic_cast<ItmoScript::FloatLiteral*>(float_literal_expr.get());
+    ASSERT_NE(float_literal, nullptr);
+
+    double float_value = float_literal->value;
+    ASSERT_EQ(float_value, expected_value);
+}
+
 static void TestIdentifier(std::unique_ptr<ItmoScript::Expression>& ident_expr, const std::string& expected_value) {
     auto* ident = dynamic_cast<ItmoScript::Identifier*>(ident_expr.get());
     ASSERT_NE(ident, nullptr);

@@ -88,6 +88,10 @@ std::string IntegerLiteral::String() const {
     return token.literal;
 }
 
+std::string FloatLiteral::String() const {
+    return token.literal;
+}
+
 std::string BooleanLiteral::String() const {
     return token.literal;
 }

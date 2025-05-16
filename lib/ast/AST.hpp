@@ -95,6 +95,13 @@ struct IntegerLiteral : public Expression {
     int64_t value;
 };
 
+struct FloatLiteral : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+
+    double value;
+};
+
 struct BooleanLiteral : public Expression {
     using Expression::Expression;
     std::string String() const override;

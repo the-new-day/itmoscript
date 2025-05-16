@@ -37,6 +37,19 @@ TEST(ParserTestSuite, IntLiteralExpressionTest) {
     TestIntegerLiteral(expr_stmt->expr, 100500);
 }
 
+TEST(ParserTestSuite, FloatLiteralExpressionTest) {
+    std::string code = R"(
+        3.14
+    )";
+
+    auto program = GetParsedProgram(code);
+    const auto& statements = program.GetStatements();
+    ASSERT_EQ(statements.size(), 1);
+
+    auto* expr_stmt = GetExpressionStatement(statements[0]);
+    TestFloatLiteral(expr_stmt->expr, 3.14);
+}
+
 TEST(ParserTestSuite, BooleanLiteralExpressionTest) {
     std::string code = R"(
         true
