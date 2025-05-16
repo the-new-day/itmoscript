@@ -51,20 +51,23 @@ static ItmoScript::Program GetParsedProgram(const std::string& code) {
 }
 
 static void TestIntegerLiteral(std::unique_ptr<ItmoScript::Expression>& int_literal_expr, int64_t expected_value) {
-    auto* integer_literal = dynamic_cast<ItmoScript::IntegerLiteral*>(int_literal_expr.get());
-    ASSERT_NE(integer_literal, nullptr);
+    auto* literal = dynamic_cast<ItmoScript::IntegerLiteral*>(int_literal_expr.get());
+    ASSERT_NE(literal, nullptr);
 
-    int64_t int_value = integer_literal->value;
-    ASSERT_EQ(int_value, expected_value);
-    ASSERT_EQ(integer_literal->token.literal, std::to_string(expected_value));
+    ASSERT_EQ(literal->value, expected_value);
+    ASSERT_EQ(literal->token.literal, std::to_string(expected_value));
 }
 
 static void TestFloatLiteral(std::unique_ptr<ItmoScript::Expression>& float_literal_expr, double expected_value) {
-    auto* float_literal = dynamic_cast<ItmoScript::FloatLiteral*>(float_literal_expr.get());
-    ASSERT_NE(float_literal, nullptr);
+    auto* literal = dynamic_cast<ItmoScript::FloatLiteral*>(float_literal_expr.get());
+    ASSERT_NE(literal, nullptr);
+    ASSERT_EQ(literal->value, expected_value);
+}
 
-    double float_value = float_literal->value;
-    ASSERT_EQ(float_value, expected_value);
+static void TestStringLiteral(std::unique_ptr<ItmoScript::Expression>& string_literal_expr, std::string expected_value) {
+    auto* literal = dynamic_cast<ItmoScript::StringLiteral*>(string_literal_expr.get());
+    ASSERT_NE(literal, nullptr);
+    ASSERT_EQ(literal->value, expected_value);
 }
 
 static void TestIdentifier(std::unique_ptr<ItmoScript::Expression>& ident_expr, const std::string& expected_value) {

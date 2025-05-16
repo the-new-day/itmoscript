@@ -92,6 +92,10 @@ std::string FloatLiteral::String() const {
     return token.literal;
 }
 
+std::string StringLiteral::String() const {
+    return token.literal;
+}
+
 std::string BooleanLiteral::String() const {
     return token.literal;
 }

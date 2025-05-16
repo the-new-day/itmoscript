@@ -50,6 +50,19 @@ TEST(ParserTestSuite, FloatLiteralExpressionTest) {
     TestFloatLiteral(expr_stmt->expr, 3.14);
 }
 
+TEST(ParserTestSuite, StringLiteralExpressionTest) {
+    std::string code = R"(
+        "Hello World"
+    )";
+
+    auto program = GetParsedProgram(code);
+    const auto& statements = program.GetStatements();
+    ASSERT_EQ(statements.size(), 1);
+
+    auto* expr_stmt = GetExpressionStatement(statements[0]);
+    TestStringLiteral(expr_stmt->expr, "Hello World");
+}
+
 TEST(ParserTestSuite, BooleanLiteralExpressionTest) {
     std::string code = R"(
         true

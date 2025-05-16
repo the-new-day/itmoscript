@@ -102,6 +102,13 @@ struct FloatLiteral : public Expression {
     double value;
 };
 
+struct StringLiteral : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+
+    std::string value;
+};
+
 struct BooleanLiteral : public Expression {
     using Expression::Expression;
     std::string String() const override;
