@@ -115,13 +115,23 @@ private:
     std::vector<std::unique_ptr<Statement>> statements_;
 };
 
+struct IfBranch {
+    std::unique_ptr<Expression> condition;
+    std::unique_ptr<BlockStatement> consequence;
+    Token token;
+
+    std::string String() const;
+    IfBranch(const Token& token) : token(token) {}
+    IfBranch() = default;
+};
+
 struct IfExpression : public Expression {
     using Expression::Expression;
     std::string String() const override;
 
-    std::unique_ptr<Expression> condition;
-    std::unique_ptr<BlockStatement> consequence;
-    std::unique_ptr<BlockStatement> alternative;
+    std::unique_ptr<Expression> main_condition;
+    std::unique_ptr<BlockStatement> main_consequence;
+    std::vector<IfBranch> alternatives;
 };
 
 struct FunctionLiteral : public Expression {

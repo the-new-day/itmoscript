@@ -298,10 +298,8 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
     auto expr = MakeNode<IfExpression>();
     AdvanceToken();
 
-    // TODO: else if
-
-    expr->condition = ParseExpression();
-    if (expr->condition == nullptr) {
+    expr->main_condition = ParseExpression();
+    if (expr->main_condition == nullptr) {
         return nullptr;
     }
 
@@ -309,19 +307,32 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
         return nullptr;
     }
 
-    expr->consequence = ParseBlockStatement();
-    if (expr->consequence == nullptr) {
+    expr->main_consequence = ParseBlockStatement();
+    if (expr->main_consequence == nullptr) {
         return nullptr;
     }
 
-    if (IsCurrentToken(TokenType::kElse)) {
-        expr->alternative = ParseBlockStatement();
-        if (expr->alternative == nullptr) {
+    while (IsCurrentToken(TokenType::kElse)) {
+        AdvanceToken();
+        IfBranch branch{current_token_};
+
+        if (IsCurrentToken(TokenType::kIf)) {
+            AdvanceToken();
+            branch.condition = ParseExpression(Precedence::kLowest);
+            if (branch.condition == nullptr || !ExpectPeek(TokenType::kThen)) {
+                return nullptr;
+            }
+        }
+
+        branch.consequence = ParseBlockStatement();
+        if (branch.consequence == nullptr) {
             return nullptr;
         }
+
+        expr->alternatives.push_back(std::move(branch));
     }
 
-    if (!ExpectPeek(TokenType::kIf)) {
+    if (!IsCurrentToken(TokenType::kEnd) || !ExpectPeek(TokenType::kIf)) {
         return nullptr;
     }
 

@@ -56,7 +56,7 @@ static void TestIntegerLiteral(std::unique_ptr<ItmoScript::Expression>& int_lite
 
     int64_t int_value = integer_literal->value;
     ASSERT_EQ(int_value, expected_value);
-    ASSERT_EQ(integer_literal->token.literal, std::to_string(expected_value)); // should work for bin, hex, octal literals too
+    ASSERT_EQ(integer_literal->token.literal, std::to_string(expected_value));
 }
 
 static void TestIdentifier(std::unique_ptr<ItmoScript::Expression>& ident_expr, const std::string& expected_value) {
@@ -152,4 +152,10 @@ static ItmoScript::ExpressionStatement* GetExpressionStatement(const std::unique
     EXPECT_NE(expr_stmt, nullptr);
     EXPECT_NE(expr_stmt->expr, nullptr);
     return expr_stmt;
+}
+
+static ItmoScript::BlockStatement* GetBlockStatement(const std::unique_ptr<ItmoScript::Statement>& stmt) {
+    auto* block_stmt = dynamic_cast<ItmoScript::BlockStatement*>(stmt.get());
+    EXPECT_NE(block_stmt, nullptr);
+    return block_stmt;
 }

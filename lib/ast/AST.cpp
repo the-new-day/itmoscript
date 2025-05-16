@@ -92,17 +92,28 @@ std::string BooleanLiteral::String() const {
     return token.literal;
 }
 
+std::string IfBranch::String() const {
+    std::string result;
+    if (condition != nullptr) {
+        result += "if ";
+        result += condition->String();
+        result += " then ";
+    }
+    
+    result += consequence->String();
+    return result;
+}
+
 std::string IfExpression::String() const {
     std::string result;
-    result += "if ";
-    result += condition->String();
+    result += " if ";
+    result += main_condition->String();
     result += " then ";
-    result += consequence->String();
-    result += "\n";
+    result += main_consequence->String();
 
-    if (alternative != nullptr) {
+    for (size_t i = 0; i < alternatives.size(); ++i) {
         result += " else ";
-        result += alternative->String();
+        result += alternatives[i].String();
     }
 
     result += " end if";
