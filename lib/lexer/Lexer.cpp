@@ -141,6 +141,11 @@ Token Lexer::ReadStringLiteral() {
 
     std::string word(1, current_char_);
     while (PeekChar() != '"') {
+        if (!HasNextToken()) {
+            token.type = TokenType::kIllegal;
+            break;
+        }
+        
         word += ReadChar();
     }
 
