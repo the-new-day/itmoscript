@@ -183,7 +183,7 @@ void Parser::PeekError(TokenType expected_type) {
 
 void Parser::AddNoPrefixFuncError(TokenType type) {
     AddError(std::format(
-        "no prefix parse function for {} found",
+        "unexpected token '{}'",
         kTokenTypeNames.at(type)
     ));
 }

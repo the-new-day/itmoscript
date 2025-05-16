@@ -25,15 +25,16 @@ public:
 
 private:
     ReplMode mode_;
+    std::string current_line_;
 
-    void EvalLexer(const std::string& line, std::ostream& output);
-    void EvalParser(const std::string& line, std::ostream& output);
-    void Eval(const std::string& line, std::ostream& output);
+    void EvalLexer(std::ostream& output);
+    void EvalParser(std::ostream& output);
+    void Eval(std::ostream& output);
 
     void PrintToken(std::ostream& output, const Token& token);
 
     void PrintParserErrors(const Parser& parser, std::ostream& output);
-    void PrintParserError(const ParserError& error, std::ostream& output);
+    void PrintParserError(const ParserError& error, std::ostream& output, size_t indent);
 };
     
 } // namespace ItmoScript

@@ -7,21 +7,20 @@ namespace ItmoScript {
 void REPL::Start(std::istream& input, std::ostream& output) {
     while (true) { 
         output << kReplPrompt;
-        std::string line;
 
-        if (!std::getline(input, line)) break;
-        if (line.empty()) continue;
+        if (!std::getline(input, current_line_)) break;
+        if (current_line_.empty()) continue;
 
         if (mode_ == ReplMode::kLexer) {
-            EvalLexer(line, output);
+            EvalLexer(output);
         } else if (mode_ == ReplMode::kParser) {
-            EvalParser(line, output);
+            EvalParser(output);
         }
     }
 }
 
-void REPL::EvalLexer(const std::string& line, std::ostream& output) {
-    Lexer lexer{line};
+void REPL::EvalLexer(std::ostream& output) {
+    Lexer lexer{current_line_};
     Token token = lexer.GetNextToken();
 
     while (token.type != TokenType::kEOF) {
@@ -31,8 +30,8 @@ void REPL::EvalLexer(const std::string& line, std::ostream& output) {
     }
 }
 
-void REPL::EvalParser(const std::string& line, std::ostream& output) {
-    Lexer lexer{line};
+void REPL::EvalParser(std::ostream& output) {
+    Lexer lexer{current_line_};
     Parser parser{lexer};
     Program program = parser.ParseProgram();
 
@@ -59,12 +58,26 @@ void REPL::PrintParserErrors(const Parser& parser, std::ostream& output) {
     output << "Parsing errors:\n";
     for (const auto& error : parser.GetErrors()) {
         output << "    ";
-        PrintParserError(error, output);
+        PrintParserError(error, output, 4);
+        output << '\n';
     }
 }
 
-void REPL::PrintParserError(const ParserError& error, std::ostream& output) {
-    output << std::format("Ln {}, Col {}: {}\n", error.token.line, error.token.column, error.message);
+void REPL::PrintParserError(const ParserError& error, std::ostream& output, size_t indent) {
+    std::string pos_info = std::format("Ln {}, Col {}: ", error.token.line, error.token.column);
+    output << pos_info << error.message << '\n';
+
+    for (size_t i = 0; i < pos_info.size() + indent; ++i) {
+        output << ' ';
+    }
+
+    output << current_line_ << '\n';
+
+    for (size_t i = 0; i < pos_info.size() + error.token.column + indent; ++i) {
+        output << ' ';
+    }
+
+    output << '^';
 }
 
 } // namespace ItmoScript
