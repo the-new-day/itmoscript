@@ -69,8 +69,6 @@ Program Parser::ParseProgram() {
 }
 
 std::unique_ptr<Statement> Parser::ParseStatement() {
-    // TODO: rewrite this spagetti
-
     if (IsCurrentToken(TokenType::kIdentifier)) {
         if (IsPeekToken(TokenType::kAssign)) {
             return ParseAssignStatement();
@@ -164,9 +162,7 @@ bool Parser::ExpectPeek(TokenType type) {
 }
 
 void Parser::AddError(const std::string& msg) {
-    errors_.push_back(
-        std::format("Ln {}, Col {}: {}", current_token_.line, current_token_.column, msg)
-    );
+    errors_.push_back({.token = current_token_, .message = msg});
 }
 
 void Parser::AddUnknownTokenError() {
@@ -357,7 +353,6 @@ std::unique_ptr<FunctionLiteral> Parser::ParseFunctionLiteral() {
         return nullptr;
     }
 
-    // TODO: join for all block types (if, function, while etc.)
     if (!ExpectPeek(TokenType::kFunction)) {
         return nullptr;
     }
@@ -502,7 +497,7 @@ std::optional<std::vector<std::unique_ptr<Identifier>>> Parser::ParseFunctionPar
     return identifiers;
 }
 
-const std::vector<std::string>& Parser::GetErrors() const {
+const std::vector<ParserError>& Parser::GetErrors() const {
     return errors_;
 }
 

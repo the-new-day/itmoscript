@@ -30,7 +30,7 @@ static std::string GetPrintableParserErrors(ItmoScript::Parser& parser) {
     if (!errors.empty()) {
         msg << "parser has " << errors.size() << " errors:\n";
         for (const auto& error : errors) {
-            msg << error << '\n';
+            msg << std::format("Ln {}, Col {}: {}", error.token.line, error.token.column, error.message) << '\n';
         }
     }
 

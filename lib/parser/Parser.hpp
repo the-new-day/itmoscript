@@ -31,6 +31,11 @@ const std::map<TokenType, Precedence> kPrecedences{
     {TokenType::kLParen, Precedence::kCall},
 };
 
+struct ParserError {
+    Token token;
+    std::string message;
+};
+
 class Parser {
 public:
     Parser(Lexer& lexer);
@@ -42,7 +47,7 @@ public:
     ~Parser() = default;
 
     Program ParseProgram();
-    const std::vector<std::string>& GetErrors() const;
+    const std::vector<ParserError>& GetErrors() const;
 
     static bool IsEndOfExpression(TokenType type);
 
@@ -51,7 +56,7 @@ private:
     Token current_token_;
     Token peek_token_;
 
-    std::vector<std::string> errors_;
+    std::vector<ParserError> errors_;
 
     void AdvanceToken();
 
@@ -74,10 +79,8 @@ private:
     bool ExpectPeek(TokenType type);
 
     void AddError(const std::string& msg);
-    //void AddError(std::string&& msg);
     void AddUnknownTokenError();
     void PeekError(TokenType expected_type);
-    //void CurrentTokenError(TokenType expected_type);
     void AddNoPrefixFuncError(TokenType type);
 
     Precedence PeekPrecedence() const;
