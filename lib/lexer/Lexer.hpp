@@ -49,6 +49,7 @@ private:
     char PeekChar() const;
     std::string ReadWord();
     Token ReadNumber();
+    Token ReadStringLiteral();
 
     // If last read character was a compound operator starter, tries to read compound operator and return it as a token.
     // If fails, returns the last read character as a token.

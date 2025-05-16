@@ -15,6 +15,7 @@ enum class TokenType {
     // Literals
     kInt,
     kFloat,
+    kStringLiteral,
 
     // Assignment operators
     kAssign,
@@ -165,6 +166,7 @@ static const std::map<TokenType, std::string> kTokenTypeNames = {
     // Literals
     {TokenType::kInt, "INT"},
     {TokenType::kFloat, "FLOAT"},
+    {TokenType::kStringLiteral, "STRING_LITERAL"},
 
     // Assignment operators
     {TokenType::kAssign, "="},

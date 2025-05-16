@@ -34,6 +34,8 @@ Token Lexer::GetNextToken() {
         token = LookupIdentifier(word);
     } else if (std::isdigit(current)) {
         token = ReadNumber();
+    } else if (current == '"') {
+        token = ReadStringLiteral();
     } else if (current == '\n') {
         token.type = TokenType::kNewLine;
     } else {
@@ -128,6 +130,21 @@ Token Lexer::ReadNumber() {
     }
 
     SetTokenPosition(token);
+    token.literal = word;
+    return token;
+}
+
+Token Lexer::ReadStringLiteral() {
+    Token token;
+    token.type = TokenType::kStringLiteral;
+    SetTokenPosition(token);
+
+    std::string word(1, current_char_);
+    while (PeekChar() != '"') {
+        word += ReadChar();
+    }
+
+    word += ReadChar();
     token.literal = word;
     return token;
 }

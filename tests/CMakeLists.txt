@@ -20,7 +20,7 @@ add_executable(
   illegal_ops_test.cpp
 
   lexer/lexer_test.cpp
-  lexer/numbers_parsing_test.cpp
+  lexer/literals_test.cpp
 
   parser/statements_test.cpp
   parser/basic_expressions_test.cpp
