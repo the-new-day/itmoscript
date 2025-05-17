@@ -129,6 +129,14 @@ Token Lexer::ReadNumber() {
         token.type = TokenType::kFloat;
     }
 
+    if (IsIdentifierChar(PeekChar())) {
+        token.type = TokenType::kIllegal;
+        
+        while (IsIdentifierChar(PeekChar())) {
+            word += ReadChar();
+        }
+    }
+
     SetTokenPosition(token);
     token.literal = word;
     return token;
