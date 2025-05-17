@@ -49,3 +49,10 @@ static void TestInteger(const Value& value, int64_t expected) {
 
     ASSERT_EQ(ItmoScript::GetValue<ItmoScript::Int>(value), expected);
 }
+
+static void TestBool(const Value& value, bool expected) {
+    ASSERT_TRUE(ItmoScript::IsBool(value)) 
+        << "real type is: " << ItmoScript::kValueTypeNames.at(ItmoScript::GetType(value));
+
+    ASSERT_EQ(ItmoScript::GetValue<ItmoScript::Bool>(value), expected);
+}

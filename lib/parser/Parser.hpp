@@ -98,6 +98,7 @@ private:
     std::unique_ptr<FloatLiteral> ParseFloatLiteral();
     std::unique_ptr<StringLiteral> ParseStringLiteral();
     std::unique_ptr<BooleanLiteral> ParseBooleanLiteral();
+    std::unique_ptr<NullTypeLiteral> ParseNullTypeLiteral();
     std::unique_ptr<PrefixExpression> ParsePrefixExpression();
     std::unique_ptr<InfixExpression> ParseInfixExpression(std::unique_ptr<Expression> left);
     std::unique_ptr<Expression> ParseGroupedExpression();

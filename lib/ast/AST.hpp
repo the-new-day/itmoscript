@@ -129,6 +129,12 @@ struct BooleanLiteral : public Expression {
     bool value;
 };
 
+struct NullTypeLiteral : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+};
+
 class BlockStatement : public Statement {
 public:
     using Statement::Statement;

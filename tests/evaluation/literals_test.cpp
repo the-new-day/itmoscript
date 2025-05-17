@@ -12,3 +12,16 @@ TEST(EvaluationTestSuite, EvalIntegerExpression) {
         TestInteger(evaluated, expected);
     }
 }
+
+TEST(EvaluationTestSuite, EvalBoolExpression) {
+    // <input, expected>
+    std::vector<std::pair<std::string, bool>> expressions{
+        {"true", true},
+        {"false", false},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        Value evaluated = Eval(input);
+        TestBool(evaluated, expected);
+    }
+}

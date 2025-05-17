@@ -13,6 +13,7 @@ struct IntegerLiteral;
 struct FloatLiteral;
 struct StringLiteral;
 struct BooleanLiteral;
+struct NullTypeLiteral;
 struct BlockStatement;
 struct IfExpression;
 struct FunctionLiteral;
@@ -37,6 +38,7 @@ public:
     virtual void Visit(FloatLiteral&) = 0;
     virtual void Visit(StringLiteral&) = 0;
     virtual void Visit(BooleanLiteral&) = 0;
+    virtual void Visit(NullTypeLiteral&) = 0;
     virtual void Visit(BlockStatement&) = 0;
     virtual void Visit(IfExpression&) = 0;
     virtual void Visit(FunctionLiteral&) = 0;

@@ -70,6 +70,11 @@ static void TestStringLiteral(std::unique_ptr<ItmoScript::Expression>& string_li
     ASSERT_EQ(literal->value, expected_value);
 }
 
+static void TestNullTypeLiteral(std::unique_ptr<ItmoScript::Expression>& null_literal_expr) {
+    auto* literal = dynamic_cast<ItmoScript::NullTypeLiteral*>(null_literal_expr.get());
+    ASSERT_NE(literal, nullptr);
+}
+
 static void TestIdentifier(std::unique_ptr<ItmoScript::Expression>& ident_expr, const std::string& expected_value) {
     auto* ident = dynamic_cast<ItmoScript::Identifier*>(ident_expr.get());
     ASSERT_NE(ident, nullptr);

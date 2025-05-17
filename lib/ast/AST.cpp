@@ -92,6 +92,10 @@ std::string BooleanLiteral::String() const {
     return token.literal;
 }
 
+std::string NullTypeLiteral::String() const {
+    return token.literal;
+}
+
 std::string IfBranch::String() const {
     std::string result;
     if (condition != nullptr) {

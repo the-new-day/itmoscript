@@ -29,6 +29,10 @@ void Evaluator::Visit(BooleanLiteral& node) {
     result_ = node.value;
 }
 
+void Evaluator::Visit(NullTypeLiteral& node) {
+    result_ = std::monostate{};
+}
+
 void Evaluator::Visit(ExpressionStatement& node) {
     node.expr->Accept(*this);
 }

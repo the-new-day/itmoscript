@@ -19,6 +19,7 @@ public:
     void Visit(Program&) override;
     void Visit(IntegerLiteral&) override;
     void Visit(BooleanLiteral&) override;
+    void Visit(NullTypeLiteral&) override;
     void Visit(ExpressionStatement&) override;
 
     void Visit(Identifier&) override {}
