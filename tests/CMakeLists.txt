@@ -28,6 +28,8 @@ add_executable(
   parser/branch_test.cpp
   parser/functions_test.cpp
   parser/loop_test.cpp
+
+  evaluation/literals_test.cpp
 )
 
 target_link_libraries(
