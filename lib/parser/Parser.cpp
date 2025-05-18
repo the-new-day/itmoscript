@@ -20,6 +20,7 @@ Parser::Parser(Lexer& lexer)
     prefix_parse_funcs_[TokenType::kNil] = [this]() { return this->ParseNullTypeLiteral(); };
     prefix_parse_funcs_[TokenType::kBang] = [this]() { return this->ParsePrefixExpression(); };
     prefix_parse_funcs_[TokenType::kMinus] = [this]() { return this->ParsePrefixExpression(); };
+    prefix_parse_funcs_[TokenType::kPlus] = [this]() { return this->ParsePrefixExpression(); };
     prefix_parse_funcs_[TokenType::kTrue] = [this]() { return this->ParseBooleanLiteral(); };
     prefix_parse_funcs_[TokenType::kFalse] = [this]() { return this->ParseBooleanLiteral(); };
     prefix_parse_funcs_[TokenType::kLParen] = [this]() { return this->ParseGroupedExpression(); };
@@ -34,10 +35,14 @@ Parser::Parser(Lexer& lexer)
     infix_parse_funcs_[TokenType::kMinus] = infix_parser;
     infix_parse_funcs_[TokenType::kSlash] = infix_parser;
     infix_parse_funcs_[TokenType::kAsterisk] = infix_parser;
+    infix_parse_funcs_[TokenType::kPow] = infix_parser;
+    infix_parse_funcs_[TokenType::kPercent] = infix_parser;
     infix_parse_funcs_[TokenType::kEqual] = infix_parser;
     infix_parse_funcs_[TokenType::kNotEqual] = infix_parser;
     infix_parse_funcs_[TokenType::kLess] = infix_parser;
+    infix_parse_funcs_[TokenType::kLessOrEqual] = infix_parser;
     infix_parse_funcs_[TokenType::kGreater] = infix_parser;
+    infix_parse_funcs_[TokenType::kGreaterOrEqual] = infix_parser;
     infix_parse_funcs_[TokenType::kLParen] = [this](std::unique_ptr<Expression> function) { 
         return this->ParseCallExpression(std::move(function)); 
     };

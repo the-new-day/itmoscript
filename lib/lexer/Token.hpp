@@ -73,9 +73,6 @@ enum class TokenType {
     kTrue,
     kFalse,
     kNil,
-
-    // AAAA
-    kScoreResOperator,
 };
 
 struct Token {
@@ -112,7 +109,7 @@ static const std::map<char, TokenType> kOneCharTokens{
 };
 
 static const std::set<char> kCompoundOpStarters = {
-    '=', '+', '-', '*', '/', '%', '^', '<', '>', '!', ':',
+    '=', '+', '-', '*', '/', '%', '^', '<', '>', '!',
 };
 
 static const std::map<std::string, TokenType> kCompoundOperators{
@@ -126,7 +123,6 @@ static const std::map<std::string, TokenType> kCompoundOperators{
     {"<=", TokenType::kLessOrEqual},
     {">=", TokenType::kGreaterOrEqual},
     {"!=", TokenType::kNotEqual},
-    {"::", TokenType::kScoreResOperator},
 };
 
 static const std::map<std::string, TokenType> kKeywords{
@@ -224,9 +220,6 @@ static const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kTrue, "TRUE"},
     {TokenType::kFalse, "FALSE"},
     {TokenType::kNil, "NIL"},
-
-    // AAA
-    {TokenType::kScoreResOperator, "SCOPE"},
 };
 
 } // namespace ItmoScript
