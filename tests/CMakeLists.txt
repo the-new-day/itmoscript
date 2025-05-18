@@ -30,6 +30,7 @@ add_executable(
   parser/loop_test.cpp
 
   evaluation/literals_test.cpp
+  evaluation/prefix_expressions_test.cpp
 )
 
 target_link_libraries(

@@ -1,6 +1,6 @@
 #include "evaluation_test.hpp"
 
-TEST(EvaluationTestSuite, EvalIntegerExpression) {
+TEST(EvaluationTestSuite, EvalIntegerExpressionTest) {
     // <input, expected>
     std::vector<std::pair<std::string, int64_t>> expressions{
         {"5", 5},
@@ -13,7 +13,7 @@ TEST(EvaluationTestSuite, EvalIntegerExpression) {
     }
 }
 
-TEST(EvaluationTestSuite, EvalBoolExpression) {
+TEST(EvaluationTestSuite, EvalBoolExpressionTest) {
     // <input, expected>
     std::vector<std::pair<std::string, bool>> expressions{
         {"true", true},
@@ -26,7 +26,7 @@ TEST(EvaluationTestSuite, EvalBoolExpression) {
     }
 }
 
-TEST(EvaluationTestSuite, EvalNullTypeExpression) {
+TEST(EvaluationTestSuite, EvalNullTypeExpressionTest) {
     std::vector<std::string> expressions{
         "nil",
     };

@@ -36,6 +36,9 @@ public:
     bool IsString() const;
     bool IsBool() const;
     bool IsFunction() const;
+
+    // Checks if contained value can be converted to true following the language rules.
+    bool IsTruphy() const;
     
     // TODO: make T a concept to prevent wrong types
     template<typename T>

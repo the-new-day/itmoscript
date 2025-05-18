@@ -26,6 +26,25 @@ bool Value::IsFunction() const {
     return IsOfType(ValueType::kFunction);
 }
 
+bool Value::IsTruphy() const {
+    switch (GetType()) {
+        case ValueType::kNullType:
+            return false;
+        case ValueType::kInt:
+            return GetValue<Int>() != 0;
+        case ValueType::kFloat:
+            return GetValue<Float>() != 0;
+        case ValueType::kString:
+            return !GetValue<String>().empty();
+        case ValueType::kBool:
+            return GetValue<Bool>();
+        case ValueType::kFunction:
+            return true;
+        default:
+            return false;
+    }
+}
+
 std::string Value::ToString() const {
     switch (GetType()) {
         case ValueType::kNullType:

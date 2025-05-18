@@ -2,7 +2,7 @@
 
 // TODO: add tests for Ln, Col
 
-TEST(LexerTestSuite, OneCharToken) {
+TEST(LexerTestSuite, OneCharTokenTest) {
     std::string code;
     std::vector<ItmoScript::Token> expected;
 
@@ -19,7 +19,7 @@ TEST(LexerTestSuite, OneCharToken) {
     CompareTokens(lexer, expected);
 }
 
-TEST(LexerTestSuite, OneCharIdentiriers) {
+TEST(LexerTestSuite, OneCharIdentiriersTest) {
     std::string code = "a b c d e f";
 
     ItmoScript::Lexer lexer{code};
@@ -37,7 +37,7 @@ TEST(LexerTestSuite, OneCharIdentiriers) {
     CompareTokens(lexer, expected);
 }
 
-TEST(LexerTestSuite, IdentifiersAssignment) {
+TEST(LexerTestSuite, IdentifiersAssignmentTest) {
     std::string code = "n = number_2";
 
     ItmoScript::Lexer lexer{code};
@@ -52,7 +52,7 @@ TEST(LexerTestSuite, IdentifiersAssignment) {
     CompareTokens(lexer, expected);
 }
 
-TEST(LexerTestSuite, FunctionCreation) {
+TEST(LexerTestSuite, FunctionCreationTest) {
     std::string code = R"(
         incr = function(value)
             return value + 1
@@ -84,7 +84,7 @@ TEST(LexerTestSuite, FunctionCreation) {
     CompareTokens(lexer, expected);
 }
 
-TEST(LexerTestSuite, KeywordsRecognition) {
+TEST(LexerTestSuite, KeywordsRecognitionTest) {
     std::string code;
     std::vector<ItmoScript::Token> expected;
 
@@ -99,7 +99,7 @@ TEST(LexerTestSuite, KeywordsRecognition) {
     CompareTokens(lexer, expected);
 }
 
-TEST(LexerTestSuite, BasicOperatorsUsage) {
+TEST(LexerTestSuite, BasicOperatorsUsageTest) {
     std::string code = R"(
         5 < 10
         5 > 10
@@ -147,7 +147,7 @@ TEST(LexerTestSuite, BasicOperatorsUsage) {
     CompareTokens(lexer, expected);
 }
 
-TEST(LexerTestSuite, IgnoringComments) {
+TEST(LexerTestSuite, IgnoringCommentsTest) {
     std::string code = R"(
         // very important function
         // very-very important function!!
@@ -181,7 +181,7 @@ TEST(LexerTestSuite, IgnoringComments) {
     CompareTokens(lexer, expected);
 }
 
-TEST(LexerTestSuite, WhileLoop) {
+TEST(LexerTestSuite, WhileLoopTest) {
     std::string code = R"(
         while i < 10
             i += 1
@@ -210,7 +210,7 @@ TEST(LexerTestSuite, WhileLoop) {
     CompareTokens(lexer, expected);
 }
 
-TEST(LexerTestSuite, ForLoop) {
+TEST(LexerTestSuite, ForLoopTest) {
     std::string code = R"(
         for i in arr
             i += 1
