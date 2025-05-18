@@ -1,4 +1,5 @@
 #include "REPL.hpp"
+#include "evaluation/Evaluator.hpp"
 
 #include <format>
 
@@ -15,6 +16,8 @@ void REPL::Start(std::istream& input, std::ostream& output) {
             EvalLexer(output);
         } else if (mode_ == ReplMode::kParser) {
             EvalParser(output);
+        } else if (mode_ == ReplMode::kEval) {
+            Eval(output);
         }
     }
 }
@@ -41,6 +44,17 @@ void REPL::EvalParser(std::ostream& output) {
     }
 
     output << program.String();
+    output << '\n';
+}
+
+void REPL::Eval(std::ostream& output) {
+    Lexer lexer{current_line_};
+    Parser parser{lexer};
+    Program program = parser.ParseProgram();
+    Evaluator evaluator;
+    evaluator.Interpret(program);
+
+    output << evaluator.GetResult();
     output << '\n';
 }
 

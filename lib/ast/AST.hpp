@@ -16,7 +16,7 @@ struct Node {
     Node() = default;
 
     virtual ~Node() = default;
-    virtual std::string String() const = 0;
+    virtual std::string String() const { return token.literal; }
     virtual void Accept(Visitor& visitor) = 0;
 
     Token token;
@@ -24,12 +24,10 @@ struct Node {
 
 struct Statement : public Node {
     using Node::Node;
-    std::string String() const override;
 };
 
 struct Expression : public Node {
     using Node::Node;
-    std::string String() const override;
 };
 
 class Program : public Node {
@@ -99,7 +97,6 @@ struct InfixExpression : public Expression {
 
 struct IntegerLiteral : public Expression {
     using Expression::Expression;
-    std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
     int64_t value;
@@ -107,7 +104,6 @@ struct IntegerLiteral : public Expression {
 
 struct FloatLiteral : public Expression {
     using Expression::Expression;
-    std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
     double value;
@@ -115,7 +111,6 @@ struct FloatLiteral : public Expression {
 
 struct StringLiteral : public Expression {
     using Expression::Expression;
-    std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
     std::string value;
@@ -123,7 +118,6 @@ struct StringLiteral : public Expression {
 
 struct BooleanLiteral : public Expression {
     using Expression::Expression;
-    std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
     
     bool value;
@@ -131,7 +125,6 @@ struct BooleanLiteral : public Expression {
 
 struct NullTypeLiteral : public Expression {
     using Expression::Expression;
-    std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 };
 
@@ -207,13 +200,11 @@ struct ForStatement : public Statement {
 
 struct BreakStatement : public Statement {
     using Statement::Statement;
-    std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 };
 
 struct ContinueStatement : public Statement {
     using Statement::Statement;
-    std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 };
 

@@ -60,40 +60,12 @@ std::string Identifier::String() const {
     return name;
 }
 
-std::string Statement::String() const {
-    return token.literal;
-}
-
-std::string Expression::String() const {
-    return token.literal;
-}
-
 std::string PrefixExpression::String() const {
     return std::format("({}{})", oper, right->String());
 }
 
 std::string InfixExpression::String() const {
     return std::format("({} {} {})", left->String(), oper, right->String());
-}
-
-std::string IntegerLiteral::String() const {
-    return token.literal;
-}
-
-std::string FloatLiteral::String() const {
-    return token.literal;
-}
-
-std::string StringLiteral::String() const {
-    return token.literal;
-}
-
-std::string BooleanLiteral::String() const {
-    return token.literal;
-}
-
-std::string NullTypeLiteral::String() const {
-    return token.literal;
 }
 
 std::string IfBranch::String() const {
@@ -187,14 +159,6 @@ std::string ForStatement::String() const {
 
     result += " end for";
     return result;
-}
-
-std::string BreakStatement::String() const {
-    return token.literal;
-}
-
-std::string ContinueStatement::String() const {
-    return token.literal;
 }
 
 } // namespace ItmoScript

@@ -25,3 +25,14 @@ TEST(EvaluationTestSuite, EvalBoolExpression) {
         TestBool(evaluated, expected);
     }
 }
+
+TEST(EvaluationTestSuite, EvalNullTypeExpression) {
+    std::vector<std::string> expressions{
+        "nil",
+    };
+
+    for (const auto& input : expressions) {
+        Value evaluated = Eval(input);
+        TestNullType(evaluated);
+    }
+}

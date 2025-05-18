@@ -44,15 +44,20 @@ static ItmoScript::Value Eval(const std::string& input) {
 }
 
 static void TestInteger(const Value& value, int64_t expected) {
-    ASSERT_TRUE(ItmoScript::IsInt(value)) 
-        << "real type is: " << ItmoScript::kValueTypeNames.at(ItmoScript::GetType(value));
+    ASSERT_TRUE(value.IsInt()) 
+        << "real type is: " << ItmoScript::kValueTypeNames.at(value.GetType());
 
-    ASSERT_EQ(ItmoScript::GetValue<ItmoScript::Int>(value), expected);
+    ASSERT_EQ(value.GetValue<ItmoScript::Int>(), expected);
 }
 
 static void TestBool(const Value& value, bool expected) {
-    ASSERT_TRUE(ItmoScript::IsBool(value)) 
-        << "real type is: " << ItmoScript::kValueTypeNames.at(ItmoScript::GetType(value));
+    ASSERT_TRUE(value.IsBool()) 
+        << "real type is: " << ItmoScript::kValueTypeNames.at(value.GetType());
 
-    ASSERT_EQ(ItmoScript::GetValue<ItmoScript::Bool>(value), expected);
+    ASSERT_EQ(value.GetValue<ItmoScript::Bool>(), expected);
+}
+
+static void TestNullType(const Value& value) {
+    ASSERT_TRUE(value.IsNullType()) 
+        << "real type is: " << ItmoScript::kValueTypeNames.at(value.GetType());
 }

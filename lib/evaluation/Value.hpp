@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <map>
+#include <ostream>
 
 namespace ItmoScript {
 
@@ -14,16 +15,6 @@ using Int = int64_t;
 using Float = double;
 using String = std::string;
 using Bool = bool;
-//using Function = Function;
-
-using Value = std::variant<
-    NullType,
-    Int,
-    Float,
-    String,
-    Bool,
-    Function
->;
 
 enum class ValueType {
     kNullType,
@@ -34,18 +25,50 @@ enum class ValueType {
     kFunction
 };
 
-bool IsNullType(const Value& value);
-bool IsInt(const Value& value);
-bool IsFloat(const Value& value);
-bool IsString(const Value& value);
-bool IsBool(const Value& value);
-bool IsFunction(const Value& value);
-ValueType GetType(const Value& value);
+class Value {
+public:
+    ValueType GetType() const;
+    bool IsOfType(ValueType type) const;
 
-template<typename T>
-T GetValue(const Value& value) {
-    return std::get<T>(value);
-}
+    bool IsNullType() const;
+    bool IsInt() const;
+    bool IsFloat() const;
+    bool IsString() const;
+    bool IsBool() const;
+    bool IsFunction() const;
+    
+    // TODO: make T a concept to prevent wrong types
+    template<typename T>
+    T GetValue() const {
+        return std::get<T>(data_);
+    }
+
+    template<typename T>
+    void Set(const T& value) {
+        data_ = value;
+    }
+
+    template<typename T>
+    Value& operator=(const T& value) {
+        Set(value);
+        return *this;
+    }
+
+    std::string ToString() const;
+    friend std::ostream& operator<<(std::ostream& stream, const Value& value);
+
+private:
+    using Type = std::variant<
+        NullType,
+        Int,
+        Float,
+        String,
+        Bool,
+        Function
+    >;
+
+    Type data_;
+};
 
 const std::map<ValueType, std::string> kValueTypeNames{
     {ValueType::kNullType, "NullType"},
