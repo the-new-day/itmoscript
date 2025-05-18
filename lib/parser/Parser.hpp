@@ -109,6 +109,8 @@ private:
 
     std::optional<std::vector<std::unique_ptr<Identifier>>> ParseFunctionParameters();
     std::optional<std::vector<std::unique_ptr<Expression>>> ParseCallArguments();
+
+    std::optional<std::string> ProcessEscapeSequences(std::string_view str);
 };
     
 template<typename T>

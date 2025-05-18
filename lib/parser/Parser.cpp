@@ -2,6 +2,7 @@
 #include "utils.hpp"
 
 #include <format>
+#include <string_view>
 
 namespace ItmoScript {
 
@@ -248,8 +249,16 @@ std::unique_ptr<FloatLiteral> Parser::ParseFloatLiteral() {
 
 std::unique_ptr<StringLiteral> Parser::ParseStringLiteral() {
     auto string_literal = MakeNode<StringLiteral>();
-    const std::string& literal = string_literal->token.literal;
-    string_literal->value = literal.substr(1, literal.size() - 2);
+
+    std::string_view literal = string_literal->token.literal;
+    literal = literal.substr(1, literal.size() - 2);
+
+    std::optional<std::string> escaped = ProcessEscapeSequences(literal);
+    if (!escaped.has_value()) {
+        return nullptr;
+    }
+
+    string_literal->value = std::move(escaped.value());
     return string_literal;
 }
 
@@ -525,6 +534,64 @@ std::optional<std::vector<std::unique_ptr<Identifier>>> Parser::ParseFunctionPar
 
 const std::vector<ParserError>& Parser::GetErrors() const {
     return errors_;
+}
+
+std::optional<std::string> Parser::ProcessEscapeSequences(std::string_view str) {
+    std::string result;
+    result.reserve(str.size());
+
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (str[i] != '\\') {
+            result += str[i];
+            continue;
+        } else if (i == str.size() - 1) {
+            AddError("unexpected end of a string");
+            return std::nullopt;
+        }
+
+        switch (str[i + 1]) {
+            case '\'':
+                result += '\'';
+                break;
+            case '"':
+                result += '\"';
+                break;
+            case '?':
+                result += '\?';
+                break;
+            case '\\':
+                result += '\\';
+                break;
+            case 'a':
+                result += '\a';
+                break;
+            case 'b':
+                result += '\b';
+                break;
+            case 'f':
+                result += '\f';
+                break;
+            case 'n':
+                result += '\n';
+                break;
+            case 'r':
+                result += '\r';
+                break;
+            case 't':
+                result += '\t';
+                break;
+            case 'v':
+                result += '\v';
+                break;
+            default:
+                AddError("unknown escape sequence");
+                return std::nullopt;
+        }
+
+        ++i;
+    }
+
+    return result;
 }
 
 } // namespace ItmoScript

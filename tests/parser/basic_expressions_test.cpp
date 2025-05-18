@@ -63,6 +63,17 @@ TEST(ParserTestSuite, StringLiteralExpressionTest) {
     TestStringLiteral(expr_stmt->expr, "Hello World");
 }
 
+TEST(ParserTestSuite, StringLiteralEscapeSeqTest) {
+    std::string code = R"("\n\t\'\"\?\a\b\f\r\v\\")";
+
+    auto program = GetParsedProgram(code);
+    const auto& statements = program.GetStatements();
+    ASSERT_EQ(statements.size(), 1);
+
+    auto* expr_stmt = GetExpressionStatement(statements[0]);
+    TestStringLiteral(expr_stmt->expr, "\n\t\'\"\?\a\b\f\r\v\\");
+}
+
 TEST(ParserTestSuite, NullTypeLiteralExpressionTest) {
     std::string code = R"(
         nil
