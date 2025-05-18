@@ -18,3 +18,16 @@ TEST(EvaluationTestSuite, BangOperatorTest) {
         TestBool(evaluated, expected);
     }
 }
+
+TEST(EvaluationTestSuite, UnaryMinusOperatorTest) {
+    // <input, expected>
+    std::vector<std::pair<std::string, int64_t>> expressions{
+        {"-30", -30},
+        {"-(-30)", 30},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        Value evaluated = Eval(input);
+        TestInteger(evaluated, expected);
+    }
+}

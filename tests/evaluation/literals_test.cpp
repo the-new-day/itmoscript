@@ -5,6 +5,8 @@ TEST(EvaluationTestSuite, EvalIntegerExpressionTest) {
     std::vector<std::pair<std::string, int64_t>> expressions{
         {"5", 5},
         {"10", 10},
+        {"-5", -5},
+        {"-10", -10},
     };
 
     for (const auto& [input, expected] : expressions) {
