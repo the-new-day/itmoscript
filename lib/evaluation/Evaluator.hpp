@@ -17,18 +17,19 @@ public:
     Value GetResult() const;
 
     void Visit(Program&) override;
+    void Visit(ExpressionStatement&) override;
+    void Visit(PrefixExpression&) override;
+
     void Visit(IntegerLiteral&) override;
     void Visit(BooleanLiteral&) override;
     void Visit(NullTypeLiteral&) override;
-    void Visit(ExpressionStatement&) override;
-    void Visit(PrefixExpression&) override;
+    void Visit(FloatLiteral&) override;
+    void Visit(StringLiteral&) override;
 
     void Visit(Identifier&) override {}
     void Visit(AssignStatement&) override {}
     void Visit(ReturnStatement&) override {}
     void Visit(InfixExpression&) override {}
-    void Visit(FloatLiteral&) override {}
-    void Visit(StringLiteral&) override {}
     void Visit(BlockStatement&) override {}
     void Visit(IfExpression&) override {}
     void Visit(FunctionLiteral&) override {}

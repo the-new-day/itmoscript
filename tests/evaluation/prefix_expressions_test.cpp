@@ -15,7 +15,7 @@ TEST(EvaluationTestSuite, BangOperatorTest) {
 
     for (const auto& [input, expected] : expressions) {
         Value evaluated = Eval(input);
-        TestBool(evaluated, expected);
+        TestValue<ItmoScript::Bool>(evaluated, expected);
     }
 }
 
@@ -28,6 +28,6 @@ TEST(EvaluationTestSuite, UnaryMinusOperatorTest) {
 
     for (const auto& [input, expected] : expressions) {
         Value evaluated = Eval(input);
-        TestInteger(evaluated, expected);
+        TestValue<ItmoScript::Int>(evaluated, expected);
     }
 }

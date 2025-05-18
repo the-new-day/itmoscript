@@ -58,6 +58,14 @@ void Evaluator::Visit(NullTypeLiteral& node) {
     result_ = std::monostate{};
 }
 
+void Evaluator::Visit(FloatLiteral& node) {
+    result_ = node.value;
+}
+
+void Evaluator::Visit(StringLiteral& node) {
+    result_ = node.value;
+}
+
 void Evaluator::Visit(ExpressionStatement& node) {
     node.expr->Accept(*this);
 }

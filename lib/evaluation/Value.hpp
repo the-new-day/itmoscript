@@ -29,6 +29,9 @@ class Value {
 public:
     ValueType GetType() const;
     bool IsOfType(ValueType type) const;
+    
+    template<typename T>
+    bool IsOfType() const;
 
     bool IsNullType() const;
     bool IsInt() const;
@@ -73,6 +76,11 @@ private:
     Type data_;
 };
 
+template<typename T>
+bool Value::IsOfType() const {
+    return std::holds_alternative<T>(data_);
+}
+
 const std::map<ValueType, std::string> kValueTypeNames{
     {ValueType::kNullType, "NullType"},
     {ValueType::kInt, "Int"},
@@ -81,5 +89,5 @@ const std::map<ValueType, std::string> kValueTypeNames{
     {ValueType::kBool, "Bool"},
     {ValueType::kFunction, "Function"},
 };
-    
+
 } // namespace ItmoScript

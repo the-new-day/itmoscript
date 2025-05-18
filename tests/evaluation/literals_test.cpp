@@ -1,6 +1,6 @@
 #include "evaluation_test.hpp"
 
-TEST(EvaluationTestSuite, EvalIntegerExpressionTest) {
+TEST(EvaluationTestSuite, IntegerLiteralTest) {
     // <input, expected>
     std::vector<std::pair<std::string, int64_t>> expressions{
         {"5", 5},
@@ -11,11 +11,11 @@ TEST(EvaluationTestSuite, EvalIntegerExpressionTest) {
 
     for (const auto& [input, expected] : expressions) {
         Value evaluated = Eval(input);
-        TestInteger(evaluated, expected);
+        TestValue<ItmoScript::Int>(evaluated, expected);
     }
 }
 
-TEST(EvaluationTestSuite, EvalBoolExpressionTest) {
+TEST(EvaluationTestSuite, BoolLiteralTest) {
     // <input, expected>
     std::vector<std::pair<std::string, bool>> expressions{
         {"true", true},
@@ -24,17 +24,55 @@ TEST(EvaluationTestSuite, EvalBoolExpressionTest) {
 
     for (const auto& [input, expected] : expressions) {
         Value evaluated = Eval(input);
-        TestBool(evaluated, expected);
+        TestValue<ItmoScript::Bool>(evaluated, expected);
     }
 }
 
-TEST(EvaluationTestSuite, EvalNullTypeExpressionTest) {
+TEST(EvaluationTestSuite, NullTypeLiteralTest) {
     std::vector<std::string> expressions{
         "nil",
     };
 
     for (const auto& input : expressions) {
         Value evaluated = Eval(input);
-        TestNullType(evaluated);
+        TestValue<ItmoScript::NullType>(evaluated, ItmoScript::NullType{});
+    }
+}
+
+TEST(EvaluationTestSuite, FloatLiteralTest) {
+    // <input, expected>
+    std::vector<std::pair<std::string, double>> expressions{
+        {"0.999", 0.999},
+        {"3.14", 3.14},
+        {"100.500", 100.5},
+        {"100.50023123", 100.50023123},
+        {"-0.999", -0.999},
+        {"-3.14", -3.14},
+        {"-100.500", -100.5},
+        {"-100.50023123", -100.50023123},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        Value evaluated = Eval(input);
+        TestValue<ItmoScript::Float>(evaluated, expected);
+    }
+}
+
+TEST(EvaluationTestSuite, StringLiteralTest) {
+    // <input, expected>
+    std::vector<std::pair<std::string, std::string>> expressions{
+        {R"("Hello World!")", "Hello World!"},
+        {R"("abcdef")", "abcdef"},
+        {R"("abc\ndef")", "abc\ndef"},
+        {R"("\t")", "\t"},
+        {R"("\n\t\n\t")", "\n\t\n\t"},
+        {R"("123456")", "123456"},
+        {R"("<=>")", "<=>"},
+        {R"("####")", "####"},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        Value evaluated = Eval(input);
+        TestValue<ItmoScript::String>(evaluated, expected);
     }
 }
