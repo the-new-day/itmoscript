@@ -26,3 +26,27 @@ TEST(EvaluationTestSuite, InfixIntegerExpressionTest) {
         TestValue<ItmoScript::Int>(evaluated, expected);
     }
 }
+
+TEST(EvaluationTestSuite, InfixBoolExpressionTest) {
+    std::vector<std::pair<std::string, bool>> expressions{
+        {"true", true},
+        {"false", false},
+        {"1 < 2", true},
+        {"1 > 2", false},
+        {"1 < 1", false},
+        {"1 > 1", false},
+        {"1 == 1", true},
+        {"1 != 1", false},
+        {"1 == 2", false},
+        {"1 != 2", true},
+        {"1 >= 2", false},
+        {"1 <= 2", true},
+        {"1 >= 1", true},
+        {"1 <= 1", true},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        Value evaluated = Eval(input);
+        TestValue<ItmoScript::Bool>(evaluated, expected);
+    }
+}

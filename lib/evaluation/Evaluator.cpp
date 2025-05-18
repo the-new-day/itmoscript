@@ -81,6 +81,18 @@ void Evaluator::EvalIntInfixExpression(const std::string& oper, const Value& lef
         result_ = left_val % right_val;
     } else if (oper == "^") {
         result_ = Pow(left_val, right_val);
+    } else if (oper == ">") {
+        result_ = left_val > right_val;
+    } else if (oper == "<") {
+        result_ = left_val < right_val;
+    } else if (oper == ">=") {
+        result_ = left_val >= right_val;
+    } else if (oper == "<=") {
+        result_ = left_val <= right_val;
+    } else if (oper == "==") {
+        result_ = left_val == right_val;
+    } else if (oper == "!=") {
+        result_ = left_val != right_val;
     } else {
         result_ = NullType{}; // TODO: error
     }
