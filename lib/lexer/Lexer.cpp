@@ -138,7 +138,7 @@ Token Lexer::ReadNumber() {
     }
 
     SetTokenPosition(token);
-    token.literal = word;
+    token.literal = std::move(word);
     return token;
 }
 
@@ -151,14 +151,18 @@ Token Lexer::ReadStringLiteral() {
     while (PeekChar() != '"') {
         if (!HasNextToken()) {
             token.type = TokenType::kIllegal;
-            break;
+            token.literal = std::move(word);
+            return token;
         }
         
         word += ReadChar();
+        if (current_char_ == '\\') {
+            word += ReadChar();
+        }
     }
 
     word += ReadChar();
-    token.literal = word;
+    token.literal = std::move(word);
     return token;
 }
 

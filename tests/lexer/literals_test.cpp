@@ -17,14 +17,16 @@ TEST(LexerTestSuite, ReadIntAndFloat) {
 }
 
 TEST(LexerTestSuite, ReadStringLiteral) {
-    std::string code = R"("Hello World" "biba'boba" "123456")";
+    std::string code = R"("Hello World" "biba'boba" "123456" "\"" "\\")";
 
     ItmoScript::Lexer lexer{code};
 
     std::vector<ItmoScript::Token> expected = {
-        {TT::kStringLiteral, "\"Hello World\""},
-        {TT::kStringLiteral, "\"biba'boba\""},
-        {TT::kStringLiteral, "\"123456\""},
+        {TT::kStringLiteral, R"("Hello World")"},
+        {TT::kStringLiteral, R"("biba'boba")"},
+        {TT::kStringLiteral, R"("123456")"},
+        {TT::kStringLiteral, R"("\"")"},
+        {TT::kStringLiteral, R"("\\")"},
     };
 
     expected.push_back({.type = TT::kEOF});
