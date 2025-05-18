@@ -1,0 +1,28 @@
+#include "evaluation_test.hpp"
+
+TEST(EvaluationTestSuite, InfixIntegerExpressionTest) {
+    // <input, expected>
+    std::vector<std::pair<std::string, int64_t>> expressions{
+        {"5 + 5", 10},
+        {"10 * 2", 20},
+        {"-5 + 5", 0},
+        {"2 * 2 * 2 * 2 * 2", 32},
+        {"-50 + 100 + -50", 0},
+        {"5 * 2 + 10", 20},
+        {"5 + 2 * 10", 25},
+        {"20 + 2 * -10", 0},
+        {"50 / 2 * 2 + 10", 60},
+        {"2 * (5 + 10)", 30},
+        {"3 * 3 * 3 + 10", 37},
+        {"3 * (3 * 3) + 10", 37},
+        {"(5 + 10 * 2 + 15 / 3) * 2 + -10", 50},
+        {"5 % 5", 0},
+        {"1244 % 5", 1244 % 5},
+        {"1244 ^ 3", 1244 * 1244 * 1244},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        Value evaluated = Eval(input);
+        TestValue<ItmoScript::Int>(evaluated, expected);
+    }
+}

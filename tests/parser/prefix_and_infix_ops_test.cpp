@@ -8,6 +8,8 @@ TEST(ParserTestSuite, IntPrefixOperatorsTest) {
         {"-15", "-", 15},
         {"-0", "-", 0},
         {"-22223333", "-", 22223333},
+        {"+22223333", "+", 22223333},
+        {"+0", "+", 0},
     };
 
     TestPrefixLiteralsExpressions<int64_t>(expressions);
@@ -28,10 +30,14 @@ TEST(ParserTestSuite, IntInfixOperatorsTest) {
         {"5 - 5", "-", 5, 5},
         {"5 * 5", "*", 5, 5},
         {"5 / 5", "/", 5, 5},
+        {"5 % 5", "%", 5, 5},
+        {"5 ^ 5", "^", 5, 5},
         {"5 > 5", ">", 5, 5},
         {"5 < 5", "<", 5, 5},
         {"5 == 5", "==", 5, 5},
         {"5 != 5", "!=", 5, 5},
+        {"5 >= 5", ">=", 5, 5},
+        {"5 <= 5", "<=", 5, 5},
     };
 
     TestInfixLiteralsExpressions<int64_t>(expressions);

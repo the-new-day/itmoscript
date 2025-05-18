@@ -19,6 +19,7 @@ public:
     void Visit(Program&) override;
     void Visit(ExpressionStatement&) override;
     void Visit(PrefixExpression&) override;
+    void Visit(InfixExpression&) override;
 
     void Visit(IntegerLiteral&) override;
     void Visit(BooleanLiteral&) override;
@@ -29,7 +30,6 @@ public:
     void Visit(Identifier&) override {}
     void Visit(AssignStatement&) override {}
     void Visit(ReturnStatement&) override {}
-    void Visit(InfixExpression&) override {}
     void Visit(BlockStatement&) override {}
     void Visit(IfExpression&) override {}
     void Visit(FunctionLiteral&) override {}
@@ -43,9 +43,13 @@ private:
     Value result_;
     Value Eval(Node& node);
 
-    void EvalPrefixExpression(std::string oper, const Value& right);
+    void EvalPrefixExpression(const std::string& oper, const Value& right);
     void EvalBangOperatorExpression(const Value& right);
     void EvalUnaryMinusOperatorExpression(const Value& right);
+    void EvalUnaryPlusOperatorExpression(const Value& right);
+
+    void EvalInfixExpression(const std::string& oper, const Value& left, const Value& right);
+    void EvalIntInfixExpression(const std::string& oper, const Value& left, const Value& right);
 };
     
 } // namespace ItmoScript

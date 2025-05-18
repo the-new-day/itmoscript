@@ -31,6 +31,7 @@ add_executable(
 
   evaluation/literals_test.cpp
   evaluation/prefix_expressions_test.cpp
+  evaluation/infix_expressions_test.cpp
 )
 
 target_link_libraries(
