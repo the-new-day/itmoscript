@@ -2,6 +2,7 @@
 
 #include "lexer/Lexer.hpp"
 #include "parser/Parser.hpp"
+#include "evaluation/Evaluator.hpp"
 
 #include <string>
 #include <iostream>
@@ -35,6 +36,9 @@ private:
 
     void PrintParserErrors(const Parser& parser, std::ostream& output);
     void PrintParserError(const ParserError& error, std::ostream& output, size_t indent);
+
+    void PrintEvaluatorErrors(const Evaluator& evaluator, std::ostream& output);
+    void PrintEvaluationError(const EvaluationError& error, std::ostream& output, size_t indent);
 };
     
 } // namespace ItmoScript
