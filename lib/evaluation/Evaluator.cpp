@@ -2,6 +2,7 @@
 #include "utils.hpp"
 
 #include <format>
+#include <cmath>
 
 namespace ItmoScript {
 
@@ -14,7 +15,14 @@ Evaluator::Evaluator() {
     });
 
     RegisterBinaryOper<Int, Int>("^", [](const Value& left, const Value& right) {
-        return Utils::Pow(left.GetValue<Int>(), right.GetValue<Int>());
+        if (right.GetValue<Int>() < 0) {
+            return Value{Utils::FastPowNeg(left.GetValue<Int>(), right.GetValue<Int>())};
+        }
+        return Value{Utils::FastPow(left.GetValue<Int>(), right.GetValue<Int>())};
+    });
+
+    RegisterBinaryOper<Float, Float>("^", [](const Value& left, const Value& right) {
+        return std::pow(left.GetValue<Float>(), right.GetValue<Float>());
     });
 
     AddUnaryOperatorForAllTypes("!", [](const Value& right) { return !right.IsTruphy(); });

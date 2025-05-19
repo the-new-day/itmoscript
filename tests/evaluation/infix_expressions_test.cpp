@@ -60,3 +60,18 @@ TEST(EvaluationTestSuite, InfixBoolExpressionTest) {
         TestValue<ItmoScript::Bool>(evaluated, expected);
     }
 }
+
+TEST(EvaluationTestSuite, InfixFloatExpressionTest) {
+    // <input, expected>
+    std::vector<std::pair<std::string, double>> expressions{
+        {"5 + 5.5", 10.5},
+        {"10 * 2.5", 25.0},
+        {"-5 + 5.0", 0},
+        {"4^0.5", 2.0},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        Value evaluated = Eval(input);
+        TestValue<ItmoScript::Float>(evaluated, expected);
+    }
+}

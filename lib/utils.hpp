@@ -24,7 +24,7 @@ std::optional<T> ParseNumber(std::string_view str) {
     return result;
 }
 
-static int64_t Pow(int64_t base, uint64_t exponent) {
+static int64_t FastPow(int64_t base, uint64_t exponent) {
     int64_t result = 1;
     while (exponent > 0) {
         if (exponent % 2 == 1) {
@@ -36,6 +36,22 @@ static int64_t Pow(int64_t base, uint64_t exponent) {
     }
 
     return result;
+}
+
+static double FastPowNeg(int64_t base, int64_t exponent) {
+    uint64_t abs_exponent = (exponent < 0) ? -exponent : exponent;
+
+    int64_t result = 1;
+    while (abs_exponent > 0) {
+        if (abs_exponent % 2 == 1) {
+            result *= base;
+        }
+
+        base *= base;
+        abs_exponent /= 2;
+    }
+
+    return (exponent < 0) ? (1.0 / result) : result;
 }
 
 struct TypePairHash {
