@@ -17,14 +17,7 @@ std::optional<Value> TypeSystem::TryConvert(const Value& v, std::type_index targ
 
     auto key = std::make_pair(v.GetTypeIndex(), target);
     if (converters_.contains(key)) {
-        switch (v.GetType()) {
-            case ValueType::kInt: return std::invoke(converters_.at(key), v.GetValue<Int>());
-            case ValueType::kFloat: return std::invoke(converters_.at(key), v.GetValue<Float>());
-            case ValueType::kString: return std::invoke(converters_.at(key), v.GetValue<String>());
-            case ValueType::kBool: return std::invoke(converters_.at(key), v.GetValue<Bool>());
-            case ValueType::kFunction: return std::invoke(converters_.at(key), v.GetValue<Function>());
-            case ValueType::kNullType: return std::invoke(converters_.at(key), v.GetValue<NullType>());
-        }
+        return std::invoke(converters_.at(key), v);
     }
 
     return std::nullopt;

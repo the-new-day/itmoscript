@@ -313,10 +313,14 @@ std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
     auto block = MakeNode<BlockStatement>();
     AdvanceToken();
 
-    while (!IsCurrentTokenEndOfBlock() && !IsCurrentToken(TokenType::kEOF)) {
+    // TODO: check for block type ("while true else while" shouldn't be accepted)
+    while (!IsCurrentTokenEndOfBlock()) {
         if (IsCurrentToken(TokenType::kNewLine)) {
             AdvanceToken();
             continue;
+        } else if (IsCurrentToken(TokenType::kEOF)) {
+            AddError("unexpected end of block");
+            return nullptr;
         }
 
         auto statement = ParseStatement();

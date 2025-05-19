@@ -6,6 +6,17 @@
 
 namespace ItmoScript {
 
+/**
+ * @enum TokenType
+ * @brief Represents all possible types of tokens produced by the lexer.
+ *
+ * This includes:
+ * - Identifiers
+ * - Literals (int, float, string)
+ * - Operators (arithmetic, assignment, logical)
+ * - Punctuation (commas, brackets, etc.)
+ * - Keywords and special literals (true, nil, etc.)
+ */
 enum class TokenType {
     kIllegal,
     kEOF,
@@ -75,17 +86,25 @@ enum class TokenType {
     kNil,
 };
 
+/**
+ * @struct Token
+ * @brief Represents a single token in the source code.
+ *
+ * Contains the token type, its string representation (literal), and its position (line and column).
+ */
 struct Token {
     TokenType type;
     std::string literal;
     size_t line;
     size_t column;
 
+    /** @brief Compares two tokens for equality based on type and literal value. */
     bool operator==(const Token& other) const {
         return type == other.type && literal == other.literal;
     }
 };
 
+/// @brief Maps single-character symbols to their corresponding token types.
 static const std::map<char, TokenType> kOneCharTokens{
     {'=', TokenType::kAssign},
     {'+', TokenType::kPlus},
@@ -105,13 +124,14 @@ static const std::map<char, TokenType> kOneCharTokens{
     {'%', TokenType::kPercent},
     {'^', TokenType::kPow},
     {'\n', TokenType::kNewLine},
-    {EOF, TokenType::kEOF},
 };
 
+/// @brief Set of characters that may begin a compound operator (e.g., '=', '!', etc.).
 static const std::set<char> kCompoundOpStarters = {
     '=', '+', '-', '*', '/', '%', '^', '<', '>', '!',
 };
 
+/// @brief Maps compound operator strings (like "==", "+=") to their token types.
 static const std::map<std::string, TokenType> kCompoundOperators{
     {"==", TokenType::kEqual},
     {"+=", TokenType::kPlusAssign},
@@ -125,6 +145,7 @@ static const std::map<std::string, TokenType> kCompoundOperators{
     {"!=", TokenType::kNotEqual},
 };
 
+/// @brief Maps keyword strings to their token types.
 static const std::map<std::string, TokenType> kKeywords{
     {"function", TokenType::kFunction},
     {"end", TokenType::kEnd},
@@ -145,14 +166,7 @@ static const std::map<std::string, TokenType> kKeywords{
     {"in", TokenType::kIn},
 };
 
-static const std::set<TokenType> kBlockTypes {
-    TokenType::kIf,
-    TokenType::kFor,
-    TokenType::kWhile,
-    TokenType::kFunction,
-    TokenType::kElse,
-};
-
+/// @brief Maps token types to their human-readable string names (mostly for debugging or error messages).
 static const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kIllegal, "ILLEGAL"},
     {TokenType::kEOF, "EOF"},
