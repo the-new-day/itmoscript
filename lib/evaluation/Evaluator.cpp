@@ -1,12 +1,104 @@
 #include "Evaluator.hpp"
 #include "utils.hpp"
 
-#include <cmath>
-
 namespace ItmoScript {
+
+Evaluator::Evaluator() {
+    // RegisterUnaryOper<Int>("+", [this](const Value& right) { result_ = right.GetValue<Int>(); });
+    // RegisterUnaryOper<Float>("+", [this](const Value& right) { result_ = right.GetValue<Float>(); });
+
+    // RegisterUnaryOper<Int>("-", [this](const Value& right) { result_ = -right.GetValue<Int>(); });
+    // RegisterUnaryOper<Float>("-", [this](const Value& right) { result_ = -right.GetValue<Float>(); });
+
+    // RegisterBinaryOper<Int, Int>("+", [](const Value& right, const Value& left) { 
+    //     return left.GetValue<Int>() + right.GetValue<Int>();
+    // });
+
+    // RegisterBinaryOper<Int, Int>("*", [](const Value& right, const Value& left) { 
+    //     return left.GetValue<Int>() * right.GetValue<Int>();
+    // });
+
+    RegisterBinaryOper<Int, Int>("%", [](const Value& left, const Value& right) { 
+        return left.GetValue<Int>() % right.GetValue<Int>();
+    });
+
+    RegisterBinaryOper<Int, Int>("^", [](const Value& left, const Value& right) { 
+        return Utils::Pow(left.GetValue<Int>(), right.GetValue<Int>());
+    });
+
+    RegisterBinaryOper<Int, Int>("+", [](const Value& left, const Value& right) { 
+        return left.GetValue<Int>() + right.GetValue<Int>();
+    });
+
+    RegisterBinaryOper<Int, Int>("-", [](const Value& left, const Value& right) { 
+        return left.GetValue<Int>() - right.GetValue<Int>();
+    });
+
+    RegisterBinaryOper<Int, Int>("*", [](const Value& left, const Value& right) {
+        return left.GetValue<Int>() * right.GetValue<Int>();
+    });
+
+    RegisterBinaryOper<Int, Int>("/", [](const Value& left, const Value& right) {
+        return left.GetValue<Int>() / right.GetValue<Int>();
+    });
+
+    RegisterBinaryOper<Float, Float>("+", [](const Value& left, const Value& right) { 
+        return left.GetValue<Float>() + right.GetValue<Float>();
+    });
+
+    RegisterBinaryOper<Float, Float>("-", [](const Value& left, const Value& right) { 
+        return left.GetValue<Float>() - right.GetValue<Float>();
+    });
+
+    RegisterBinaryOper<Float, Float>("*", [](const Value& left, const Value& right) {
+        return left.GetValue<Float>() * right.GetValue<Float>();
+    });
+
+    RegisterBinaryOper<Float, Float>("/", [](const Value& left, const Value& right) {
+        return left.GetValue<Float>() / right.GetValue<Float>();
+    });
+}
 
 void Evaluator::Interpret(Program& root) {
     root.Accept(*this);
+}
+
+std::optional<Value> Evaluator::HandleBinaryOper(const std::string& oper, const Value& left, const Value& right) {
+    if (auto handler = FindExactHandler(oper, left, right)) {
+        return std::invoke(*handler, left, right);
+    }
+
+    if (auto common = types_.FindCommonType(left, right)) {
+        auto lhs = types_.TryConvert(left, *common);
+        auto rhs = types_.TryConvert(right, *common);
+
+        if (lhs && rhs) {
+            if (auto handler = FindExactHandler(oper, *lhs, *rhs)) {
+                return std::invoke(*handler, *lhs, *rhs);
+            }
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<Evaluator::BinaryHandler> // TODO: change left and right to type_index
+Evaluator::FindExactHandler(const std::string& oper, const Value& left, const Value& right) {
+    auto key = std::make_pair(left.GetTypeIndex(), right.GetTypeIndex());
+    if (binary_ops_.contains(oper) && binary_ops_[oper].contains(key)) {
+        return binary_ops_[oper][key];
+    }
+
+    return std::nullopt;
+}
+
+void Evaluator::AddUnaryOperatorForAllTypes(const std::string& oper, UnaryHandler handler) {
+    RegisterUnaryOper<NullType>(oper, handler);
+    RegisterUnaryOper<Int>(oper, handler);
+    RegisterUnaryOper<Float>(oper, handler);
+    RegisterUnaryOper<String>(oper, handler);
+    RegisterUnaryOper<Bool>(oper, handler);
+    RegisterUnaryOper<Function>(oper, handler);
 }
 
 Value Evaluator::Eval(Node& node) {
@@ -49,13 +141,13 @@ void Evaluator::EvalUnaryPlusOperatorExpression(const Value& right) {
     } else {
         result_ = NullType{}; // TODO: error
     }
-
-    // TODO: maybe some other types are acceptable
 }
 
 void Evaluator::EvalInfixExpression(const std::string& oper, const Value& left, const Value& right) {
-    if (left.IsOfType<Int>() && right.IsOfType<Int>()) {
+    if (left.IsInt() && right.IsInt()) {
         EvalIntInfixExpression(oper, left, right);
+    } else if (left.IsBool() && right.IsBool()) {
+        EvalBoolInfixExpression(oper, left, right);
     } else {
         result_ = NullType{}; // TODO: error
     }
@@ -66,8 +158,6 @@ void Evaluator::EvalIntInfixExpression(const std::string& oper, const Value& lef
     Int right_val = right.GetValue<Int>();
 
     // TODO: map for operators
-    // TODO: error check for division
-    // TODO: negative exponents
 
     if (oper == "+") {
         result_ = left_val + right_val;
@@ -76,11 +166,11 @@ void Evaluator::EvalIntInfixExpression(const std::string& oper, const Value& lef
     } else if (oper == "*") {
         result_ = left_val * right_val;
     } else if (oper == "/") {
-        result_ = left_val / right_val;
+        result_ = left_val / right_val; // TODO: check right_val == 0
     } else if (oper == "%") {
-        result_ = left_val % right_val;
+        result_ = left_val % right_val; // TODO: check right_val == 0
     } else if (oper == "^") {
-        result_ = Pow(left_val, right_val);
+        result_ = Utils::Pow(left_val, right_val); // TODO: negative exponents
     } else if (oper == ">") {
         result_ = left_val > right_val;
     } else if (oper == "<") {
@@ -93,6 +183,19 @@ void Evaluator::EvalIntInfixExpression(const std::string& oper, const Value& lef
         result_ = left_val == right_val;
     } else if (oper == "!=") {
         result_ = left_val != right_val;
+    } else {
+        result_ = NullType{}; // TODO: error
+    }
+}
+
+void Evaluator::EvalBoolInfixExpression(const std::string& oper, const Value& left, const Value& right) {
+    Bool left_val = left.GetValue<Bool>();
+    Bool right_val = right.GetValue<Bool>();
+
+    if (oper == "==") {
+        result_ = (left_val == right_val);
+    } else if (oper == "!=") {
+        result_ = (left_val != right_val);
     } else {
         result_ = NullType{}; // TODO: error
     }
@@ -140,7 +243,12 @@ void Evaluator::Visit(PrefixExpression& node) {
 void Evaluator::Visit(InfixExpression& node) {
     Value left = Eval(*node.left);
     Value right = Eval(*node.right);
-    EvalInfixExpression(node.oper, left, right);
+    
+    if (auto new_value = HandleBinaryOper(node.oper, left, right)) {
+        result_ = *new_value;
+    } else {
+        result_ = NullType{}; // TODO: error
+    }
 }
 
 } // namespace ItmoScript

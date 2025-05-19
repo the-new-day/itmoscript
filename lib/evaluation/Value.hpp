@@ -5,10 +5,15 @@
 #include <string>
 #include <map>
 #include <ostream>
+#include <typeindex>
 
 namespace ItmoScript {
 
-struct Function {};
+struct Function {
+    bool operator==(const Function& other) const {
+        return false;
+    }
+};
 
 using NullType = std::monostate;
 using Int = int64_t;
@@ -27,7 +32,14 @@ enum class ValueType {
 
 class Value {
 public:
+    template<typename T>
+    Value(const T& val)
+        : data_(val) {}
+
+    Value() = default;
+
     ValueType GetType() const;
+    std::type_index GetTypeIndex() const;
     bool IsOfType(ValueType type) const;
     
     template<typename T>
@@ -62,6 +74,8 @@ public:
 
     std::string ToString() const;
     friend std::ostream& operator<<(std::ostream& stream, const Value& value);
+
+    bool operator==(const Value& other) const;
 
 private:
     using Type = std::variant<

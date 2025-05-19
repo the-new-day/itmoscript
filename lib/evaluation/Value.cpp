@@ -64,6 +64,10 @@ std::string Value::ToString() const {
     }
 }
 
+bool Value::operator==(const Value& other) const {
+    return GetType() == other.GetType() && data_ == other.data_;
+}
+
 std::ostream& operator<<(std::ostream& stream, const Value& value) {
     return stream << value.ToString();
 }
@@ -82,6 +86,22 @@ ValueType Value::GetType() const {
     }
 
     return ValueType::kNullType;
+}
+
+std::type_index Value::GetTypeIndex() const {
+    if (IsInt()) {
+        return typeid(Int);
+    } else if (IsFloat()) {
+        return typeid(Float);
+    } else if (IsString()) {
+        return typeid(String);
+    } else if (IsBool()) {
+        return typeid(Bool);
+    } else if (IsFunction()) {
+        return typeid(Function);
+    }
+    
+    return typeid(NullType);
 }
 
 bool Value::IsOfType(ValueType type) const {

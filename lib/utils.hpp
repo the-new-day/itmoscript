@@ -4,8 +4,11 @@
 #include <string_view>
 #include <charconv>
 #include <cstdint>
+#include <typeindex>
 
 namespace ItmoScript {
+
+namespace Utils {
 
 template<typename T>
 std::optional<T> ParseNumber(std::string_view str) {
@@ -34,6 +37,14 @@ static int64_t Pow(int64_t base, uint64_t exponent) {
 
     return result;
 }
-    
-} // namespace ItmoScript
 
+struct TypePairHash {
+    size_t operator()(const std::pair<std::type_index, std::type_index>& p) const {
+        return std::hash<std::type_index>()(p.first) ^ 
+            (std::hash<std::type_index>()(p.second) << 1);
+    }
+};
+    
+} // namespace Utils
+
+} // namespace ItmoScript
