@@ -51,10 +51,16 @@ void REPL::Eval(std::ostream& output) {
     Lexer lexer{current_line_};
     Parser parser{lexer};
     Program program = parser.ParseProgram();
+
+    if (!parser.GetErrors().empty()) {
+        PrintParserErrors(parser, output);
+        return;
+    }
+
     Evaluator evaluator;
     evaluator.Interpret(program);
 
-    if (evaluator.GetErrors().size() != 0) {
+    if (!evaluator.GetErrors().empty()) {
         PrintEvaluatorErrors(evaluator, output);
         return;
     }
