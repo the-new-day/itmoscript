@@ -14,6 +14,11 @@
 #include "utils.hpp"
 
 namespace ItmoScript {
+
+struct EvaluationError {
+    std::string message;
+    Token token;
+};
     
 class Evaluator : public Visitor {
 private:
@@ -31,6 +36,8 @@ public:
 
     template<typename Left, typename Right>
     void RegisterBinaryOper(const std::string& oper, BinaryHandler handler);
+
+    const std::vector<EvaluationError>& GetErrors() const { return errors_; }
 
     void Visit(Program&) override;
     void Visit(ExpressionStatement&) override;
@@ -76,25 +83,26 @@ private:
     > unary_ops_;
 
     TypeSystem types_;
+    std::vector<EvaluationError> errors_;
+    Token current_token_;
 
+    std::optional<Value> HandleUnaryOper(const std::string& oper, const Value& right);
     std::optional<Value> HandleBinaryOper(const std::string& oper, const Value& left, const Value& right);
+    
     std::optional<BinaryHandler> FindExactHandler(const std::string& oper, const Value& left, const Value& right);
+    std::optional<UnaryHandler> FindExactHandler(const std::string& oper, const Value& right);
 
     void AddUnaryOperatorForAllTypes(const std::string& oper, UnaryHandler handler);
 
     Value Eval(Node& node);
 
-    void EvalPrefixExpression(const std::string& oper, const Value& right);
-    void EvalBangOperatorExpression(const Value& right);
-    void EvalUnaryMinusOperatorExpression(const Value& right);
-    void EvalUnaryPlusOperatorExpression(const Value& right);
-
-    void EvalInfixExpression(const std::string& oper, const Value& left, const Value& right);
-    void EvalIntInfixExpression(const std::string& oper, const Value& left, const Value& right);
-    void EvalBoolInfixExpression(const std::string& oper, const Value& left, const Value& right);
+    template<typename T>
+    void RegisterCommonAriphmeticOps();
 
     template<typename T>
-    std::optional<T> PerformOperation(const std::string& oper, const T& left, const T& right);
+    void RegisterComparisonOps();
+
+    void AddError(const std::string& message);
 };
 
 template<typename Right>
@@ -108,36 +116,37 @@ void Evaluator::RegisterBinaryOper(const std::string& oper, BinaryHandler handle
 }
 
 template<typename T>
-std::optional<T> Evaluator::PerformOperation(const std::string& oper, const T& left, const T& right) {
-    if (oper == "+") {
-        return left + right;
-    } else if (oper == "*") {
-        return left * right;
-    } else if (oper == "-") {
-        return left - right;
-    } else if (oper == "/") {
-        return left / right;
-    } else if (oper == "%") {
-        return left % right;
-    } else if (oper == "^") {
-        return Utils::Pow(left, right); // TODO: negative exponents
-    } else if (oper == ">") {
-        return left > right;
-    } else if (oper == ">") {
-        return left > right;
-    } else if (oper == "<") {
-        return left <= right;
-    } else if (oper == ">=") {
-        return left >= right;
-    } else if (oper == "<=") {
-        return left <= right;
-    } else if (oper == "==") {
-        return left == right;
-    } else if (oper == "!=") {
-        return left != right;
-    } else {
-        return std::nullopt;
-    }
+void Evaluator::RegisterCommonAriphmeticOps() {
+    RegisterBinaryOper<T, T>("+", [](const Value& left, const Value& right) { return left.GetValue<T>() + right.GetValue<T>(); });
+    RegisterBinaryOper<T, T>("-", [](const Value& left, const Value& right) { return left.GetValue<T>() - right.GetValue<T>(); });
+    RegisterBinaryOper<T, T>("*", [](const Value& left, const Value& right) { return left.GetValue<T>() * right.GetValue<T>(); });
+    RegisterBinaryOper<T, T>("/", [this](const Value& left, const Value& right) { 
+        if (right.GetValue<T>() == 0) {
+            AddError("division by zero");
+            return Value{NullType{}}; // TODO: proper error
+        }
+        
+        return Value{left.GetValue<T>() / right.GetValue<T>()};
+    });
+
+    RegisterUnaryOper<T>("+", [](const Value& right) { return right; });
+    RegisterUnaryOper<T>("-", [](const Value& right) { return -right.GetValue<T>(); });
+}
+
+template<typename T>
+void Evaluator::RegisterComparisonOps() {
+    const auto cmp = [](auto op) {
+        return [op](const Value& left, const Value& right) {
+            return op(left.GetValue<T>(), right.GetValue<T>());
+        };
+    };
+    
+    RegisterBinaryOper<T, T>("==", cmp(std::equal_to{}));
+    RegisterBinaryOper<T, T>("!=", cmp(std::not_equal_to{}));
+    RegisterBinaryOper<T, T>("<", cmp(std::less{}));
+    RegisterBinaryOper<T, T>("<=", cmp(std::less_equal{}));
+    RegisterBinaryOper<T, T>(">", cmp(std::greater{}));
+    RegisterBinaryOper<T, T>(">=", cmp(std::greater_equal{}));
 }
 
 } // namespace ItmoScript
