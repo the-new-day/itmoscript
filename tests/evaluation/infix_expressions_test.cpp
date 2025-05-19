@@ -1,7 +1,6 @@
 #include "evaluation_test.hpp"
 
 TEST(EvaluationTestSuite, InfixIntegerExpressionTest) {
-    // <input, expected>
     std::vector<std::pair<std::string, int64_t>> expressions{
         {"5 + 5", 10},
         {"10 * 2", 20},
@@ -62,7 +61,6 @@ TEST(EvaluationTestSuite, InfixBoolExpressionTest) {
 }
 
 TEST(EvaluationTestSuite, InfixFloatExpressionTest) {
-    // <input, expected>
     std::vector<std::pair<std::string, double>> expressions{
         {"5 + 5.5", 10.5},
         {"10 * 2.5", 25.0},
@@ -73,5 +71,20 @@ TEST(EvaluationTestSuite, InfixFloatExpressionTest) {
     for (const auto& [input, expected] : expressions) {
         Value evaluated = Eval(input);
         TestValue<ItmoScript::Float>(evaluated, expected);
+    }
+}
+
+TEST(EvaluationTestSuite, StringComparisonTest) {
+    std::vector<std::pair<std::string, bool>> expressions{
+        {R"("hello" == "hello")", true},
+        {R"("hello" == "goodbye")", false},
+        {R"("hello" != "goodbye")", true},
+        {R"("" == "hello")", false},
+        {R"("" == "")", true},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        Value evaluated = Eval(input);
+        TestValue<ItmoScript::Bool>(evaluated, expected);
     }
 }

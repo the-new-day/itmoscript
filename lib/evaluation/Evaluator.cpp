@@ -29,6 +29,7 @@ Evaluator::Evaluator() {
 
     RegisterComparisonOps<Int>();
     RegisterComparisonOps<Float>();
+    RegisterComparisonOps<String>();
     
     RegisterBinaryOper<Bool, Bool>("==", [](const Value& left, const Value& right) {
         return left.GetValue<Bool>() == right.GetValue<Bool>();
@@ -157,7 +158,7 @@ void Evaluator::Visit(PrefixExpression& node) {
             kValueTypeNames.at(right.GetType())
         ));
 
-        result_ = NullType{};
+        result_ = NullType{}; // TODO: proper error
     }
 }
 
@@ -176,7 +177,7 @@ void Evaluator::Visit(InfixExpression& node) {
             kValueTypeNames.at(right.GetType())
         ));
 
-        result_ = NullType{};
+        result_ = NullType{}; // TODO: proper error
     }
 }
 
