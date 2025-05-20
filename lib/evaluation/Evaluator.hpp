@@ -94,6 +94,9 @@ private:
 
     void AddUnaryOperatorForAllTypes(const std::string& oper, UnaryHandler handler);
 
+    template<SupportedValueType T, SupportedValueType U>
+    void RegisterCommutativeOperator(const std::string& oper, BinaryHandler handler);
+
     template<SupportedValueType T>
     void AddCommutativeOperatorForAllTypes(const std::string& oper, BinaryHandler handler);
 
@@ -118,20 +121,20 @@ void Evaluator::RegisterBinaryOper(const std::string& oper, BinaryHandler handle
     binary_ops_[oper][{typeid(Left), typeid(Right)}] = handler;
 }
 
+template<SupportedValueType T, SupportedValueType U>
+void Evaluator::RegisterCommutativeOperator(const std::string& oper, BinaryHandler handler) {
+    binary_ops_[oper][{typeid(T), typeid(U)}] = handler;
+    binary_ops_[oper][{typeid(U), typeid(T)}] = handler;
+}
+
 template<SupportedValueType T>
 void Evaluator::AddCommutativeOperatorForAllTypes(const std::string& oper, BinaryHandler handler) {
-    RegisterBinaryOper<T, NullType>(oper, handler);
-    RegisterBinaryOper<NullType, T>(oper, handler);
-    RegisterBinaryOper<T, Int>(oper, handler);
-    RegisterBinaryOper<Int, T>(oper, handler);
-    RegisterBinaryOper<T, Float>(oper, handler);
-    RegisterBinaryOper<Float, T>(oper, handler);
-    RegisterBinaryOper<T, String>(oper, handler);
-    RegisterBinaryOper<String, T>(oper, handler);
-    RegisterBinaryOper<T, Bool>(oper, handler);
-    RegisterBinaryOper<Bool, T>(oper, handler);
-    RegisterBinaryOper<T, Function>(oper, handler);
-    RegisterBinaryOper<Function, T>(oper, handler);
+    RegisterCommutativeOperator<T, NullType>(oper, handler);
+    RegisterCommutativeOperator<T, Int>(oper, handler);
+    RegisterCommutativeOperator<T, Float>(oper, handler);
+    RegisterCommutativeOperator<T, String>(oper, handler);
+    RegisterCommutativeOperator<T, Bool>(oper, handler);
+    RegisterCommutativeOperator<T, Function>(oper, handler);
 }
 
 template<SupportedValueType T>

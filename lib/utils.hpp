@@ -5,6 +5,7 @@
 #include <charconv>
 #include <cstdint>
 #include <typeindex>
+#include <string>
 
 namespace ItmoScript {
 
@@ -60,6 +61,27 @@ struct TypePairHash {
             (std::hash<std::type_index>()(p.second) << 1);
     }
 };
+
+static std::optional<std::string> MultiplyStr(const std::string& str, double times) {
+    if (times < 0) return std::nullopt;
+
+    size_t whole_part = static_cast<size_t>(times);
+    size_t additional_chars = static_cast<double>(str.size()) * (times - static_cast<double>(whole_part));
+
+    std::string result;
+    result.reserve(str.size() * whole_part + additional_chars);
+
+    for (size_t i = 0; i < whole_part; ++i) {
+        for (size_t j = 0; j < str.size(); ++j) {
+            result.push_back(str[j]);
+        }
+    }
+
+    for (size_t i = 0; i < additional_chars; ++i)
+        result.push_back(str[i]);
+
+    return result;
+}
     
 } // namespace Utils
 

@@ -14,11 +14,11 @@ Evaluator::Evaluator() {
         return left.GetValue<Int>() % right.GetValue<Int>();
     });
 
-    RegisterBinaryOper<Int, Int>("^", [](const Value& left, const Value& right) {
+    RegisterBinaryOper<Int, Int>("^", [](const Value& left, const Value& right) -> Value {
         if (right.GetValue<Int>() < 0) {
-            return Value{Utils::FastPowNeg(left.GetValue<Int>(), right.GetValue<Int>())};
+            return Utils::FastPowNeg(left.GetValue<Int>(), right.GetValue<Int>());
         }
-        return Value{Utils::FastPow(left.GetValue<Int>(), right.GetValue<Int>())};
+        return Utils::FastPow(left.GetValue<Int>(), right.GetValue<Int>());
     });
 
     RegisterBinaryOper<Float, Float>("^", [](const Value& left, const Value& right) {
@@ -49,6 +49,40 @@ Evaluator::Evaluator() {
 
     RegisterBinaryOper<String, String>("+", [](const Value& left, const Value& right) {
         return left.GetValue<String>() + right.GetValue<String>();
+    });
+
+    RegisterCommutativeOperator<String, Float>("*", [this](const Value& left, const Value& right) -> Value {
+        String str = left.IsOfType<String>() ? left.GetValue<String>() : right.GetValue<String>();
+        Float number = left.IsOfType<String>() ? right.GetValue<Float>() : left.GetValue<Float>();
+
+        std::optional<std::string> result = Utils::MultiplyStr(str, number);
+        if (!result) {
+            AddError(std::format(
+                "cannot multiply string {} by negative value {}",
+                str,
+                number
+            ));
+            return NullType{}; // TODO: proper error
+        }
+
+        return result.value();
+    });
+
+    RegisterCommutativeOperator<String, Int>("*", [this](const Value& left, const Value& right) -> Value {
+        String str = left.IsOfType<String>() ? left.GetValue<String>() : right.GetValue<String>();
+        Int number = left.IsOfType<String>() ? right.GetValue<Int>() : left.GetValue<Int>();
+
+        std::optional<std::string> result = Utils::MultiplyStr(str, number);
+        if (!result) {
+            AddError(std::format(
+                "cannot multiply string {} by negative value {}",
+                str,
+                number
+            ));
+            return NullType{}; // TODO: proper error
+        }
+
+        return result.value();
     });
 }
 
