@@ -31,10 +31,10 @@ public:
     void Interpret(Program& root);
     Value GetResult() const;
 
-    template<typename Right>
+    template<SupportedValueType Right>
     void RegisterUnaryOper(const std::string& oper, UnaryHandler handler);
 
-    template<typename Left, typename Right>
+    template<SupportedValueType Left, SupportedValueType Right>
     void RegisterBinaryOper(const std::string& oper, BinaryHandler handler);
 
     const std::vector<EvaluationError>& GetErrors() const { return errors_; }
@@ -94,28 +94,47 @@ private:
 
     void AddUnaryOperatorForAllTypes(const std::string& oper, UnaryHandler handler);
 
+    template<SupportedValueType T>
+    void AddCommutativeOperatorForAllTypes(const std::string& oper, BinaryHandler handler);
+
     Value Eval(Node& node);
 
-    template<typename T>
+    template<SupportedValueType T>
     void RegisterCommonAriphmeticOps();
 
-    template<typename T>
+    template<SupportedValueType T>
     void RegisterComparisonOps();
 
     void AddError(const std::string& message);
 };
 
-template<typename Right>
+template<SupportedValueType Right>
 void Evaluator::RegisterUnaryOper(const std::string& oper, UnaryHandler handler) {
     unary_ops_[oper][typeid(Right)] = handler;
 }
 
-template<typename Left, typename Right>
+template<SupportedValueType Left, SupportedValueType Right>
 void Evaluator::RegisterBinaryOper(const std::string& oper, BinaryHandler handler) {
     binary_ops_[oper][{typeid(Left), typeid(Right)}] = handler;
 }
 
-template<typename T>
+template<SupportedValueType T>
+void Evaluator::AddCommutativeOperatorForAllTypes(const std::string& oper, BinaryHandler handler) {
+    RegisterBinaryOper<T, NullType>(oper, handler);
+    RegisterBinaryOper<NullType, T>(oper, handler);
+    RegisterBinaryOper<T, Int>(oper, handler);
+    RegisterBinaryOper<Int, T>(oper, handler);
+    RegisterBinaryOper<T, Float>(oper, handler);
+    RegisterBinaryOper<Float, T>(oper, handler);
+    RegisterBinaryOper<T, String>(oper, handler);
+    RegisterBinaryOper<String, T>(oper, handler);
+    RegisterBinaryOper<T, Bool>(oper, handler);
+    RegisterBinaryOper<Bool, T>(oper, handler);
+    RegisterBinaryOper<T, Function>(oper, handler);
+    RegisterBinaryOper<Function, T>(oper, handler);
+}
+
+template<SupportedValueType T>
 void Evaluator::RegisterCommonAriphmeticOps() {
     RegisterBinaryOper<T, T>("+", [](const Value& left, const Value& right) { return left.GetValue<T>() + right.GetValue<T>(); });
     RegisterBinaryOper<T, T>("-", [](const Value& left, const Value& right) { return left.GetValue<T>() - right.GetValue<T>(); });
@@ -133,7 +152,7 @@ void Evaluator::RegisterCommonAriphmeticOps() {
     RegisterUnaryOper<T>("-", [](const Value& right) { return -right.GetValue<T>(); });
 }
 
-template<typename T>
+template<SupportedValueType T>
 void Evaluator::RegisterComparisonOps() {
     const auto cmp = [](auto op) {
         return [op](const Value& left, const Value& right) {

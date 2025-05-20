@@ -231,7 +231,7 @@ std::unique_ptr<Identifier> Parser::ParseIdentifier() {
 std::unique_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
     std::optional<int64_t> parsing_result = Utils::ParseNumber<int64_t>(current_token_.literal);
     if (!parsing_result.has_value()) {
-        AddError(std::format("could not parse {} as an integer", current_token_.literal));
+        AddError(std::format("could not parse {} as an Integer", current_token_.literal));
         return nullptr;
     }
 
@@ -243,7 +243,7 @@ std::unique_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
 std::unique_ptr<FloatLiteral> Parser::ParseFloatLiteral() {
     std::optional<double> parsing_result = Utils::ParseNumber<double>(current_token_.literal);
     if (!parsing_result.has_value()) {
-        AddError(std::format("could not parse {} as a float", current_token_.literal));
+        AddError(std::format("could not parse {} as a Float", current_token_.literal));
         return nullptr;
     }
 

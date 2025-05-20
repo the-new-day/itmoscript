@@ -38,6 +38,18 @@ Evaluator::Evaluator() {
     RegisterBinaryOper<Bool, Bool>("!=", [](const Value& left, const Value& right) {
         return left.GetValue<Bool>() != right.GetValue<Bool>();
     });
+
+    AddCommutativeOperatorForAllTypes<NullType>("==", [](const Value& left, const Value& right) {
+        return left.IsNullType() && right.IsNullType();
+    });
+
+    AddCommutativeOperatorForAllTypes<NullType>("!=", [](const Value& left, const Value& right) {
+        return left.GetType() != right.GetType();
+    });
+
+    RegisterBinaryOper<String, String>("+", [](const Value& left, const Value& right) {
+        return left.GetValue<String>() + right.GetValue<String>();
+    });
 }
 
 void Evaluator::Interpret(Program& root) {

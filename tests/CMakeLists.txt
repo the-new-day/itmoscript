@@ -33,6 +33,7 @@ add_executable(
   evaluation/prefix_expressions_test.cpp
   evaluation/infix_expressions_test.cpp
   evaluation/type_system_test.cpp
+  evaluation/string_operators_test.cpp
 )
 
 target_link_libraries(

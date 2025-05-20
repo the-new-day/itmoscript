@@ -81,6 +81,32 @@ TEST(EvaluationTestSuite, StringComparisonTest) {
         {R"("hello" != "goodbye")", true},
         {R"("" == "hello")", false},
         {R"("" == "")", true},
+
+        {R"("222" > "111")", true},
+        {R"("222" >= "111")", true},
+        {R"("111" >= "111")", true},
+        {R"("111" <= "111")", true},
+        {R"("111" <= "222")", true},
+        {R"("111" < "222")", true},
+        {R"("" <= "")", true},
+        {R"("" < "123")", true},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        Value evaluated = Eval(input);
+        TestValue<ItmoScript::Bool>(evaluated, expected);
+    }
+}
+
+TEST(EvaluationTestSuite, NullComparisonTest) {
+    std::vector<std::pair<std::string, bool>> expressions{
+        {"true == nil", false},
+        {"false == nil", false},
+        {"5 == nil", false},
+        {"5 != nil", true},
+        {"a == nil", true},
+        {"nil == nil", true},
+        {"nil != nil", false},
     };
 
     for (const auto& [input, expected] : expressions) {
