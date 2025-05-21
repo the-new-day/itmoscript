@@ -31,13 +31,13 @@ bool Value::IsTruphy() const {
         case ValueType::kNullType:
             return false;
         case ValueType::kInt:
-            return GetValue<Int>() != 0;
+            return Get<Int>() != 0;
         case ValueType::kFloat:
-            return GetValue<Float>() != 0;
+            return Get<Float>() != 0;
         case ValueType::kString:
-            return !GetValue<String>().empty();
+            return !Get<String>().empty();
         case ValueType::kBool:
-            return GetValue<Bool>();
+            return Get<Bool>();
         case ValueType::kFunction:
             return true;
         default:
@@ -50,13 +50,13 @@ std::string Value::ToString() const {
         case ValueType::kNullType:
             return "nil";
         case ValueType::kInt:
-            return std::to_string(GetValue<Int>());
+            return std::to_string(Get<Int>());
         case ValueType::kFloat:
-            return std::to_string(GetValue<Float>());
+            return std::to_string(Get<Float>());
         case ValueType::kString:
-            return GetValue<String>();
+            return Get<String>();
         case ValueType::kBool:
-            return GetValue<Bool>() ? "true" : "false";
+            return Get<Bool>() ? "true" : "false";
         case ValueType::kFunction:
             return "Function";
         default:

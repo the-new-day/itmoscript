@@ -48,5 +48,5 @@ void TestValue(const Value& value, T expected) {
     ASSERT_TRUE(value.IsOfType<T>()) 
         << "real type of " << value.ToString() << " is: " << ItmoScript::kValueTypeNames.at(value.GetType());
     
-    ASSERT_EQ(value.GetValue<T>(), expected);
+    ASSERT_EQ(value.Get<T>(), expected);
 }

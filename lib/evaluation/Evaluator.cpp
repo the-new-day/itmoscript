@@ -11,18 +11,18 @@ Evaluator::Evaluator() {
     RegisterCommonAriphmeticOps<Float>();
 
     RegisterBinaryOper<Int, Int>("%", [](const Value& left, const Value& right) {
-        return left.GetValue<Int>() % right.GetValue<Int>();
+        return left.Get<Int>() % right.Get<Int>();
     });
 
     RegisterBinaryOper<Int, Int>("^", [](const Value& left, const Value& right) -> Value {
-        if (right.GetValue<Int>() < 0) {
-            return Utils::FastPowNeg(left.GetValue<Int>(), right.GetValue<Int>());
+        if (right.Get<Int>() < 0) {
+            return Utils::FastPowNeg(left.Get<Int>(), right.Get<Int>());
         }
-        return Utils::FastPow(left.GetValue<Int>(), right.GetValue<Int>());
+        return Utils::FastPow(left.Get<Int>(), right.Get<Int>());
     });
 
     RegisterBinaryOper<Float, Float>("^", [](const Value& left, const Value& right) {
-        return std::pow(left.GetValue<Float>(), right.GetValue<Float>());
+        return std::pow(left.Get<Float>(), right.Get<Float>());
     });
 
     AddUnaryOperatorForAllTypes("!", [](const Value& right) { return !right.IsTruphy(); });
@@ -32,11 +32,11 @@ Evaluator::Evaluator() {
     RegisterComparisonOps<String>();
     
     RegisterBinaryOper<Bool, Bool>("==", [](const Value& left, const Value& right) {
-        return left.GetValue<Bool>() == right.GetValue<Bool>();
+        return left.Get<Bool>() == right.Get<Bool>();
     });
     
     RegisterBinaryOper<Bool, Bool>("!=", [](const Value& left, const Value& right) {
-        return left.GetValue<Bool>() != right.GetValue<Bool>();
+        return left.Get<Bool>() != right.Get<Bool>();
     });
 
     AddCommutativeOperatorForAllTypes<NullType>("==", [](const Value& left, const Value& right) {
@@ -48,11 +48,21 @@ Evaluator::Evaluator() {
     });
 
     RegisterBinaryOper<String, String>("+", [](const Value& left, const Value& right) {
-        return left.GetValue<String>() + right.GetValue<String>();
+        return left.Get<String>() + right.Get<String>();
     });
 
     RegisterStringMultiplication<Int>();
     RegisterStringMultiplication<Float>();
+
+    RegisterBinaryOper<String, String>("-", [](const Value& left, const Value& right) -> Value {
+        String str = left.Get<String>();
+        String suffix = right.Get<String>();
+
+        if (str.ends_with(suffix))
+            return str.substr(0, str.size() - suffix.size());
+        
+        return str;
+    });
 }
 
 void Evaluator::Interpret(Program& root) {

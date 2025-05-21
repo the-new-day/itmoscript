@@ -19,7 +19,16 @@ int main(int argc, char** argv) {
     }
 
     ItmoScript::REPL repl{repl_mode};
-    repl.Start(std::cin, std::cout);
+    
+    try {
+        repl.Start(std::cin, std::cout);
+    } catch (const std::bad_alloc& e) {
+        std::cerr << "Memory error" << std::endl; // TODO: proper error handling
+        return -1;
+    } catch (...) {
+        std::cerr << "An unknown error occured" << std::endl;
+        return -1;
+    }
 
     return 0;
 }

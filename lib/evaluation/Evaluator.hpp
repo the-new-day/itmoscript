@@ -142,27 +142,27 @@ void Evaluator::AddCommutativeOperatorForAllTypes(const std::string& oper, Binar
 
 template<SupportedValueType T>
 void Evaluator::RegisterCommonAriphmeticOps() {
-    RegisterBinaryOper<T, T>("+", [](const Value& left, const Value& right) { return left.GetValue<T>() + right.GetValue<T>(); });
-    RegisterBinaryOper<T, T>("-", [](const Value& left, const Value& right) { return left.GetValue<T>() - right.GetValue<T>(); });
-    RegisterBinaryOper<T, T>("*", [](const Value& left, const Value& right) { return left.GetValue<T>() * right.GetValue<T>(); });
+    RegisterBinaryOper<T, T>("+", [](const Value& left, const Value& right) { return left.Get<T>() + right.Get<T>(); });
+    RegisterBinaryOper<T, T>("-", [](const Value& left, const Value& right) { return left.Get<T>() - right.Get<T>(); });
+    RegisterBinaryOper<T, T>("*", [](const Value& left, const Value& right) { return left.Get<T>() * right.Get<T>(); });
     RegisterBinaryOper<T, T>("/", [this](const Value& left, const Value& right) { 
-        if (right.GetValue<T>() == 0) {
+        if (right.Get<T>() == 0) {
             AddError("division by zero");
             return Value{NullType{}}; // TODO: proper error
         }
         
-        return Value{left.GetValue<T>() / right.GetValue<T>()};
+        return Value{left.Get<T>() / right.Get<T>()};
     });
 
     RegisterUnaryOper<T>("+", [](const Value& right) { return right; });
-    RegisterUnaryOper<T>("-", [](const Value& right) { return -right.GetValue<T>(); });
+    RegisterUnaryOper<T>("-", [](const Value& right) { return -right.Get<T>(); });
 }
 
 template<SupportedValueType T>
 void Evaluator::RegisterComparisonOps() {
     const auto cmp = [](auto op) {
         return [op](const Value& left, const Value& right) {
-            return op(left.GetValue<T>(), right.GetValue<T>());
+            return op(left.Get<T>(), right.Get<T>());
         };
     };
     
@@ -177,8 +177,8 @@ void Evaluator::RegisterComparisonOps() {
 template<NumericValueType T>
 void Evaluator::RegisterStringMultiplication() {
     RegisterCommutativeOperator<String, T>("*", [this](const Value& left, const Value& right) -> Value {
-        String str = left.IsOfType<String>() ? left.GetValue<String>() : right.GetValue<String>();
-        T number = left.IsOfType<String>() ? right.GetValue<T>() : left.GetValue<T>();
+        String str = left.IsOfType<String>() ? left.Get<String>() : right.Get<String>();
+        T number = left.IsOfType<String>() ? right.Get<T>() : left.Get<T>();
 
         std::optional<std::string> result = Utils::MultiplyStr(str, number);
         if (!result) {

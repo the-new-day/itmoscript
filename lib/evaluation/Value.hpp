@@ -119,7 +119,7 @@ public:
      * @throws std::bad_variant_access if type does not match.
      */
     template<SupportedValueType T>
-    T GetValue() const {
+    T Get() const {
         return std::get<T>(data_);
     }
 

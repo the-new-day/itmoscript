@@ -24,7 +24,7 @@ public:
     template <typename From, typename To>
     void RegisterConversion(Convertion<From, To> func) {
         converters_[{typeid(From), typeid(To)}] = [func](const Value& v) { 
-            return std::invoke(func, v.GetValue<From>());
+            return std::invoke(func, v.Get<From>());
         };
     }
 
