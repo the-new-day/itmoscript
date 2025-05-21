@@ -6,8 +6,11 @@
 #include <cstdint>
 #include <typeindex>
 #include <string>
+#include <type_traits>
 
 namespace ItmoScript {
+
+// TODO: make utils.cpp and link it, don't use static functions here
 
 namespace Utils {
 

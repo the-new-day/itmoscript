@@ -49,8 +49,9 @@ public:
     void Visit(NullTypeLiteral&) override;
     void Visit(FloatLiteral&) override;
     void Visit(StringLiteral&) override;
+    
+    void Visit(Identifier&) override;
 
-    void Visit(Identifier&) override {}
     void Visit(AssignStatement&) override {}
     void Visit(ReturnStatement&) override {}
     void Visit(BlockStatement&) override {}
@@ -102,14 +103,14 @@ private:
 
     Value Eval(Node& node);
 
-    template<SupportedValueType T>
+    template<NumericValueType T>
     void RegisterCommonAriphmeticOps();
-
-    template<SupportedValueType T>
-    void RegisterComparisonOps();
 
     template<NumericValueType T>
     void RegisterStringMultiplication();
+
+    template<SupportedValueType T>
+    void RegisterAllComparisonOps();
 
     void AddError(const std::string& message);
 };
@@ -140,7 +141,7 @@ void Evaluator::AddCommutativeOperatorForAllTypes(const std::string& oper, Binar
     RegisterCommutativeOperator<T, Function>(oper, handler);
 }
 
-template<SupportedValueType T>
+template<NumericValueType T>
 void Evaluator::RegisterCommonAriphmeticOps() {
     RegisterBinaryOper<T, T>("+", [](const Value& left, const Value& right) { return left.Get<T>() + right.Get<T>(); });
     RegisterBinaryOper<T, T>("-", [](const Value& left, const Value& right) { return left.Get<T>() - right.Get<T>(); });
@@ -159,7 +160,7 @@ void Evaluator::RegisterCommonAriphmeticOps() {
 }
 
 template<SupportedValueType T>
-void Evaluator::RegisterComparisonOps() {
+void Evaluator::RegisterAllComparisonOps() {
     const auto cmp = [](auto op) {
         return [op](const Value& left, const Value& right) {
             return op(left.Get<T>(), right.Get<T>());

@@ -27,9 +27,9 @@ Evaluator::Evaluator() {
 
     AddUnaryOperatorForAllTypes("!", [](const Value& right) { return !right.IsTruphy(); });
 
-    RegisterComparisonOps<Int>();
-    RegisterComparisonOps<Float>();
-    RegisterComparisonOps<String>();
+    RegisterAllComparisonOps<Int>();
+    RegisterAllComparisonOps<Float>();
+    RegisterAllComparisonOps<String>();
     
     RegisterBinaryOper<Bool, Bool>("==", [](const Value& left, const Value& right) {
         return left.Get<Bool>() == right.Get<Bool>();
@@ -63,6 +63,9 @@ Evaluator::Evaluator() {
         
         return str;
     });
+
+    // TODO: check expression "5 + a" (returns 10 == 5 * 2, wtf)
+    // seems like a is interpreted as 5 again (works for every operation WTF)
 }
 
 void Evaluator::Interpret(Program& root) {
@@ -165,6 +168,11 @@ void Evaluator::Visit(StringLiteral& node) {
     result_ = node.value;
 }
 
+void Evaluator::Visit(Identifier& ident) {
+    // TODO:
+    result_ = NullType{};
+}
+
 void Evaluator::Visit(ExpressionStatement& node) {
     current_token_ = node.token;
     node.expr->Accept(*this);
@@ -191,7 +199,7 @@ void Evaluator::Visit(InfixExpression& node) {
     current_token_ = node.token;
     Value left = Eval(*node.left);
     Value right = Eval(*node.right);
-    
+
     if (auto new_value = HandleBinaryOper(node.oper, left, right)) {
         result_ = *new_value;
     } else {

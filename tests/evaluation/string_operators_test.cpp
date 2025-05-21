@@ -39,7 +39,7 @@ TEST(EvaluationTestSuite, StringSubstractionsTest) {
         {R"("hello" - "llo")", "he"},
         {R"("hello" - "")", "hello"},
         {R"("hello" - "hello")", ""},
-        {R"("hello" - "hellohello")", "hello"},
+        {R"("hello" - "abc")", "hello"},
         {R"("" - "")", ""},
         {R"("" - "hello")", ""},
     };
