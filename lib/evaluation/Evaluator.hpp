@@ -108,6 +108,9 @@ private:
     template<SupportedValueType T>
     void RegisterComparisonOps();
 
+    template<NumericValueType T>
+    void RegisterStringMultiplication();
+
     void AddError(const std::string& message);
 };
 
@@ -169,6 +172,26 @@ void Evaluator::RegisterComparisonOps() {
     RegisterBinaryOper<T, T>("<=", cmp(std::less_equal{}));
     RegisterBinaryOper<T, T>(">", cmp(std::greater{}));
     RegisterBinaryOper<T, T>(">=", cmp(std::greater_equal{}));
+}
+
+template<NumericValueType T>
+void Evaluator::RegisterStringMultiplication() {
+    RegisterCommutativeOperator<String, T>("*", [this](const Value& left, const Value& right) -> Value {
+        String str = left.IsOfType<String>() ? left.GetValue<String>() : right.GetValue<String>();
+        T number = left.IsOfType<String>() ? right.GetValue<T>() : left.GetValue<T>();
+
+        std::optional<std::string> result = Utils::MultiplyStr(str, number);
+        if (!result) {
+            AddError(std::format(
+                "cannot multiply string {} by negative value {}",
+                str,
+                number
+            ));
+            return NullType{}; // TODO: proper error
+        }
+
+        return result.value();
+    });
 }
 
 } // namespace ItmoScript

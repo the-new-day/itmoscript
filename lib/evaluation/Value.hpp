@@ -41,6 +41,14 @@ concept SupportedValueType =
     std::same_as<T, Bool> ||
     std::same_as<T, Function>;
 
+/**
+ * @brief Concept to constrain supported numeric types for Value class.
+ */
+template<typename T>
+concept NumericValueType = 
+    std::same_as<T, Int> || std::convertible_to<T, Int> ||
+    std::same_as<T, Float> || std::convertible_to<T, Float>;
+
 /** @brief Enum representing all possible types stored in a Value. */
 enum class ValueType {
     kNullType,

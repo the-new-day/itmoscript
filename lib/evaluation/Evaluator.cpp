@@ -51,39 +51,8 @@ Evaluator::Evaluator() {
         return left.GetValue<String>() + right.GetValue<String>();
     });
 
-    RegisterCommutativeOperator<String, Float>("*", [this](const Value& left, const Value& right) -> Value {
-        String str = left.IsOfType<String>() ? left.GetValue<String>() : right.GetValue<String>();
-        Float number = left.IsOfType<String>() ? right.GetValue<Float>() : left.GetValue<Float>();
-
-        std::optional<std::string> result = Utils::MultiplyStr(str, number);
-        if (!result) {
-            AddError(std::format(
-                "cannot multiply string {} by negative value {}",
-                str,
-                number
-            ));
-            return NullType{}; // TODO: proper error
-        }
-
-        return result.value();
-    });
-
-    RegisterCommutativeOperator<String, Int>("*", [this](const Value& left, const Value& right) -> Value {
-        String str = left.IsOfType<String>() ? left.GetValue<String>() : right.GetValue<String>();
-        Int number = left.IsOfType<String>() ? right.GetValue<Int>() : left.GetValue<Int>();
-
-        std::optional<std::string> result = Utils::MultiplyStr(str, number);
-        if (!result) {
-            AddError(std::format(
-                "cannot multiply string {} by negative value {}",
-                str,
-                number
-            ));
-            return NullType{}; // TODO: proper error
-        }
-
-        return result.value();
-    });
+    RegisterStringMultiplication<Int>();
+    RegisterStringMultiplication<Float>();
 }
 
 void Evaluator::Interpret(Program& root) {
