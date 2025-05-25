@@ -2,7 +2,7 @@
 
 #include <format>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 const std::vector<std::unique_ptr<Statement>>& Program::GetStatements() const {
     return statements_;
@@ -161,4 +161,4 @@ std::string ForStatement::String() const {
     return result;
 }
 
-} // namespace ItmoScript
+} // namespace itmoscript

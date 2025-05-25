@@ -1,10 +1,11 @@
 #include "Parser.hpp"
+#include "ParsingError.hpp"
 #include "utils.hpp"
 
 #include <format>
 #include <string_view>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 Parser::Parser(Lexer& lexer)
     : lexer_(lexer) 
@@ -43,6 +44,8 @@ Parser::Parser(Lexer& lexer)
     infix_parse_funcs_[TokenType::kLessOrEqual] = infix_parser;
     infix_parse_funcs_[TokenType::kGreater] = infix_parser;
     infix_parse_funcs_[TokenType::kGreaterOrEqual] = infix_parser;
+    infix_parse_funcs_[TokenType::kAnd] = infix_parser;
+    infix_parse_funcs_[TokenType::kOr] = infix_parser;
     infix_parse_funcs_[TokenType::kLParen] = [this](std::unique_ptr<Expression> function) { 
         return this->ParseCallExpression(std::move(function)); 
     };
@@ -60,17 +63,9 @@ Program Parser::ParseProgram() {
         if (IsCurrentToken(TokenType::kNewLine)) {
             AdvanceToken();
             continue;
-        } else if (IsCurrentToken(TokenType::kIllegal)) {
-            AddUnknownTokenError();
-            AdvanceToken();
-            continue;
         }
 
-        auto statement = ParseStatement();
-        if (statement != nullptr) {
-            program.AddStatement(std::move(statement));
-        }
-
+        program.AddStatement(ParseStatement());
         AdvanceToken();
     }
 
@@ -92,9 +87,6 @@ std::unique_ptr<Statement> Parser::ParseStatement() {
         return ParseBreakStatement();
     } else if (IsCurrentToken(TokenType::kContinue)) {
         return ParseContinueStatement();
-    } else if (IsCurrentToken(TokenType::kIllegal)) {
-        AddUnknownTokenError();
-        return nullptr;
     }
 
     return ParseExpressionStatement();
@@ -106,9 +98,7 @@ std::unique_ptr<AssignStatement> Parser::ParseAssignStatement() {
     statement->ident = MakeNode<Identifier>();
     statement->ident->name = current_token_.literal;
 
-    if (!ExpectPeek(TokenType::kAssign)) {
-        return nullptr;
-    }
+    Consume(TokenType::kAssign);
 
     AdvanceToken();
     statement->expr = ParseExpression();
@@ -130,8 +120,14 @@ std::unique_ptr<ExpressionStatement> Parser::ParseExpressionStatement() {
 
 std::unique_ptr<Expression> Parser::ParseExpression(Precedence precedence) {
     if (!prefix_parse_funcs_.contains(current_token_.type)) {
-        AddNoPrefixFuncError(current_token_.type);
-        return nullptr;
+        throw lang_exceptions::ParsingError{
+            current_token_.line, 
+            current_token_.column, 
+            std::format(
+                "unexpected token '{}'",
+                kTokenTypeNames.at(current_token_.type)
+            )
+        };
     }
 
     std::unique_ptr<Expression> left = std::invoke(prefix_parse_funcs_.at(current_token_.type));
@@ -160,40 +156,24 @@ bool Parser::IsPeekToken(TokenType type) const {
     return peek_token_.type == type;
 }
 
-bool Parser::ExpectPeek(TokenType type) {
+void Parser::Consume(TokenType type) {
     if (IsPeekToken(type)) {
         AdvanceToken();
-        return true;
     } else {
-        PeekError(type);
-        return false;
+        ThrowPeekError(type);
     }
 }
 
-void Parser::AddError(const std::string& msg) {
-    errors_.push_back({.token = current_token_, .message = msg});
-}
-
-void Parser::AddUnknownTokenError() {
-    AddError(std::format(
-        "got unknown token '{}'",
-        current_token_.literal
-    ));
-}
-
-void Parser::PeekError(TokenType expected_type) {
-    AddError(std::format(
-        "expected next token to be {}, got {} instead",
-        kTokenTypeNames.at(expected_type),
-        kTokenTypeNames.at(peek_token_.type)
-    ));
-}
-
-void Parser::AddNoPrefixFuncError(TokenType type) {
-    AddError(std::format(
-        "unexpected token '{}'",
-        kTokenTypeNames.at(type)
-    ));
+void Parser::ThrowPeekError(TokenType expected_type) {
+    throw lang_exceptions::ParsingError{
+        current_token_.line, 
+        current_token_.column + current_token_.literal.size(),
+        std::format(
+            "expected next token to be {}, got {} instead",
+            kTokenTypeNames.at(expected_type),
+            kTokenTypeNames.at(peek_token_.type)
+        ),
+    };
 }
 
 bool Parser::IsEndOfExpression(TokenType type) {
@@ -229,10 +209,16 @@ std::unique_ptr<Identifier> Parser::ParseIdentifier() {
 }
 
 std::unique_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
-    std::optional<int64_t> parsing_result = Utils::ParseNumber<int64_t>(current_token_.literal);
+    // TODO: parsing with base other than 10
+    std::expected<int64_t, std::errc> parsing_result = utils::ParseNumber<int64_t>(current_token_.literal);
+
     if (!parsing_result.has_value()) {
-        AddError(std::format("could not parse {} as an Integer", current_token_.literal));
-        return nullptr;
+        const std::errc& error = parsing_result.error();
+        if (error == std::errc::result_out_of_range) {
+            ThrowError(std::format("could not parse {} as an Integer: result is out of range", current_token_.literal));
+        } else {
+            ThrowError(std::format("could not parse {} as an Integer", current_token_.literal));
+        }
     }
 
     auto int_literal = MakeNode<IntegerLiteral>();
@@ -241,10 +227,15 @@ std::unique_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
 }
 
 std::unique_ptr<FloatLiteral> Parser::ParseFloatLiteral() {
-    std::optional<double> parsing_result = Utils::ParseNumber<double>(current_token_.literal);
+    std::expected<double, std::errc> parsing_result = utils::ParseNumber<double>(current_token_.literal);
+
     if (!parsing_result.has_value()) {
-        AddError(std::format("could not parse {} as a Float", current_token_.literal));
-        return nullptr;
+        const std::errc& error = parsing_result.error();
+        if (error == std::errc::result_out_of_range) {
+            ThrowError(std::format("could not parse {} as a Float: result is out of range", current_token_.literal));
+        } else {
+            ThrowError(std::format("could not parse {} as a Float", current_token_.literal));
+        }
     }
 
     auto float_literal = MakeNode<FloatLiteral>();
@@ -258,12 +249,7 @@ std::unique_ptr<StringLiteral> Parser::ParseStringLiteral() {
     std::string_view literal = string_literal->token.literal;
     literal = literal.substr(1, literal.size() - 2);
 
-    std::optional<std::string> escaped = ProcessEscapeSequences(literal);
-    if (!escaped.has_value()) {
-        return nullptr;
-    }
-
-    string_literal->value = std::move(escaped.value());
+    string_literal->value = ProcessEscapeSequences(literal);
     return string_literal;
 }
 
@@ -301,12 +287,8 @@ std::unique_ptr<InfixExpression> Parser::ParseInfixExpression(std::unique_ptr<Ex
 std::unique_ptr<Expression> Parser::ParseGroupedExpression() {
     AdvanceToken();
     auto expr = ParseExpression();
-
-    if (ExpectPeek(TokenType::kRParen)) {
-        return expr;
-    } else {
-        return nullptr;
-    }
+    Consume(TokenType::kRParen);
+    return expr;
 }
 
 std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
@@ -319,18 +301,14 @@ std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
             AdvanceToken();
             continue;
         } else if (IsCurrentToken(TokenType::kEOF)) {
-            AddError("unexpected end of block");
-            return nullptr;
+            ThrowError("unexpected end of block");
         }
 
-        auto statement = ParseStatement();
-        if (statement != nullptr) {
-            block->AddStatement(std::move(statement));
-        }
-
+        block->AddStatement(ParseStatement());
         AdvanceToken();
     }
 
+    // don't check for 'end' token here, because of 'if' expressions
     return block;
 }
 
@@ -339,18 +317,9 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
     AdvanceToken();
 
     expr->main_condition = ParseExpression();
-    if (expr->main_condition == nullptr) {
-        return nullptr;
-    }
-
-    if (!ExpectPeek(TokenType::kThen)) {
-        return nullptr;
-    }
+    Consume(TokenType::kThen);
 
     expr->main_consequence = ParseBlockStatement();
-    if (expr->main_consequence == nullptr) {
-        return nullptr;
-    }
 
     while (IsCurrentToken(TokenType::kElse)) {
         AdvanceToken();
@@ -359,65 +328,40 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
         if (IsCurrentToken(TokenType::kIf)) {
             AdvanceToken();
             branch.condition = ParseExpression(Precedence::kLowest);
-            if (branch.condition == nullptr || !ExpectPeek(TokenType::kThen)) {
-                return nullptr;
-            }
+            Consume(TokenType::kThen);
         }
 
         branch.consequence = ParseBlockStatement();
-        if (branch.consequence == nullptr) {
-            return nullptr;
-        }
-
         expr->alternatives.push_back(std::move(branch));
     }
 
-    if (!IsCurrentToken(TokenType::kEnd) || !ExpectPeek(TokenType::kIf)) {
-        return nullptr;
+    if (!IsCurrentToken(TokenType::kEnd)) {
+        ThrowError("unexpected end of block");
     }
 
+    Consume(TokenType::kIf);
     return expr;
 }
 
 std::unique_ptr<FunctionLiteral> Parser::ParseFunctionLiteral() {
     auto function_lit = MakeNode<FunctionLiteral>();
+    Consume(TokenType::kLParen);
 
-    if (!ExpectPeek(TokenType::kLParen)) {
-        return nullptr;
-    }
-
-    auto params = ParseFunctionParameters();
-    if (!params.has_value()) {
-        return nullptr;
-    }
-
-    function_lit->parameters = std::move(params.value());
+    function_lit->parameters = ParseFunctionParameters();
     function_lit->body = ParseBlockStatement();
-    if (function_lit->body == nullptr) {
-        return nullptr;
-    }
 
-    if (!ExpectPeek(TokenType::kFunction)) {
-        return nullptr;
-    }
-
+    Consume(TokenType::kFunction);
     return function_lit;
 }
 
 std::unique_ptr<CallExpression> Parser::ParseCallExpression(std::unique_ptr<Expression> function) {
     auto expr = MakeNode<CallExpression>();
     expr->function = std::move(function);
-    auto args = ParseCallArguments();
-
-    if (args.has_value()) {
-        expr->arguments = std::move(args.value());
-        return expr;
-    } else {
-        return nullptr;
-    }
+    expr->arguments = ParseCallArguments();
+    return expr;
 }
 
-std::optional<std::vector<std::unique_ptr<Expression>>> Parser::ParseCallArguments() {
+std::vector<std::unique_ptr<Expression>> Parser::ParseCallArguments() {
     std::vector<std::unique_ptr<Expression>> args;
     AdvanceToken();
 
@@ -434,10 +378,7 @@ std::optional<std::vector<std::unique_ptr<Expression>>> Parser::ParseCallArgumen
         args.push_back(ParseExpression());
     }
 
-    if (!ExpectPeek(TokenType::kRParen)) {
-        return std::nullopt;
-    }
-
+    Consume(TokenType::kRParen);
     return args;
 }
 
@@ -446,51 +387,25 @@ std::unique_ptr<WhileStatement> Parser::ParseWhileStatement() {
     AdvanceToken();
 
     stmt->condition = ParseExpression();
-    if (stmt->condition == nullptr) {
-        return nullptr;
-    }
-
     stmt->body = ParseBlockStatement();
-    if (stmt->body == nullptr) {
-        return nullptr;
-    }
 
-    if (!ExpectPeek(TokenType::kWhile)) {
-        return nullptr;
-    }
-
+    Consume(TokenType::kWhile);
     return stmt;
 }
 
 std::unique_ptr<ForStatement> Parser::ParseForStatement() {
     auto stmt = MakeNode<ForStatement>();
-
-    if (!ExpectPeek(TokenType::kIdentifier)) {
-        return nullptr;
-    }
+    Consume(TokenType::kIdentifier);
 
     stmt->iter = ParseIdentifier();
     
-    if (!ExpectPeek(TokenType::kIn)) {
-        return nullptr;
-    }
-
+    Consume(TokenType::kIn);
     AdvanceToken();
     
     stmt->range = ParseExpression();
-    if (stmt->range == nullptr) {
-        return nullptr;
-    }
-
     stmt->body = ParseBlockStatement();
-    if (stmt->body == nullptr) {
-        return nullptr;
-    }
 
-    if (!ExpectPeek(TokenType::kFor)) {
-        return nullptr;
-    }
-
+    Consume(TokenType::kFor);
     return stmt;
 }
 
@@ -506,7 +421,7 @@ std::unique_ptr<ContinueStatement> Parser::ParseContinueStatement() {
     return stmt;
 }
 
-std::optional<std::vector<std::unique_ptr<Identifier>>> Parser::ParseFunctionParameters() {
+std::vector<std::unique_ptr<Identifier>> Parser::ParseFunctionParameters() {
     std::vector<std::unique_ptr<Identifier>> identifiers;
 
     if (IsPeekToken(TokenType::kRParen)) {
@@ -514,17 +429,14 @@ std::optional<std::vector<std::unique_ptr<Identifier>>> Parser::ParseFunctionPar
         return identifiers;
     }
 
-    if (!ExpectPeek(TokenType::kIdentifier)) {
-        return std::nullopt;
-    }
+    Consume(TokenType::kIdentifier);
 
     auto ident = ParseIdentifier();
     identifiers.push_back(std::move(ident));
 
     while (IsPeekToken(TokenType::kComma)) {
         if (!IsCurrentToken(TokenType::kIdentifier)) {
-            PeekError(TokenType::kIdentifier);
-            return std::nullopt;
+            ThrowPeekError(TokenType::kIdentifier);
         }
 
         AdvanceToken();
@@ -534,18 +446,11 @@ std::optional<std::vector<std::unique_ptr<Identifier>>> Parser::ParseFunctionPar
         identifiers.push_back(std::move(ident));
     }
 
-    if (!ExpectPeek(TokenType::kRParen)) {
-        return std::nullopt;
-    }
-
+    Consume(TokenType::kRParen);
     return identifiers;
 }
 
-const std::vector<ParserError>& Parser::GetErrors() const {
-    return errors_;
-}
-
-std::optional<std::string> Parser::ProcessEscapeSequences(std::string_view str) {
+std::string Parser::ProcessEscapeSequences(std::string_view str) {
     std::string result;
     result.reserve(str.size());
 
@@ -554,8 +459,7 @@ std::optional<std::string> Parser::ProcessEscapeSequences(std::string_view str) 
             result += str[i];
             continue;
         } else if (i == str.size() - 1) {
-            AddError("unexpected end of a string");
-            return std::nullopt;
+            ThrowError("unexpected end of a string");
         }
 
         switch (str[i + 1]) {
@@ -593,8 +497,7 @@ std::optional<std::string> Parser::ProcessEscapeSequences(std::string_view str) 
                 result += '\v';
                 break;
             default:
-                AddError("unknown escape sequence");
-                return std::nullopt;
+                ThrowError("unknown escape sequence");
         }
 
         ++i;
@@ -603,4 +506,8 @@ std::optional<std::string> Parser::ProcessEscapeSequences(std::string_view str) 
     return result;
 }
 
-} // namespace ItmoScript
+void Parser::ThrowError(const std::string& message) noexcept(false) {
+    throw lang_exceptions::ParsingError{current_token_.line, current_token_.column, message};
+}
+
+} // namespace itmoscript

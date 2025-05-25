@@ -1,60 +1,60 @@
-#include "Evaluator.hpp"
-#include "utils.hpp"
-
 #include <format>
 #include <cmath>
 
-namespace ItmoScript {
+#include "Evaluator.hpp"
+#include "utils.hpp"
+
+namespace itmoscript {
 
 Evaluator::Evaluator() {
     RegisterCommonAriphmeticOps<Int>();
     RegisterCommonAriphmeticOps<Float>();
 
-    RegisterBinaryOper<Int, Int>("%", [](const Value& left, const Value& right) {
+    operator_registry_.RegisterBinaryOper<Int, Int>("%", [](const Value& left, const Value& right) {
         return left.Get<Int>() % right.Get<Int>();
     });
 
-    RegisterBinaryOper<Int, Int>("^", [](const Value& left, const Value& right) -> Value {
+    operator_registry_.RegisterBinaryOper<Int, Int>("^", [](const Value& left, const Value& right) -> Value {
         if (right.Get<Int>() < 0) {
-            return Utils::FastPowNeg(left.Get<Int>(), right.Get<Int>());
+            return utils::FastPowNeg(left.Get<Int>(), right.Get<Int>());
         }
-        return Utils::FastPow(left.Get<Int>(), right.Get<Int>());
+        return utils::FastPow(left.Get<Int>(), right.Get<Int>());
     });
 
-    RegisterBinaryOper<Float, Float>("^", [](const Value& left, const Value& right) {
+    operator_registry_.RegisterBinaryOper<Float, Float>("^", [](const Value& left, const Value& right) {
         return std::pow(left.Get<Float>(), right.Get<Float>());
     });
 
-    AddUnaryOperatorForAllTypes("!", [](const Value& right) { return !right.IsTruphy(); });
+    operator_registry_.RegisterUnaryOperatorForAllTypes("!", [](const Value& right) { return !right.IsTruphy(); });
 
-    RegisterAllComparisonOps<Int>();
-    RegisterAllComparisonOps<Float>();
-    RegisterAllComparisonOps<String>();
+    operator_registry_.RegisterAllComparisonOps<Int>();
+    operator_registry_.RegisterAllComparisonOps<Float>();
+    operator_registry_.RegisterAllComparisonOps<String>();
     
-    RegisterBinaryOper<Bool, Bool>("==", [](const Value& left, const Value& right) {
+    operator_registry_.RegisterBinaryOper<Bool, Bool>("==", [](const Value& left, const Value& right) {
         return left.Get<Bool>() == right.Get<Bool>();
     });
     
-    RegisterBinaryOper<Bool, Bool>("!=", [](const Value& left, const Value& right) {
+    operator_registry_.RegisterBinaryOper<Bool, Bool>("!=", [](const Value& left, const Value& right) {
         return left.Get<Bool>() != right.Get<Bool>();
     });
 
-    AddCommutativeOperatorForAllTypes<NullType>("==", [](const Value& left, const Value& right) {
-        return left.IsNullType() && right.IsNullType();
+    operator_registry_.RegisterCommutativeOperatorForAllTypes<NullType>("==", [](const Value& left, const Value& right) {
+        return left.IsOfType<NullType>() && right.IsOfType<NullType>();
     });
 
-    AddCommutativeOperatorForAllTypes<NullType>("!=", [](const Value& left, const Value& right) {
+    operator_registry_.RegisterCommutativeOperatorForAllTypes<NullType>("!=", [](const Value& left, const Value& right) {
         return left.GetType() != right.GetType();
     });
 
-    RegisterBinaryOper<String, String>("+", [](const Value& left, const Value& right) {
+    operator_registry_.RegisterBinaryOper<String, String>("+", [](const Value& left, const Value& right) {
         return left.Get<String>() + right.Get<String>();
     });
 
     RegisterStringMultiplication<Int>();
     RegisterStringMultiplication<Float>();
 
-    RegisterBinaryOper<String, String>("-", [](const Value& left, const Value& right) -> Value {
+    operator_registry_.RegisterBinaryOper<String, String>("-", [](const Value& left, const Value& right) -> Value {
         String str = left.Get<String>();
         String suffix = right.Get<String>();
 
@@ -64,8 +64,11 @@ Evaluator::Evaluator() {
         return str;
     });
 
-    // TODO: check expression "5 + a" (returns 10 == 5 * 2, wtf)
-    // seems like a is interpreted as 5 again (works for every operation WTF)
+    // operator_registry_.RegisterCommutativeOperatorForAllTypes<Bool>("and", [] (const Value& left, const Value& right) -> Value {
+    //     return left.IsTruphy() && right.IsTruphy();
+    // });
+
+    // TODO: add comparison with bool (5 == true)
 }
 
 void Evaluator::Interpret(Program& root) {
@@ -73,7 +76,7 @@ void Evaluator::Interpret(Program& root) {
 }
 
 std::optional<Value> Evaluator::HandleUnaryOper(const std::string& oper, const Value& right) {
-    if (auto handler = FindExactHandler(oper, right)) {
+    if (auto handler = operator_registry_.FindExactHandler(oper, right.GetType())) {
         return std::invoke(*handler, right);
     }
 
@@ -81,7 +84,7 @@ std::optional<Value> Evaluator::HandleUnaryOper(const std::string& oper, const V
 }
 
 std::optional<Value> Evaluator::HandleBinaryOper(const std::string& oper, const Value& left, const Value& right) {
-    if (auto handler = FindExactHandler(oper, left, right)) {
+    if (auto handler = operator_registry_.FindExactHandler(oper, left.GetType(), right.GetType())) {
         return std::invoke(*handler, left, right);
     }
 
@@ -90,41 +93,13 @@ std::optional<Value> Evaluator::HandleBinaryOper(const std::string& oper, const 
         auto rhs = types_.TryConvert(right, *common);
 
         if (lhs && rhs) {
-            if (auto handler = FindExactHandler(oper, *lhs, *rhs)) {
+            if (auto handler = operator_registry_.FindExactHandler(oper, lhs->GetType(), rhs->GetType())) {
                 return std::invoke(*handler, *lhs, *rhs);
             }
         }
     }
 
     return std::nullopt;
-}
-
-std::optional<Evaluator::BinaryHandler> // TODO: change left and right to type_index
-Evaluator::FindExactHandler(const std::string& oper, const Value& left, const Value& right) {
-    auto key = std::make_pair(left.GetTypeIndex(), right.GetTypeIndex());
-    if (binary_ops_.contains(oper) && binary_ops_[oper].contains(key)) {
-        return binary_ops_[oper][key];
-    }
-
-    return std::nullopt;
-}
-
-std::optional<Evaluator::UnaryHandler>
-Evaluator::FindExactHandler(const std::string& oper, const Value& right) {
-    if (unary_ops_.contains(oper) && unary_ops_[oper].contains(right.GetTypeIndex())) {
-        return unary_ops_[oper][right.GetTypeIndex()];
-    }
-
-    return std::nullopt;
-}
-
-void Evaluator::AddUnaryOperatorForAllTypes(const std::string& oper, UnaryHandler handler) {
-    RegisterUnaryOper<NullType>(oper, handler);
-    RegisterUnaryOper<Int>(oper, handler);
-    RegisterUnaryOper<Float>(oper, handler);
-    RegisterUnaryOper<String>(oper, handler);
-    RegisterUnaryOper<Bool>(oper, handler);
-    RegisterUnaryOper<Function>(oper, handler);
 }
 
 Value Evaluator::Eval(Node& node) {
@@ -185,13 +160,7 @@ void Evaluator::Visit(PrefixExpression& node) {
     if (auto new_value = HandleUnaryOper(node.oper, right)) {
         result_ = *new_value;
     } else {
-        AddError(std::format(
-            "unsupported operand type for '{}': {}",
-            node.oper,
-            kValueTypeNames.at(right.GetType())
-        ));
-
-        result_ = NullType{}; // TODO: proper error
+        throw lang_exceptions::OperatorTypeError{current_token_, node.oper, right.GetType()};
     }
 }
 
@@ -203,19 +172,8 @@ void Evaluator::Visit(InfixExpression& node) {
     if (auto new_value = HandleBinaryOper(node.oper, left, right)) {
         result_ = *new_value;
     } else {
-        AddError(std::format(
-            "unsupported operand types for '{}': {} and {}",
-            node.oper, 
-            kValueTypeNames.at(left.GetType()), 
-            kValueTypeNames.at(right.GetType())
-        ));
-
-        result_ = NullType{}; // TODO: proper error
+        throw lang_exceptions::OperatorTypeError{current_token_, node.oper, left.GetType(), right.GetType()};
     }
 }
 
-void Evaluator::AddError(const std::string& message) {
-    errors_.push_back({.message = message, .token = current_token_});
-}
-
-} // namespace ItmoScript
+} // namespace itmoscript

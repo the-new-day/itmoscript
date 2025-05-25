@@ -7,7 +7,7 @@
 #include <functional>
 #include <map>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 /**
  * @enum Precedence
@@ -97,15 +97,11 @@ public:
      * @param type The token type to check.
      */
     static bool IsEndOfExpression(TokenType type);
-    
-    const std::vector<ParserError>& GetErrors() const;
 
 private:
     Lexer& lexer_;
     Token current_token_;
     Token peek_token_;
-
-    std::vector<ParserError> errors_;
 
     /** @brief Reads next token from the lexer. */
     void AdvanceToken();
@@ -137,29 +133,22 @@ private:
 
     /**
      * @brief Checks whether the current token can be an beginning of a block statement or not.
-     * @see ItmoScript::kBlockTypes for the set of such tokens.
+     * @see itmoscript::kBlockTypes for the set of such tokens.
      */
     bool IsCurrentTokenBlock() const;
 
     /**
      * @brief Checks if next token is of given type. If it is, reads it.
-     * Otherwise, adds an error.
+     * Otherwise, throws an exception.
+     * @throws ParsingError If the next token is not of the given type.
      * @param type Token type to check.
      */
-    bool ExpectPeek(TokenType type);
+    void Consume(TokenType type);
 
     /**
-     * @brief Adds an error message including current token.
+     * @brief Throws an error message that next token is not of expected type.
      */
-    void AddError(const std::string& msg);
-
-    /**
-     * @brief Adds an error message that next token is not of expected type.
-     */
-    void PeekError(TokenType expected_type);
-
-    void AddUnknownTokenError();
-    void AddNoPrefixFuncError(TokenType type);
+    void ThrowPeekError(TokenType expected_type);
 
     /**
      * @brief Returns precedence of the next token.
@@ -208,17 +197,21 @@ private:
     std::unique_ptr<FunctionLiteral> ParseFunctionLiteral();
     std::unique_ptr<CallExpression> ParseCallExpression(std::unique_ptr<Expression> function);
 
-    std::optional<std::vector<std::unique_ptr<Identifier>>> ParseFunctionParameters();
-    std::optional<std::vector<std::unique_ptr<Expression>>> ParseCallArguments();
+    std::vector<std::unique_ptr<Identifier>> ParseFunctionParameters();
+    std::vector<std::unique_ptr<Expression>> ParseCallArguments();
 
     /**
      * @brief Replaces all recognized escape sequences (e.g., \\n, \t) in the string
      * with their corresponding characters.
      * @param str String containing escape sequences.
-     * @return std::nullopt if an unknown escape sequence is encountered,
-     * otherwise the resulting unescaped string.
+     * @return Processed string
+     * @throws ParsingError If the string contains an unknown escape sequence 
+     * or if the last character of the string is a backslash (breaking the string literal)
      */
-    std::optional<std::string> ProcessEscapeSequences(std::string_view str);
+    std::string ProcessEscapeSequences(std::string_view str);
+
+    /** @brief Throws a ParsingError exception with current token's line and column info. */
+    void ThrowError(const std::string& message) noexcept(false);
 };
     
 template<typename T>
@@ -226,4 +219,4 @@ std::unique_ptr<T> Parser::MakeNode() {
     return std::make_unique<T>(current_token_);
 }
 
-} // namespace ItmoScript
+} // namespace itmoscript

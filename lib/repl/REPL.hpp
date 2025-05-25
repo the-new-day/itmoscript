@@ -7,7 +7,7 @@
 #include <string>
 #include <iostream>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 const std::string kReplPrompt = ">>> ";
 
@@ -33,12 +33,6 @@ private:
     void Eval(std::ostream& output);
 
     void PrintToken(std::ostream& output, const Token& token);
-
-    void PrintParserErrors(const Parser& parser, std::ostream& output);
-    void PrintParserError(const ParserError& error, std::ostream& output, size_t indent);
-
-    void PrintEvaluatorErrors(const Evaluator& evaluator, std::ostream& output);
-    void PrintEvaluationError(const EvaluationError& error, std::ostream& output, size_t indent);
 };
     
-} // namespace ItmoScript
+} // namespace itmoscript

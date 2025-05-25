@@ -1,30 +1,6 @@
 #include "Value.hpp"
 
-namespace ItmoScript {
-
-bool Value::IsNullType() const {
-    return IsOfType(ValueType::kNullType);
-}
-
-bool Value::IsInt() const {
-    return IsOfType(ValueType::kInt);
-}
-
-bool Value::IsFloat() const {
-    return IsOfType(ValueType::kFloat);
-}
-
-bool Value::IsString() const {
-    return IsOfType(ValueType::kString);
-}
-
-bool Value::IsBool() const {
-    return IsOfType(ValueType::kBool);
-}
-
-bool Value::IsFunction() const {
-    return IsOfType(ValueType::kFunction);
-}
+namespace itmoscript {
 
 bool Value::IsTruphy() const {
     switch (GetType()) {
@@ -52,7 +28,7 @@ std::string Value::ToString() const {
         case ValueType::kInt:
             return std::to_string(Get<Int>());
         case ValueType::kFloat:
-            return std::to_string(Get<Float>());
+            return std::format("{}", Get<Float>());
         case ValueType::kString:
             return Get<String>();
         case ValueType::kBool:
@@ -73,35 +49,19 @@ std::ostream& operator<<(std::ostream& stream, const Value& value) {
 }
 
 ValueType Value::GetType() const {
-    if (IsInt()) {
+    if (IsOfType<Int>()) {
         return ValueType::kInt;
-    } else if (IsFloat()) {
+    } else if (IsOfType<Float>()) {
         return ValueType::kFloat;
-    } else if (IsString()) {
+    } else if (IsOfType<String>()) {
         return ValueType::kString;
-    } else if (IsBool()) {
+    } else if (IsOfType<Bool>()) {
         return ValueType::kBool;
-    } else if (IsFunction()) {
+    } else if (IsOfType<Function>()) {
         return ValueType::kFunction;
     }
 
     return ValueType::kNullType;
-}
-
-std::type_index Value::GetTypeIndex() const {
-    if (IsInt()) {
-        return typeid(Int);
-    } else if (IsFloat()) {
-        return typeid(Float);
-    } else if (IsString()) {
-        return typeid(String);
-    } else if (IsBool()) {
-        return typeid(Bool);
-    } else if (IsFunction()) {
-        return typeid(Function);
-    }
-    
-    return typeid(NullType);
 }
 
 bool Value::IsOfType(ValueType type) const {
@@ -123,4 +83,4 @@ bool Value::IsOfType(ValueType type) const {
     }
 }
 
-} // namespace ItmoScript
+} // namespace itmoscript

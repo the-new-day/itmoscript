@@ -1,30 +1,26 @@
 #include "lexer_test.hpp"
 
-// TODO: add tests for Ln, Col
-
 TEST(LexerTestSuite, OneCharTokenTest) {
     std::string code;
-    std::vector<ItmoScript::Token> expected;
+    std::vector<itmoscript::Token> expected;
 
-    for (const auto& [token, type] : ItmoScript::kOneCharTokens) {
-        if (type == TT::kEOF) continue;
-
+    for (const auto& [token, type] : itmoscript::kOneCharTokens) {
         expected.push_back({.type = type, .literal = std::string{token}});
         code += token;
         code += ' ';
     }
 
     expected.push_back({.type = TT::kEOF});
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
     CompareTokens(lexer, expected);
 }
 
 TEST(LexerTestSuite, OneCharIdentiriersTest) {
     std::string code = "a b c d e f";
 
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
 
-    std::vector<ItmoScript::Token> expected = {
+    std::vector<itmoscript::Token> expected = {
         {TT::kIdentifier, "a"},
         {TT::kIdentifier, "b"},
         {TT::kIdentifier, "c"},
@@ -40,9 +36,9 @@ TEST(LexerTestSuite, OneCharIdentiriersTest) {
 TEST(LexerTestSuite, IdentifiersAssignmentTest) {
     std::string code = "n = number_2";
 
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
 
-    std::vector<ItmoScript::Token> expected = {
+    std::vector<itmoscript::Token> expected = {
         {TT::kIdentifier, "n"},
         {TT::kAssign, "="},
         {TT::kIdentifier, "number_2"},
@@ -59,9 +55,9 @@ TEST(LexerTestSuite, FunctionCreationTest) {
         end function
     )";
 
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
 
-    std::vector<ItmoScript::Token> expected = {
+    std::vector<itmoscript::Token> expected = {
         {TT::kNewLine, "\n"},
         {TT::kIdentifier, "incr"},
         {TT::kAssign, "="},
@@ -86,16 +82,16 @@ TEST(LexerTestSuite, FunctionCreationTest) {
 
 TEST(LexerTestSuite, KeywordsRecognitionTest) {
     std::string code;
-    std::vector<ItmoScript::Token> expected;
+    std::vector<itmoscript::Token> expected;
 
-    for (const auto& [keyword, type] : ItmoScript::kKeywords) {
+    for (const auto& [keyword, type] : itmoscript::kKeywords) {
         code += keyword;
         code += ' ';
         expected.push_back({.type = type, .literal = keyword});
     }
 
     expected.push_back({TT::kEOF, ""});
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
     CompareTokens(lexer, expected);
 }
 
@@ -110,9 +106,9 @@ TEST(LexerTestSuite, BasicOperatorsUsageTest) {
         3 <= 40
     )";
 
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
 
-    std::vector<ItmoScript::Token> expected = {
+    std::vector<itmoscript::Token> expected = {
         {TT::kNewLine, "\n"},
         {TT::kInt, "5"},
         {TT::kLess, "<"},
@@ -157,9 +153,9 @@ TEST(LexerTestSuite, IgnoringCommentsTest) {
         end function // 239 239
     )";
 
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
 
-    std::vector<ItmoScript::Token> expected = {
+    std::vector<itmoscript::Token> expected = {
         {TT::kNewLine, "\n"},
         {TT::kIdentifier, "incr"},
         {TT::kAssign, "="},
@@ -188,9 +184,9 @@ TEST(LexerTestSuite, WhileLoopTest) {
         end while
     )";
 
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
 
-    std::vector<ItmoScript::Token> expected = {
+    std::vector<itmoscript::Token> expected = {
         {TT::kNewLine, "\n"},
         {TT::kWhile, "while"},
         {TT::kIdentifier, "i"},
@@ -217,9 +213,9 @@ TEST(LexerTestSuite, ForLoopTest) {
         end for
     )";
 
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
 
-    std::vector<ItmoScript::Token> expected = {
+    std::vector<itmoscript::Token> expected = {
         {TT::kNewLine, "\n"},
         {TT::kFor, "for"},
         {TT::kIdentifier, "i"},

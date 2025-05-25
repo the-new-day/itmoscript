@@ -2,8 +2,8 @@
 
 void TestStringExpressions(const std::vector<std::pair<std::string, std::string>>& expressions) {
     for (const auto& [input, expected] : expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::String>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::String>(evaluated, expected);
     }
 }
 

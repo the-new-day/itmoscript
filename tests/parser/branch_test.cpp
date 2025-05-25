@@ -1,9 +1,9 @@
 #include "parser_test.hpp"
 
-ItmoScript::IfExpression* GetIfExpression(const std::unique_ptr<ItmoScript::Statement>& stmt) {
+itmoscript::IfExpression* GetIfExpression(const std::unique_ptr<itmoscript::Statement>& stmt) {
     auto* expr_stmt = GetExpressionStatement(stmt);
 
-    auto* if_expr = dynamic_cast<ItmoScript::IfExpression*>(expr_stmt->expr.get());
+    auto* if_expr = dynamic_cast<itmoscript::IfExpression*>(expr_stmt->expr.get());
     EXPECT_NE(if_expr, nullptr);
     EXPECT_NE(if_expr->main_condition, nullptr);
     EXPECT_NE(if_expr->main_consequence, nullptr);
@@ -11,7 +11,7 @@ ItmoScript::IfExpression* GetIfExpression(const std::unique_ptr<ItmoScript::Stat
     return if_expr;
 }
 
-ItmoScript::IfExpression* GetIfExpression(const ItmoScript::Program& program) {
+itmoscript::IfExpression* GetIfExpression(const itmoscript::Program& program) {
     const auto& statements = program.GetStatements();
     EXPECT_EQ(statements.size(), 1);
 

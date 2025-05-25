@@ -3,7 +3,7 @@
 
 #include <format>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 void REPL::Start(std::istream& input, std::ostream& output) {
     while (true) { 
@@ -12,12 +12,26 @@ void REPL::Start(std::istream& input, std::ostream& output) {
         if (!std::getline(input, current_line_)) break;
         if (current_line_.empty()) continue;
 
-        if (mode_ == ReplMode::kLexer) {
-            EvalLexer(output);
-        } else if (mode_ == ReplMode::kParser) {
-            EvalParser(output);
-        } else if (mode_ == ReplMode::kEval) {
-            Eval(output);
+        try {
+            if (mode_ == ReplMode::kLexer) {
+                EvalLexer(output);
+            } else if (mode_ == ReplMode::kParser) {
+                EvalParser(output);
+            } else if (mode_ == ReplMode::kEval) {
+                Eval(output);
+            }
+        } catch (const lang_exceptions::Exception& e) {
+            std::cerr << std::format(
+                "Unhandled error on line {}, column {}:\n{}", 
+                e.line(), 
+                e.column(), 
+                *utils::MultiplyStr(" ", lang_exceptions::kErrorDetailsIndent)
+            );
+            std::cerr << std::format("{}: {}", e.error_type(), e.what()) << std::endl;
+
+            std::cout << current_line_ << std::endl;
+            std::cout << *utils::MultiplyStr(" ", e.column());
+            std::cout << '^' << std::endl;
         }
     }
 }
@@ -38,11 +52,6 @@ void REPL::EvalParser(std::ostream& output) {
     Parser parser{lexer};
     Program program = parser.ParseProgram();
 
-    if (parser.GetErrors().size() != 0) {
-        PrintParserErrors(parser, output);
-        return;
-    }
-
     output << program.String();
     output << '\n';
 }
@@ -52,18 +61,8 @@ void REPL::Eval(std::ostream& output) {
     Parser parser{lexer};
     Program program = parser.ParseProgram();
 
-    if (!parser.GetErrors().empty()) {
-        PrintParserErrors(parser, output);
-        return;
-    }
-
     Evaluator evaluator;
     evaluator.Interpret(program);
-
-    if (!evaluator.GetErrors().empty()) {
-        PrintEvaluatorErrors(evaluator, output);
-        return;
-    }
 
     output << evaluator.GetResult();
     output << '\n';
@@ -79,56 +78,4 @@ void REPL::PrintToken(std::ostream& output, const Token& token) {
     );
 }
 
-void REPL::PrintParserErrors(const Parser& parser, std::ostream& output) {
-    output << "Parsing errors:\n";
-    for (const auto& error : parser.GetErrors()) {
-        output << "    ";
-        PrintParserError(error, output, 4);
-        output << '\n';
-    }
-}
-
-void REPL::PrintParserError(const ParserError& error, std::ostream& output, size_t indent) {
-    std::string pos_info = std::format("Ln {}, Col {}: ", error.token.line, error.token.column);
-    output << pos_info << error.message << '\n';
-
-    for (size_t i = 0; i < pos_info.size() + indent; ++i) {
-        output << ' ';
-    }
-
-    output << current_line_ << '\n';
-
-    for (size_t i = 0; i < pos_info.size() + error.token.column + indent; ++i) {
-        output << ' ';
-    }
-
-    output << '^';
-}
-
-void REPL::PrintEvaluatorErrors(const Evaluator& evaluator, std::ostream& output) {
-    output << "Evaluation errors:\n";
-    for (const auto& error : evaluator.GetErrors()) {
-        output << "    ";
-        PrintEvaluationError(error, output, 4);
-        output << '\n';
-    }
-}
-
-void REPL::PrintEvaluationError(const EvaluationError& error, std::ostream& output, size_t indent) {
-    std::string pos_info = std::format("Ln {}, Col {}: ", error.token.line, error.token.column);
-    output << pos_info << error.message << '\n';
-
-    for (size_t i = 0; i < pos_info.size() + indent; ++i) {
-        output << ' ';
-    }
-
-    output << current_line_ << '\n';
-
-    for (size_t i = 0; i < pos_info.size() + error.token.column + indent; ++i) {
-        output << ' ';
-    }
-
-    output << '^';
-}
-
-} // namespace ItmoScript
+} // namespace itmoscript

@@ -23,6 +23,7 @@ add_executable(
 
   lexer/lexer_test.cpp
   lexer/literals_test.cpp
+  lexer/syntax_errors_test.cpp
 
   parser/statements_test.cpp
   parser/basic_expressions_test.cpp

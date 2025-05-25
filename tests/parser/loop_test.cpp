@@ -1,11 +1,11 @@
 #include "parser_test.hpp"
 
 // Code must contain only while statement
-ItmoScript::WhileStatement* GetWhileStmt(const ItmoScript::Program& program) {
+itmoscript::WhileStatement* GetWhileStmt(const itmoscript::Program& program) {
     const auto& statements = program.GetStatements();
     EXPECT_EQ(statements.size(), 1);
 
-    auto* while_stmt = dynamic_cast<ItmoScript::WhileStatement*>(statements[0].get());
+    auto* while_stmt = dynamic_cast<itmoscript::WhileStatement*>(statements[0].get());
     EXPECT_NE(while_stmt, nullptr);
     EXPECT_NE(while_stmt->condition, nullptr);
     EXPECT_NE(while_stmt->body, nullptr);
@@ -14,11 +14,11 @@ ItmoScript::WhileStatement* GetWhileStmt(const ItmoScript::Program& program) {
 }
 
 // Code must contain only for statement
-ItmoScript::ForStatement* GetForStmt(const ItmoScript::Program& program) {
+itmoscript::ForStatement* GetForStmt(const itmoscript::Program& program) {
     const auto& statements = program.GetStatements();
     EXPECT_EQ(statements.size(), 1);
 
-    auto* for_stmt = dynamic_cast<ItmoScript::ForStatement*>(statements[0].get());
+    auto* for_stmt = dynamic_cast<itmoscript::ForStatement*>(statements[0].get());
     EXPECT_NE(for_stmt, nullptr);
     EXPECT_NE(for_stmt->range, nullptr);
     EXPECT_NE(for_stmt->body, nullptr);
@@ -46,9 +46,9 @@ TEST(ParserTestSuite, SimpleWhileTest) {
     const auto& block_statements = while_stmt->body->GetStatements();
     ASSERT_EQ(block_statements.size(), expected.size());
 
-    TestStatement<ItmoScript::AssignStatement>(block_statements[0], expected[0]);
-    TestStatement<ItmoScript::ContinueStatement>(block_statements[1], expected[1]);
-    TestStatement<ItmoScript::BreakStatement>(block_statements[2], expected[2]);
+    TestStatement<itmoscript::AssignStatement>(block_statements[0], expected[0]);
+    TestStatement<itmoscript::ContinueStatement>(block_statements[1], expected[1]);
+    TestStatement<itmoscript::BreakStatement>(block_statements[2], expected[2]);
 }
 
 TEST(ParserTestSuite, SimpleForTest) {
@@ -71,9 +71,9 @@ TEST(ParserTestSuite, SimpleForTest) {
     const auto& block_statements = for_stmt->body->GetStatements();
     ASSERT_EQ(block_statements.size(), expected.size());
 
-    TestStatement<ItmoScript::AssignStatement>(block_statements[0], expected[0]);
-    TestStatement<ItmoScript::ContinueStatement>(block_statements[1], expected[1]);
-    TestStatement<ItmoScript::BreakStatement>(block_statements[2], expected[2]);
+    TestStatement<itmoscript::AssignStatement>(block_statements[0], expected[0]);
+    TestStatement<itmoscript::ContinueStatement>(block_statements[1], expected[1]);
+    TestStatement<itmoscript::BreakStatement>(block_statements[2], expected[2]);
 }
 
 TEST(ParserTestSuite, EmptyForTest) {

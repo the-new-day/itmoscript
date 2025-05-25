@@ -4,7 +4,7 @@
 #include <map>
 #include <set>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 /**
  * @enum TokenType
@@ -18,7 +18,6 @@ namespace ItmoScript {
  * - Keywords and special literals (true, nil, etc.)
  */
 enum class TokenType {
-    kIllegal,
     kEOF,
 
     kIdentifier,
@@ -97,6 +96,7 @@ struct Token {
     std::string literal;
     size_t line;
     size_t column;
+    // std::string filename; // TODO: need this?
 
     /** @brief Compares two tokens for equality based on type and literal value. */
     bool operator==(const Token& other) const {
@@ -168,7 +168,6 @@ static const std::map<std::string, TokenType> kKeywords{
 
 /// @brief Maps token types to their human-readable string names (mostly for debugging or error messages).
 static const std::map<TokenType, std::string> kTokenTypeNames = {
-    {TokenType::kIllegal, "ILLEGAL"},
     {TokenType::kEOF, "EOF"},
 
     {TokenType::kIdentifier, "IDENTIFIER"},
@@ -236,4 +235,4 @@ static const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kNil, "NIL"},
 };
 
-} // namespace ItmoScript
+} // namespace itmoscript

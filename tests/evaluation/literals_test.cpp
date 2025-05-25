@@ -10,8 +10,8 @@ TEST(EvaluationTestSuite, IntegerLiteralTest) {
     };
 
     for (const auto& [input, expected] : expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::Int>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Int>(evaluated, expected);
     }
 }
 
@@ -23,8 +23,8 @@ TEST(EvaluationTestSuite, BoolLiteralTest) {
     };
 
     for (const auto& [input, expected] : expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::Bool>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Bool>(evaluated, expected);
     }
 }
 
@@ -34,8 +34,8 @@ TEST(EvaluationTestSuite, NullTypeLiteralTest) {
     };
 
     for (const auto& input : expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::NullType>(evaluated, ItmoScript::NullType{});
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::NullType>(evaluated, itmoscript::NullType{});
     }
 }
 
@@ -53,8 +53,8 @@ TEST(EvaluationTestSuite, FloatLiteralTest) {
     };
 
     for (const auto& [input, expected] : expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::Float>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Float>(evaluated, expected);
     }
 }
 
@@ -72,7 +72,7 @@ TEST(EvaluationTestSuite, StringLiteralTest) {
     };
 
     for (const auto& [input, expected] : expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::String>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::String>(evaluated, expected);
     }
 }

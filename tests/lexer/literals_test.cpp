@@ -3,9 +3,9 @@
 TEST(LexerTestSuite, ReadIntAndFloat) {
     std::string code = "123 9.1 33.091234 900";
 
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
 
-    std::vector<ItmoScript::Token> expected = {
+    std::vector<itmoscript::Token> expected = {
         {TT::kInt, "123"},
         {TT::kFloat, "9.1"},
         {TT::kFloat, "33.091234"},
@@ -19,9 +19,9 @@ TEST(LexerTestSuite, ReadIntAndFloat) {
 TEST(LexerTestSuite, ReadStringLiteral) {
     std::string code = R"("Hello World" "biba'boba" "123456" "\"" "\\")";
 
-    ItmoScript::Lexer lexer{code};
+    itmoscript::Lexer lexer{code};
 
-    std::vector<ItmoScript::Token> expected = {
+    std::vector<itmoscript::Token> expected = {
         {TT::kStringLiteral, R"("Hello World")"},
         {TT::kStringLiteral, R"("biba'boba")"},
         {TT::kStringLiteral, R"("123456")"},

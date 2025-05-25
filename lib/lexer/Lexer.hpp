@@ -9,7 +9,7 @@
 #include <memory>
 #include <sstream>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 /**
  * @class Lexer
@@ -63,7 +63,7 @@ private:
     std::unique_ptr<std::istream> owned_input_;
     std::istream* input_;
 
-    Token last_token_{.type = TokenType::kIllegal};
+    Token last_token_{.type = TokenType::kEOF};
     char current_char_ = 0;
 
     size_t current_line_{0};
@@ -120,4 +120,4 @@ private:
     Token LookupIdentifier(const std::string& word) const;
 };
     
-} // namespace ItmoScript
+} // namespace itmoscript

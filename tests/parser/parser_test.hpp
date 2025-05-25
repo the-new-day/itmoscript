@@ -5,7 +5,7 @@
 
 #include "lib/interpreter.hpp"
 
-using TT = ItmoScript::TokenType;
+using TT = itmoscript::TokenType;
 
 template<typename T>
 struct PrefixOpExpr {
@@ -22,61 +22,41 @@ struct InfixOpExpr {
     R right_value;
 };
 
-static std::string GetPrintableParserErrors(ItmoScript::Parser& parser) {
-    const auto& errors = parser.GetErrors();
 
-    std::ostringstream msg;
-
-    if (!errors.empty()) {
-        msg << "parser has " << errors.size() << " errors:\n";
-        for (const auto& error : errors) {
-            msg << std::format("Ln {}, Col {}: {}", error.token.line, error.token.column, error.message) << '\n';
-        }
-    }
-
-    return msg.str();
-}
-
-static void CheckParserErrors(ItmoScript::Parser& parser, int expected_amount = 0) {
-    std::string errors = GetPrintableParserErrors(parser);
-    ASSERT_EQ(parser.GetErrors().size(), expected_amount) << errors;
-}
-
-static ItmoScript::Program GetParsedProgram(const std::string& code) {
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
+static itmoscript::Program GetParsedProgram(const std::string& code) {
+    itmoscript::Lexer lexer{code};
+    itmoscript::Parser parser{lexer};
+    itmoscript::Program program = parser.ParseProgram();
     return program;
 }
 
-static void TestIntegerLiteral(std::unique_ptr<ItmoScript::Expression>& int_literal_expr, int64_t expected_value) {
-    auto* literal = dynamic_cast<ItmoScript::IntegerLiteral*>(int_literal_expr.get());
+static void TestIntegerLiteral(std::unique_ptr<itmoscript::Expression>& int_literal_expr, int64_t expected_value) {
+    auto* literal = dynamic_cast<itmoscript::IntegerLiteral*>(int_literal_expr.get());
     ASSERT_NE(literal, nullptr);
 
     ASSERT_EQ(literal->value, expected_value);
     ASSERT_EQ(literal->token.literal, std::to_string(expected_value));
 }
 
-static void TestFloatLiteral(std::unique_ptr<ItmoScript::Expression>& float_literal_expr, double expected_value) {
-    auto* literal = dynamic_cast<ItmoScript::FloatLiteral*>(float_literal_expr.get());
+static void TestFloatLiteral(std::unique_ptr<itmoscript::Expression>& float_literal_expr, double expected_value) {
+    auto* literal = dynamic_cast<itmoscript::FloatLiteral*>(float_literal_expr.get());
     ASSERT_NE(literal, nullptr);
     ASSERT_EQ(literal->value, expected_value);
 }
 
-static void TestStringLiteral(std::unique_ptr<ItmoScript::Expression>& string_literal_expr, std::string expected_value) {
-    auto* literal = dynamic_cast<ItmoScript::StringLiteral*>(string_literal_expr.get());
+static void TestStringLiteral(std::unique_ptr<itmoscript::Expression>& string_literal_expr, std::string expected_value) {
+    auto* literal = dynamic_cast<itmoscript::StringLiteral*>(string_literal_expr.get());
     ASSERT_NE(literal, nullptr);
     ASSERT_EQ(literal->value, expected_value);
 }
 
-static void TestNullTypeLiteral(std::unique_ptr<ItmoScript::Expression>& null_literal_expr) {
-    auto* literal = dynamic_cast<ItmoScript::NullTypeLiteral*>(null_literal_expr.get());
+static void TestNullTypeLiteral(std::unique_ptr<itmoscript::Expression>& null_literal_expr) {
+    auto* literal = dynamic_cast<itmoscript::NullTypeLiteral*>(null_literal_expr.get());
     ASSERT_NE(literal, nullptr);
 }
 
-static void TestIdentifier(std::unique_ptr<ItmoScript::Expression>& ident_expr, const std::string& expected_value) {
-    auto* ident = dynamic_cast<ItmoScript::Identifier*>(ident_expr.get());
+static void TestIdentifier(std::unique_ptr<itmoscript::Expression>& ident_expr, const std::string& expected_value) {
+    auto* ident = dynamic_cast<itmoscript::Identifier*>(ident_expr.get());
     ASSERT_NE(ident, nullptr);
 
     std::string name = ident->name;
@@ -84,8 +64,8 @@ static void TestIdentifier(std::unique_ptr<ItmoScript::Expression>& ident_expr, 
     ASSERT_EQ(ident->token.literal, expected_value);
 }
 
-static void TestBooleanLiteral(std::unique_ptr<ItmoScript::Expression>& int_literal_expr, bool expected_value) {
-    auto* bool_literal = dynamic_cast<ItmoScript::BooleanLiteral*>(int_literal_expr.get());
+static void TestBooleanLiteral(std::unique_ptr<itmoscript::Expression>& int_literal_expr, bool expected_value) {
+    auto* bool_literal = dynamic_cast<itmoscript::BooleanLiteral*>(int_literal_expr.get());
     ASSERT_NE(bool_literal, nullptr);
 
     bool bool_value = bool_literal->value;
@@ -94,7 +74,7 @@ static void TestBooleanLiteral(std::unique_ptr<ItmoScript::Expression>& int_lite
 }
 
 template<typename T>
-void TestLiteralExpression(std::unique_ptr<ItmoScript::Expression>& expr, T expected) {
+void TestLiteralExpression(std::unique_ptr<itmoscript::Expression>& expr, T expected) {
     if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, const char*>) {
         TestIdentifier(expr, expected);
     } else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, int>) {
@@ -107,8 +87,8 @@ void TestLiteralExpression(std::unique_ptr<ItmoScript::Expression>& expr, T expe
 }
 
 template<typename L, typename R>
-void TestInfixExpression(std::unique_ptr<ItmoScript::Expression>& expr, L left, std::string oper, R right) {
-    auto* infix_expr = dynamic_cast<ItmoScript::InfixExpression*>(expr.get());
+void TestInfixExpression(std::unique_ptr<itmoscript::Expression>& expr, L left, std::string oper, R right) {
+    auto* infix_expr = dynamic_cast<itmoscript::InfixExpression*>(expr.get());
     ASSERT_NE(infix_expr, nullptr);
     ASSERT_NE(infix_expr->right, nullptr);
     ASSERT_NE(infix_expr->left, nullptr);
@@ -126,7 +106,7 @@ void TestInfixLiteralsExpressions(const std::vector<InfixOpExpr<L, R>>& expressi
         const auto& statements = program.GetStatements();
         ASSERT_EQ(statements.size(), 1) << "parser returned more than 1 statement, got " << statements.size() << '\n';
 
-        auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[0].get());
+        auto* expr_stmt = dynamic_cast<itmoscript::ExpressionStatement*>(statements[0].get());
         ASSERT_NE(expr_stmt, nullptr);
         ASSERT_NE(expr_stmt->expr, nullptr);
 
@@ -142,11 +122,11 @@ void TestPrefixLiteralsExpressions(const std::vector<PrefixOpExpr<L>>& expressio
         const auto& statements = program.GetStatements();
         ASSERT_EQ(statements.size(), 1);
 
-        auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(statements[0].get());
+        auto* expr_stmt = dynamic_cast<itmoscript::ExpressionStatement*>(statements[0].get());
         ASSERT_NE(expr_stmt, nullptr);
         ASSERT_NE(expr_stmt->expr, nullptr);
 
-        auto* prefix_expr = dynamic_cast<ItmoScript::PrefixExpression*>(expr_stmt->expr.get());
+        auto* prefix_expr = dynamic_cast<itmoscript::PrefixExpression*>(expr_stmt->expr.get());
         ASSERT_NE(prefix_expr, nullptr);
         ASSERT_NE(prefix_expr->right, nullptr);
 
@@ -157,21 +137,21 @@ void TestPrefixLiteralsExpressions(const std::vector<PrefixOpExpr<L>>& expressio
 }
 
 template<typename T>
-void TestStatement(const std::unique_ptr<ItmoScript::Statement>& stmt, const std::string& expected) {
+void TestStatement(const std::unique_ptr<itmoscript::Statement>& stmt, const std::string& expected) {
     auto* body = dynamic_cast<T*>(stmt.get());
     ASSERT_NE(body, nullptr);
     ASSERT_EQ(body->String(), expected);
 }
 
-static ItmoScript::ExpressionStatement* GetExpressionStatement(const std::unique_ptr<ItmoScript::Statement>& stmt) {
-    auto* expr_stmt = dynamic_cast<ItmoScript::ExpressionStatement*>(stmt.get());
+static itmoscript::ExpressionStatement* GetExpressionStatement(const std::unique_ptr<itmoscript::Statement>& stmt) {
+    auto* expr_stmt = dynamic_cast<itmoscript::ExpressionStatement*>(stmt.get());
     EXPECT_NE(expr_stmt, nullptr);
     EXPECT_NE(expr_stmt->expr, nullptr);
     return expr_stmt;
 }
 
-static ItmoScript::BlockStatement* GetBlockStatement(const std::unique_ptr<ItmoScript::Statement>& stmt) {
-    auto* block_stmt = dynamic_cast<ItmoScript::BlockStatement*>(stmt.get());
+static itmoscript::BlockStatement* GetBlockStatement(const std::unique_ptr<itmoscript::Statement>& stmt) {
+    auto* block_stmt = dynamic_cast<itmoscript::BlockStatement*>(stmt.get());
     EXPECT_NE(block_stmt, nullptr);
     return block_stmt;
 }

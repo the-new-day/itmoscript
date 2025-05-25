@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ItmoScript {
+namespace itmoscript {
 
 struct Program;
 struct ExpressionStatement;
@@ -49,4 +49,4 @@ public:
     virtual void Visit(ContinueStatement&) = 0;
 };
 
-} // namespace ItmoScript
+} // namespace itmoscript

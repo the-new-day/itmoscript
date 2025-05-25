@@ -1,21 +1,21 @@
 #include "TypeSystem.hpp"
 
-namespace ItmoScript {
+namespace itmoscript {
 
 TypeSystem::TypeSystem() {
     RegisterConversion<Int, Float>([](Int value) { return static_cast<Float>(value); });
     RegisterConversion<Float, Int>([](Float value) { return static_cast<Int>(value); });
 }
 
-bool TypeSystem::CanConvert(std::type_index from, std::type_index to) const {
+bool TypeSystem::CanConvert(ValueType from, ValueType to) const {
     auto key = std::make_pair(from, to);
     return from == to || converters_.contains(key);
 }
 
-std::optional<Value> TypeSystem::TryConvert(const Value& v, std::type_index target) const {
-    if (target == v.GetTypeIndex()) return v;
+std::optional<Value> TypeSystem::TryConvert(const Value& v, ValueType target) const {
+    if (target == v.GetType()) return v;
 
-    auto key = std::make_pair(v.GetTypeIndex(), target);
+    auto key = std::make_pair(v.GetType(), target);
     if (converters_.contains(key)) {
         return std::invoke(converters_.at(key), v);
     }
@@ -23,17 +23,17 @@ std::optional<Value> TypeSystem::TryConvert(const Value& v, std::type_index targ
     return std::nullopt;
 }
 
-std::optional<std::type_index> TypeSystem::FindCommonType(const Value& a, const Value& b) const {
-    static const std::vector<std::type_index> type_priority = {
-        typeid(Float),
-        typeid(Int),
-        typeid(String),
-        typeid(Bool),
+std::optional<ValueType> TypeSystem::FindCommonType(const Value& a, const Value& b) const {
+    static const std::vector<ValueType> type_priority = {
+        ValueType::kFloat,
+        ValueType::kInt,
+        ValueType::kString,
+        ValueType::kBool
     };
     
     for (auto t : type_priority) {
-        if (CanConvert(a.GetTypeIndex(), t) && 
-            CanConvert(b.GetTypeIndex(), t)) {
+        if (CanConvert(a.GetType(), t) && 
+            CanConvert(b.GetType(), t)) {
             return t;
         }
     }
@@ -41,4 +41,4 @@ std::optional<std::type_index> TypeSystem::FindCommonType(const Value& a, const 
     return std::nullopt;
 }
 
-} // namespace ItmoScript
+} // namespace itmoscript

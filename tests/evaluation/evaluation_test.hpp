@@ -6,47 +6,27 @@
 
 #include "lib/interpreter.hpp"
 
-using Value = ItmoScript::Value;
+using IsValue = itmoscript::Value;
+using IsValueType = itmoscript::ValueType;
 
-static std::string GetPrintableParserErrors(ItmoScript::Parser& parser) {
-    const auto& errors = parser.GetErrors();
-
-    std::ostringstream msg;
-
-    if (!errors.empty()) {
-        msg << "parser has " << errors.size() << " errors:\n";
-        for (const auto& error : errors) {
-            msg << std::format("Ln {}, Col {}: {}", error.token.line, error.token.column, error.message) << '\n';
-        }
-    }
-
-    return msg.str();
-}
-
-static void CheckParserErrors(ItmoScript::Parser& parser, int expected_amount = 0) {
-    std::string errors = GetPrintableParserErrors(parser);
-    ASSERT_EQ(parser.GetErrors().size(), expected_amount) << errors;
-}
-
-static ItmoScript::Program GetParsedProgram(const std::string& code) {
-    ItmoScript::Lexer lexer{code};
-    ItmoScript::Parser parser{lexer};
-    ItmoScript::Program program = parser.ParseProgram();
-    CheckParserErrors(parser);
+static itmoscript::Program GetParsedProgram(const std::string& code) {
+    itmoscript::Lexer lexer{code};
+    itmoscript::Parser parser{lexer};
+    itmoscript::Program program = parser.ParseProgram();
     return program;
 }
 
-static ItmoScript::Value Eval(const std::string& input) {
-    ItmoScript::Evaluator evaluator;
-    ItmoScript::Program program = GetParsedProgram(input);
+static itmoscript::Value Eval(const std::string& input) {
+    itmoscript::Evaluator evaluator;
+    itmoscript::Program program = GetParsedProgram(input);
     evaluator.Interpret(program);
     return evaluator.GetResult();
 }
 
 template<typename T>
-void TestValue(const Value& value, T expected) {
+void TestValue(const IsValue& value, T expected) {
     ASSERT_TRUE(value.IsOfType<T>()) 
-        << "real type of " << value.ToString() << " is: " << ItmoScript::kValueTypeNames.at(value.GetType());
+        << "real type of " << value.ToString() << " is: " << itmoscript::kValueTypeNames.at(value.GetType());
     
     ASSERT_EQ(value.Get<T>(), expected);
 }

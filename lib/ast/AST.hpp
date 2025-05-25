@@ -8,7 +8,7 @@
 #include "lexer/Lexer.hpp"
 #include "Visitor.hpp"
 
-namespace ItmoScript {
+namespace itmoscript {
 
 struct Node {
     Node(const Token& token)
@@ -208,4 +208,4 @@ struct ContinueStatement : public Statement {
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 };
 
-} // namespace ItmoScript
+} // namespace itmoscript

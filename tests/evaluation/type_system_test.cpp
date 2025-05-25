@@ -1,15 +1,20 @@
 #include "evaluation_test.hpp"
 
-TEST(EvaluationTestSuite, TypeConversionTest) {
-    ItmoScript::TypeSystem type_system;
+using TS = itmoscript::TypeSystem;
 
-    std::vector<std::tuple<Value, std::type_index, Value>> expressions{
-        {*type_system.TryConvert(Value(10), typeid(ItmoScript::Float)), typeid(ItmoScript::Float), Value(10.0)},
-        {*type_system.TryConvert(Value(10.4), typeid(ItmoScript::Int)), typeid(ItmoScript::Int), Value(10)},
+TEST(EvaluationTestSuite, TypeConversionTest) {
+    itmoscript::TypeSystem type_system;
+    auto float_type = TS::GetValueType<itmoscript::Float>();
+    auto int_type = TS::GetValueType<itmoscript::Int>();
+
+    // <converted, to, expected>
+    std::vector<std::tuple<IsValue, IsValueType, IsValue>> expressions{
+        {*type_system.TryConvert(IsValue(10), float_type), float_type, IsValue(10.0)},
+        {*type_system.TryConvert(IsValue(10.4), int_type), int_type, IsValue(10)},
     };
 
     for (const auto& [src, type, converted] : expressions) {
-        ASSERT_EQ(converted.GetTypeIndex(), type);
+        ASSERT_EQ(converted.GetType(), type);
         ASSERT_EQ(src, converted);
     }
 }

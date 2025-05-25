@@ -1,31 +1,42 @@
 #pragma once
 
 #include <optional>
+#include <expected>
 #include <string_view>
 #include <charconv>
 #include <cstdint>
-#include <typeindex>
 #include <string>
 #include <type_traits>
+#include <concepts>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 // TODO: make utils.cpp and link it, don't use static functions here
 
-namespace Utils {
+namespace utils {
 
-template<typename T>
-std::optional<T> ParseNumber(std::string_view str) {
+template<std::integral T>
+std::expected<T, std::errc> ParseNumber(std::string_view str, int base = 10) {
+    T result;
+    std::from_chars_result convertion_result = std::from_chars(str.data(), str.data() + str.size(), result, base);
+
+    if (convertion_result.ptr != str.end() || convertion_result.ec == std::errc::result_out_of_range) {
+        return std::unexpected{convertion_result.ec};
+    } else {
+        return result;
+    }
+}
+
+template<std::floating_point T>
+std::expected<T, std::errc> ParseNumber(std::string_view str) {
     T result;
     std::from_chars_result convertion_result = std::from_chars(str.data(), str.data() + str.size(), result);
 
-    if (convertion_result.ec == std::errc::invalid_argument || convertion_result.ptr != str.end()) {
-        return std::nullopt;
-    } else if (convertion_result.ec == std::errc::result_out_of_range) {
-        return std::nullopt;
+    if (convertion_result.ptr != str.end() || convertion_result.ec == std::errc::result_out_of_range) {
+        return std::unexpected{convertion_result.ec};
+    } else {
+        return result;
     }
-
-    return result;
 }
 
 static int64_t FastPow(int64_t base, uint64_t exponent) {
@@ -58,13 +69,6 @@ static double FastPowNeg(int64_t base, int64_t exponent) {
     return (exponent < 0) ? (1.0 / result) : result;
 }
 
-struct TypePairHash {
-    size_t operator()(const std::pair<std::type_index, std::type_index>& p) const {
-        return std::hash<std::type_index>()(p.first) ^ 
-            (std::hash<std::type_index>()(p.second) << 1);
-    }
-};
-
 static std::optional<std::string> MultiplyStr(const std::string& str, double times) {
     if (times < 0) return std::nullopt;
 
@@ -85,7 +89,7 @@ static std::optional<std::string> MultiplyStr(const std::string& str, double tim
 
     return result;
 }
-    
-} // namespace Utils
 
-} // namespace ItmoScript
+} // namespace utils
+
+} // namespace itmoscript

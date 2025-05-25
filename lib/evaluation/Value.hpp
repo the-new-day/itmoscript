@@ -8,7 +8,7 @@
 #include <typeindex>
 #include <concepts>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 /**
  * @brief Represents a function value in the language.
@@ -20,6 +20,9 @@ struct Function {
     }
 };
 
+// TODO: implement
+struct List {};
+
 using NullType = std::monostate; // Represents the null value.
 using Int = int64_t;             // Integer type used in the language.
 using Float = double;            // Floating-point type used in the language.
@@ -27,13 +30,10 @@ using String = std::string;      // String type used in the language.
 using Bool = bool;               // Bool type used in the language.
 
 /**
- * @brief Concept to constrain supported types for Value class.
- * 
- * Supports exact types and types convertible to Int or Float.
- * This enables implicit conversions like int -> int64_t and float -> double.
+ * @brief Concept to constrain core language types for Value class.
  */
 template<typename T>
-concept SupportedValueType = 
+concept CoreValueType = 
     std::same_as<T, NullType> ||
     std::same_as<T, Int> || std::convertible_to<T, Int> ||
     std::same_as<T, Float> || std::convertible_to<T, Float> ||
@@ -43,6 +43,7 @@ concept SupportedValueType =
 
 /**
  * @brief Concept to constrain supported numeric types for Value class.
+ * @details Current supported numeric types are: Int, Float.
  */
 template<typename T>
 concept NumericValueType = 
@@ -59,6 +60,14 @@ enum class ValueType {
     kFunction
 };
 
+/** @brief Hasher for std::pair<ValueType, ValueType>. Used for std::unordered_map of type converters. */
+struct ValueTypePairHash {
+    size_t operator()(const std::pair<ValueType, ValueType>& p) const {
+        return std::hash<ValueType>()(p.first) ^ 
+            (std::hash<ValueType>()(p.second) << 1);
+    }
+};
+
 /**
  * @class Value
  * @brief Represents a dynamically-typed value in the ItmoScript language.
@@ -72,38 +81,31 @@ public:
      * @brief Constructs a Value from any supported type or convertible type.
      * 
      * Allows implicit conversions from int, float, etc. to Value.
-     * @tparam T Must satisfy SupportedValueType concept.
+     * @tparam T Must satisfy CoreValueType concept.
      * @param val The value to store.
      */
-    template<SupportedValueType T>
+    template<CoreValueType T>
     Value(const T& val)
         : data_(val) {}
 
+    /**
+     * @brief Constructs a Value with NullType.
+     */
     Value() = default;
 
     /** @brief Returns the ValueType enum corresponding to the stored type. */
     ValueType GetType() const;
 
-    /** @brief Returns the std::type_index corresponding to the stored type. */
-    std::type_index GetTypeIndex() const;
-
     bool IsOfType(ValueType type) const;
     
     /**
      * @brief Checks if the stored value is of type T.
-     * @tparam T The type to check. Must satisfy SupportedValueType concept.
+     * @tparam T The type to check. Must satisfy CoreValueType concept.
      */
-    template<SupportedValueType T>
+    template<CoreValueType T>
     bool IsOfType() const {
         return std::holds_alternative<T>(data_);
     }
-
-    bool IsNullType() const;
-    bool IsInt() const;
-    bool IsFloat() const;
-    bool IsString() const;
-    bool IsBool() const;
-    bool IsFunction() const;
 
     /**
      * @brief Checks if the stored value is truthy according to language rules.
@@ -114,17 +116,17 @@ public:
     /**
      * @brief Returns the stored value casted to type T.
      * 
-     * @tparam T Must satisfy SupportedValueType.
+     * @tparam T Must satisfy CoreValueType.
      * @return The stored value.
      * @throws std::bad_variant_access if type does not match.
      */
-    template<SupportedValueType T>
+    template<CoreValueType T>
     T Get() const {
         return std::get<T>(data_);
     }
 
-    /** @tparam T Must satisfy SupportedValueType. */
-    template<SupportedValueType T>
+    /** @tparam T Must satisfy CoreValueType. */
+    template<CoreValueType T>
     Value& operator=(const T& value) {
         data_ = value;
         return *this;
@@ -149,7 +151,7 @@ private:
         Function
     >;
 
-    Type data_;
+    Type data_ = NullType{};
 };
 
 /** @brief Mapping from ValueType enum to string names for debugging/logging. */
@@ -162,4 +164,4 @@ const std::map<ValueType, std::string> kValueTypeNames{
     {ValueType::kFunction, "Function"},
 };
 
-} // namespace ItmoScript
+} // namespace itmoscript

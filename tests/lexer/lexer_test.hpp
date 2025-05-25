@@ -7,13 +7,22 @@
 
 #include "lib/lexer/Lexer.hpp"
 
-using TT = ItmoScript::TokenType;
+using TT = itmoscript::TokenType;
 
-static void CompareTokens(ItmoScript::Lexer& lexer, const std::vector<ItmoScript::Token>& expected) {
-    std::vector<ItmoScript::Token> tokens;
+// static std::string Join(const std::vector<itmoscript::Token>& tokens, const std::string& glue = "") {
+//     std::string result;
+//     for (size_t i = 0; i < tokens.size(); ++i) {
+//         result += tokens[i].literal;
+//         if (i != tokens.size() - 1) result += glue;
+//     }
+//     return result;
+// }
+
+static void CompareTokens(itmoscript::Lexer& lexer, const std::vector<itmoscript::Token>& expected) {
+    std::vector<itmoscript::Token> tokens;
 
     while (lexer.HasNextToken()) {
-        ItmoScript::Token token = lexer.GetNextToken();
+        itmoscript::Token token = lexer.GetNextToken();
         tokens.push_back(std::move(token));
     }
 
@@ -24,17 +33,23 @@ static void CompareTokens(ItmoScript::Lexer& lexer, const std::vector<ItmoScript
     ASSERT_EQ(tokens.size(), expected.size());
 
     for (size_t i = 0; i < tokens.size(); ++i) {
-        ItmoScript::Token real_token = tokens[i];
-        ItmoScript::Token expected_token = expected[i];
+        itmoscript::Token real_token = tokens[i];
+        itmoscript::Token expected_token = expected[i];
 
         ASSERT_EQ(real_token.type, expected_token.type) 
             << std::format(
                 "expected {}, got {} for token {}\n", 
-                ItmoScript::kTokenTypeNames.at(expected_token.type),
-                ItmoScript::kTokenTypeNames.at(real_token.type),
+                itmoscript::kTokenTypeNames.at(expected_token.type),
+                itmoscript::kTokenTypeNames.at(real_token.type),
                 i
             );
             
-        ASSERT_EQ(real_token.literal, expected_token.literal);
+        ASSERT_EQ(real_token.literal, expected_token.literal)
+            << std::format(
+                "expected {}, got {} for token {}\n", 
+                real_token.literal,
+                expected_token.literal,
+                i
+            );
     }
 }

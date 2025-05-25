@@ -1,8 +1,9 @@
 #include "Lexer.hpp"
+#include "SyntaxError.hpp"
 
 #include <algorithm>
 
-namespace ItmoScript {
+namespace itmoscript {
 
 Token Lexer::GetNextToken() {
     char current = ReadChar();
@@ -39,8 +40,7 @@ Token Lexer::GetNextToken() {
     } else if (current == '\n') {
         token.type = TokenType::kNewLine;
     } else {
-        token.type = TokenType::kIllegal;
-        token.literal = std::string{current};
+        throw lang_exceptions::SyntaxError{current_line_, current_col_};
     }
 
     SetTokenPosition(token);
@@ -51,7 +51,7 @@ Token Lexer::GetNextToken() {
 }
 
 bool Lexer::HasNextToken() const {
-    return last_token_.type != TokenType::kEOF && !input_->eof();
+    return !input_->eof();
 }
 
 char Lexer::ReadChar() {
@@ -129,12 +129,10 @@ Token Lexer::ReadNumber() {
         token.type = TokenType::kFloat;
     }
 
+    // TODO: add notation (1.23e-1)
+
     if (IsIdentifierChar(PeekChar())) {
-        token.type = TokenType::kIllegal;
-        
-        while (IsIdentifierChar(PeekChar())) {
-            word += ReadChar();
-        }
+        throw lang_exceptions::SyntaxError{current_line_, current_col_ + word.size()};
     }
 
     SetTokenPosition(token);
@@ -150,9 +148,11 @@ Token Lexer::ReadStringLiteral() {
     std::string word(1, current_char_);
     while (PeekChar() != '"') {
         if (!HasNextToken()) {
-            token.type = TokenType::kIllegal;
-            token.literal = std::move(word);
-            return token;
+            throw lang_exceptions::SyntaxError{
+                current_line_, 
+                current_col_ + word.size(), 
+                "unexpected end of a string"
+            };
         }
         
         word += ReadChar();

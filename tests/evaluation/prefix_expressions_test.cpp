@@ -20,8 +20,8 @@ TEST(EvaluationTestSuite, BangOperatorTest) {
     };
 
     for (const auto& [input, expected] : expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::Bool>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Bool>(evaluated, expected);
     }
 }
 
@@ -32,8 +32,8 @@ TEST(EvaluationTestSuite, UnaryMinusOperatorTest) {
     };
 
     for (const auto& [input, expected] : int_expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::Int>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Int>(evaluated, expected);
     }
 
     std::vector<std::pair<std::string, double>> float_expressions{
@@ -42,8 +42,8 @@ TEST(EvaluationTestSuite, UnaryMinusOperatorTest) {
     };
 
     for (const auto& [input, expected] : float_expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::Float>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Float>(evaluated, expected);
     }
 }
 
@@ -54,8 +54,8 @@ TEST(EvaluationTestSuite, UnaryPlusOperatorTest) {
     };
 
     for (const auto& [input, expected] : int_expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::Int>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Int>(evaluated, expected);
     }
 
     std::vector<std::pair<std::string, double>> float_expressions{
@@ -64,7 +64,7 @@ TEST(EvaluationTestSuite, UnaryPlusOperatorTest) {
     };
 
     for (const auto& [input, expected] : float_expressions) {
-        Value evaluated = Eval(input);
-        TestValue<ItmoScript::Float>(evaluated, expected);
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Float>(evaluated, expected);
     }
 }
