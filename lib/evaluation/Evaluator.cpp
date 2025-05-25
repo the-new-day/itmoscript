@@ -33,14 +33,6 @@ Evaluator::Evaluator() {
     operator_registry_.RegisterAllComparisonOps<Int>();
     operator_registry_.RegisterAllComparisonOps<Float>();
     operator_registry_.RegisterAllComparisonOps<String>();
-    
-    operator_registry_.RegisterBinaryOper<Bool, Bool>("==", [](const Value& left, const Value& right) {
-        return left.Get<Bool>() == right.Get<Bool>();
-    });
-    
-    operator_registry_.RegisterBinaryOper<Bool, Bool>("!=", [](const Value& left, const Value& right) {
-        return left.Get<Bool>() != right.Get<Bool>();
-    });
 
     operator_registry_.RegisterCommutativeOperatorForAllTypes<NullType>("==", [](const Value& left, const Value& right) {
         return left.IsOfType<NullType>() && right.IsOfType<NullType>();
@@ -71,7 +63,13 @@ Evaluator::Evaluator() {
     //     return left.IsTruphy() && right.IsTruphy();
     // });
 
-    // TODO: add comparison with bool (5 == true)
+    operator_registry_.RegisterCommutativeOperatorForAllTypes<Bool>("==", [](const Value& left, const Value& right) {
+        return left.IsTruphy() == right.IsTruphy();
+    });
+
+    operator_registry_.RegisterCommutativeOperatorForAllTypes<Bool>("!=", [](const Value& left, const Value& right) {
+        return left.IsTruphy() != right.IsTruphy();
+    });
 }
 
 void Evaluator::Interpret(Program& root) {
