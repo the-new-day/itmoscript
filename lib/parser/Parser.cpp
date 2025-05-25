@@ -22,6 +22,7 @@ Parser::Parser(Lexer& lexer)
     prefix_parse_funcs_[TokenType::kBang] = [this]() { return this->ParsePrefixExpression(); };
     prefix_parse_funcs_[TokenType::kMinus] = [this]() { return this->ParsePrefixExpression(); };
     prefix_parse_funcs_[TokenType::kPlus] = [this]() { return this->ParsePrefixExpression(); };
+    prefix_parse_funcs_[TokenType::kNot] = [this]() { return this->ParsePrefixExpression(); };
     prefix_parse_funcs_[TokenType::kTrue] = [this]() { return this->ParseBooleanLiteral(); };
     prefix_parse_funcs_[TokenType::kFalse] = [this]() { return this->ParseBooleanLiteral(); };
     prefix_parse_funcs_[TokenType::kLParen] = [this]() { return this->ParseGroupedExpression(); };

@@ -2,6 +2,15 @@
 
 namespace itmoscript {
 
+void OperatorRegistry::RegisterCommutativeOperatorForAllPairsOfTypes(const std::string& oper, BinaryHandler handler) {
+    RegisterCommutativeOperatorForAllTypes<NullType>(oper, handler);
+    RegisterCommutativeOperatorForAllTypes<Int>(oper, handler);
+    RegisterCommutativeOperatorForAllTypes<Float>(oper, handler);
+    RegisterCommutativeOperatorForAllTypes<String>(oper, handler);
+    RegisterCommutativeOperatorForAllTypes<Bool>(oper, handler);
+    RegisterCommutativeOperatorForAllTypes<Function>(oper, handler);
+}
+
 void OperatorRegistry::RegisterUnaryOperatorForAllTypes(const std::string& oper, UnaryHandler handler) {
     RegisterUnaryOper<NullType>(oper, handler);
     RegisterUnaryOper<Int>(oper, handler);

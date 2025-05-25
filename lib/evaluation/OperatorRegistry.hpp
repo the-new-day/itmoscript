@@ -25,6 +25,8 @@ public:
     template<CoreValueType T>
     void RegisterCommutativeOperatorForAllTypes(const std::string& oper, BinaryHandler handler);
 
+    void RegisterCommutativeOperatorForAllPairsOfTypes(const std::string& oper, BinaryHandler handler);
+
     void RegisterUnaryOperatorForAllTypes(const std::string& oper, UnaryHandler handler);
 
     template<CoreValueType T>

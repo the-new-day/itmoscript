@@ -114,3 +114,20 @@ TEST(EvaluationTestSuite, NullComparisonTest) {
         TestValue<itmoscript::Bool>(evaluated, expected);
     }
 }
+
+TEST(EvaluationTestSuite, LogicalOperatorsTest) {
+    std::vector<std::pair<std::string, bool>> expressions{
+        {"true and true", true},
+        {"true or true", true},
+        {"true or false", true},
+        {"false or false", false},
+        {"false and false", false},
+        {"not false", true},
+        {"not true", false},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Bool>(evaluated, expected);
+    }
+}

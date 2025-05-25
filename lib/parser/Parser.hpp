@@ -35,6 +35,8 @@ const std::map<TokenType, Precedence> kPrecedences{
     {TokenType::kGreater, Precedence::kLessGreater},
     {TokenType::kLessOrEqual, Precedence::kLessGreater},
     {TokenType::kGreaterOrEqual, Precedence::kLessGreater},
+    {TokenType::kAnd, Precedence::kLessGreater},
+    {TokenType::kOr, Precedence::kLessGreater},
     {TokenType::kPlus, Precedence::kSum},
     {TokenType::kMinus, Precedence::kSum},
     {TokenType::kPercent, Precedence::kSum},

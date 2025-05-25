@@ -19,6 +19,8 @@ TEST(ParserTestSuite, BooleanPrefixOperatorsTest) {
     std::vector<PrefixOpExpr<bool>> expressions{
         {"!true", "!", true},
         {"!false", "!", false},
+        {"not true", "not", true},
+        {"not false", "not", false},
     };
 
     TestPrefixLiteralsExpressions<bool>(expressions);
@@ -50,6 +52,8 @@ TEST(ParserTestSuite, BooleanInfixOperatorsTest) {
         {"true == false", "==", true, false},
         {"true == true", "==", true, true},
         {"true != false", "!=", true, false},
+        {"true and false", "and", true, false},
+        {"true or false", "or", true, false},
     };
     
     TestInfixLiteralsExpressions<bool>(expressions);

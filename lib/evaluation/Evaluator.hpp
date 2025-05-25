@@ -68,8 +68,13 @@ private:
 
     template<NumericValueType T>
     void RegisterStringMultiplication();
-
-    void AddError(const std::string& message);
+    
+    void RegisterTypeConversions();
+    void RegisterAriphmeticOps();
+    void RegisterUnaryOps();
+    void RegisterComparisonOps();
+    void RegisterStringOps();
+    void RegisterLogicalOps();
 };
 
 template<NumericValueType T>
