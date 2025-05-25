@@ -47,7 +47,7 @@ Evaluator::Evaluator() {
     });
 
     operator_registry_.RegisterCommutativeOperatorForAllTypes<NullType>("!=", [](const Value& left, const Value& right) {
-        return left.GetType() != right.GetType();
+        return left.type() != right.type();
     });
 
     operator_registry_.RegisterBinaryOper<String, String>("+", [](const Value& left, const Value& right) {
@@ -79,7 +79,7 @@ void Evaluator::Interpret(Program& root) {
 }
 
 std::optional<Value> Evaluator::HandleUnaryOper(const std::string& oper, const Value& right) {
-    if (auto handler = operator_registry_.FindExactHandler(oper, right.GetType())) {
+    if (auto handler = operator_registry_.FindExactHandler(oper, right.type())) {
         return std::invoke(*handler, right);
     }
 
@@ -87,16 +87,16 @@ std::optional<Value> Evaluator::HandleUnaryOper(const std::string& oper, const V
 }
 
 std::optional<Value> Evaluator::HandleBinaryOper(const std::string& oper, const Value& left, const Value& right) {
-    if (auto handler = operator_registry_.FindExactHandler(oper, left.GetType(), right.GetType())) {
+    if (auto handler = operator_registry_.FindExactHandler(oper, left.type(), right.type())) {
         return std::invoke(*handler, left, right);
     }
 
-    if (auto common = types_.FindCommonType(left, right)) {
+    if (auto common = types_.FindCommonType(left.type(), right.type())) {
         auto lhs = types_.TryConvert(left, *common);
         auto rhs = types_.TryConvert(right, *common);
 
         if (lhs && rhs) {
-            if (auto handler = operator_registry_.FindExactHandler(oper, lhs->GetType(), rhs->GetType())) {
+            if (auto handler = operator_registry_.FindExactHandler(oper, *common, *common)) {
                 return std::invoke(*handler, *lhs, *rhs);
             }
         }
@@ -163,7 +163,7 @@ void Evaluator::Visit(PrefixExpression& node) {
     if (auto new_value = HandleUnaryOper(node.oper, right)) {
         result_ = *new_value;
     } else {
-        throw lang_exceptions::OperatorTypeError{current_token_, node.oper, right.GetType()};
+        throw lang_exceptions::OperatorTypeError{current_token_, node.oper, right.type()};
     }
 }
 
@@ -175,7 +175,7 @@ void Evaluator::Visit(InfixExpression& node) {
     if (auto new_value = HandleBinaryOper(node.oper, left, right)) {
         result_ = *new_value;
     } else {
-        throw lang_exceptions::OperatorTypeError{current_token_, node.oper, left.GetType(), right.GetType()};
+        throw lang_exceptions::OperatorTypeError{current_token_, node.oper, left.type(), right.type()};
     }
 }
 

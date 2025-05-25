@@ -11,7 +11,8 @@ namespace itmoscript {
 
 /**
  * @class TypeSystem
- * @brief Holds the type conversion rules and allows implicit type conversions upon request.
+ * @brief Holds the type conversion rules and allows 
+ * implicit type conversions upon request.
  */
 class TypeSystem {
 public:
@@ -31,17 +32,17 @@ public:
     std::optional<Value> TryConvert(const Value& v, ValueType target) const;
 
     /**
-     * @brief Tries to find the common type - the type to which both values are convertible.
+     * @brief Tries to find the common type - the type to which values both types are convertible.
      * @return The common type if the conversion is found, nullopt otherwise.
-     * @details Goes through types allowed for implicit conversion in the priority order, namely:
+     * @details If a and b are of the same type, returns it. Otherwise, does the following.
+     * Goes through types allowed for implicit conversion in the priority order, namely:
      * 1. Int
      * 2. Float
-     * 3. Bool
      * 
      * If the direct conversion of both values to one of the types above is found, returns the type.
      * If no conversion is found, returns nullopt.
      */
-    std::optional<ValueType> FindCommonType(const Value& a, const Value& b) const;
+    std::optional<ValueType> FindCommonType(ValueType a, ValueType b) const;
 
     /**
      * @brief Registers a conversion from type to type.

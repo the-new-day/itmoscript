@@ -55,8 +55,9 @@ enum class ValueType {
     kNullType,
     kInt,
     kFloat,
-    kString,
     kBool,
+    
+    kString,
     kFunction
 };
 
@@ -94,7 +95,7 @@ public:
     Value() = default;
 
     /** @brief Returns the ValueType enum corresponding to the stored type. */
-    ValueType GetType() const;
+    ValueType type() const;
 
     bool IsOfType(ValueType type) const;
     
@@ -140,6 +141,8 @@ public:
      * by comparing the stored types and data.
      */
     bool operator==(const Value& other) const;
+
+    const std::string GetTypeName() const;
 
 private:
     using Type = std::variant<

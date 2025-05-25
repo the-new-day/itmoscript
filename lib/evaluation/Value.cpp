@@ -3,7 +3,7 @@
 namespace itmoscript {
 
 bool Value::IsTruphy() const {
-    switch (GetType()) {
+    switch (type()) {
         case ValueType::kNullType:
             return false;
         case ValueType::kInt:
@@ -22,7 +22,7 @@ bool Value::IsTruphy() const {
 }
 
 std::string Value::ToString() const {
-    switch (GetType()) {
+    switch (type()) {
         case ValueType::kNullType:
             return "nil";
         case ValueType::kInt:
@@ -41,14 +41,18 @@ std::string Value::ToString() const {
 }
 
 bool Value::operator==(const Value& other) const {
-    return GetType() == other.GetType() && data_ == other.data_;
+    return type() == other.type() && data_ == other.data_;
+}
+
+const std::string Value::GetTypeName() const {
+    return kValueTypeNames.at(type());
 }
 
 std::ostream& operator<<(std::ostream& stream, const Value& value) {
     return stream << value.ToString();
 }
 
-ValueType Value::GetType() const {
+ValueType Value::type() const {
     if (IsOfType<Int>()) {
         return ValueType::kInt;
     } else if (IsOfType<Float>()) {

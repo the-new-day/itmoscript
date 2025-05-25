@@ -8,11 +8,9 @@ bool TypeSystem::CanConvert(ValueType from, ValueType to) const {
 }
 
 std::optional<Value> TypeSystem::TryConvert(const Value& v, ValueType target) const {
-    if (target == v.GetType()) return v;
-    else if (target == ValueType::kBool) return v.IsTruphy(); // added this to avoid 
-                                                              // registering conversions for all types
+    if (target == v.type()) return v;
 
-    auto key = std::make_pair(v.GetType(), target);
+    auto key = std::make_pair(v.type(), target);
     if (converters_.contains(key)) {
         return std::invoke(converters_.at(key), v);
     }
@@ -20,16 +18,16 @@ std::optional<Value> TypeSystem::TryConvert(const Value& v, ValueType target) co
     return std::nullopt;
 }
 
-std::optional<ValueType> TypeSystem::FindCommonType(const Value& a, const Value& b) const {
+std::optional<ValueType> TypeSystem::FindCommonType(ValueType a, ValueType b) const {
+    if (a == b) return a;
+
     static const std::vector<ValueType> type_priority = {
         ValueType::kFloat,
         ValueType::kInt,
-        ValueType::kBool
     };
     
     for (auto t : type_priority) {
-        if (CanConvert(a.GetType(), t) && 
-            CanConvert(b.GetType(), t)) {
+        if (CanConvert(a, t) && CanConvert(b, t)) {
             return t;
         }
     }
