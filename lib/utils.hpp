@@ -8,6 +8,7 @@
 #include <string>
 #include <type_traits>
 #include <concepts>
+#include <sstream>
 
 namespace itmoscript {
 
@@ -88,6 +89,15 @@ static std::optional<std::string> MultiplyStr(const std::string& str, double tim
         result.push_back(str[i]);
 
     return result;
+}
+
+template<typename T>
+std::string Join(const std::vector<T>& objects, const std::string& glue) {
+    std::ostringstream result;
+    for (size_t i = 0; i < objects.size(); ++i) {
+        result << objects[i];
+    }
+    return result.str();
 }
 
 } // namespace utils

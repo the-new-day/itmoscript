@@ -7,13 +7,16 @@
 #include <unordered_map>
 #include <typeindex>
 
+#include "utils.hpp"
+
 #include "ast/Visitor.hpp"
 #include "ast/AST.hpp"
 #include "evaluation/Value.hpp"
 #include "evaluation/TypeSystem.hpp"
 #include "evaluation/OperatorRegistry.hpp"
 #include "evaluation/Environment.hpp"
-#include "utils.hpp"
+
+#include "evaluation/FunctionObject.hpp"
 
 #include "exceptions/OperatorTypeError.hpp"
 #include "exceptions/ZeroDivisionError.hpp"
@@ -27,7 +30,7 @@ public:
     Evaluator();
 
     void Interpret(Program& root);
-    Value GetLastEvaluatedValue() const;
+    const Value& GetLastEvaluatedValue() const;
 
     void Visit(Program&) override;
     void Visit(ExpressionStatement&) override;
@@ -66,7 +69,7 @@ private:
     std::optional<Value> HandleUnaryOper(const std::string& oper, const Value& right);
     std::optional<Value> HandleBinaryOper(const std::string& oper, const Value& left, const Value& right);
 
-    Value Eval(Node& node);
+    const Value& Eval(Node& node);
 
     template<NumericValueType T>
     void RegisterCommonAriphmeticOps();

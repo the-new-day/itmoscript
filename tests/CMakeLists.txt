@@ -40,6 +40,7 @@ add_executable(
   evaluation_units/string_operators_test.cpp
   evaluation_units/branch_test.cpp
   evaluation_units/naming_test.cpp
+  evaluation_units/functions_test.cpp
 )
 
 target_link_libraries(

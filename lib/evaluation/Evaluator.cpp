@@ -50,7 +50,7 @@ std::optional<Value> Evaluator::HandleBinaryOper(const std::string& oper, const 
     return std::nullopt;
 }
 
-Value Evaluator::Eval(Node& node) {
+const Value& Evaluator::Eval(Node& node) {
     node.Accept(*this);
     return last_evaluated_value_;
 }
@@ -136,7 +136,7 @@ void Evaluator::RegisterLogicalOps() {
     });
 }
 
-Value Evaluator::GetLastEvaluatedValue() const {
+const Value& Evaluator::GetLastEvaluatedValue() const {
     return last_evaluated_value_;
 }
 
@@ -185,7 +185,17 @@ void Evaluator::Visit(AssignStatement& stmt) {
 }
 
 void Evaluator::Visit(FunctionLiteral& func) {
-    last_evaluated_value_ = Function{};
+    auto parameters = std::make_shared<std::vector<Identifier>>();
+    parameters->reserve(func.parameters.size());
+
+    for (std::unique_ptr<Identifier>& param : func.parameters) {
+        parameters->push_back(std::move(*std::move(param)));
+    }
+
+    auto body = std::make_shared<BlockStatement>(std::move(*std::move(func.body)));
+    auto env = std::make_shared<Environment>(env_);
+
+    last_evaluated_value_ = std::make_shared<FunctionObject>(parameters, body, env);
 }
 
 void Evaluator::Visit(IfExpression& expr) {

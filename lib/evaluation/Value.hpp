@@ -8,17 +8,12 @@
 #include <typeindex>
 #include <concepts>
 
+#include "ast/AST.hpp"
+#include "Environment.hpp"
+
 namespace itmoscript {
 
-/**
- * @brief Represents a function value in the language.
- * Two Function instances are equal only if they are the exact same object.
- */
-struct Function {
-    bool operator==(const Function& other) const {
-        return this == &other;
-    }
-};
+struct FunctionObject;
 
 // TODO: implement
 struct List {};
@@ -28,6 +23,7 @@ using Int = int64_t;             // Integer type used in the language.
 using Float = double;            // Floating-point type used in the language.
 using String = std::string;      // String type used in the language.
 using Bool = bool;               // Bool type used in the language.
+using Function = std::shared_ptr<FunctionObject>;
 
 /**
  * @brief Concept to constrain core language types for Value class.
@@ -56,7 +52,7 @@ enum class ValueType {
     kInt,
     kFloat,
     kBool,
-    
+
     kString,
     kFunction
 };
@@ -118,11 +114,11 @@ public:
      * @brief Returns the stored value casted to type T.
      * 
      * @tparam T Must satisfy CoreValueType.
-     * @return The stored value.
+     * @return Const reference to the stored value.
      * @throws std::bad_variant_access if type does not match.
      */
     template<CoreValueType T>
-    T Get() const {
+    const T& Get() const {
         return std::get<T>(data_);
     }
 

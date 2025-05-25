@@ -1,4 +1,5 @@
 #include "Value.hpp"
+#include "FunctionObject.hpp"
 
 namespace itmoscript {
 
@@ -34,7 +35,7 @@ std::string Value::ToString() const {
         case ValueType::kBool:
             return Get<Bool>() ? "true" : "false";
         case ValueType::kFunction:
-            return "Function";
+            return "<Function object>";
         default:
             return "<UnknownType>";
     }
