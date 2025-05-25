@@ -104,7 +104,6 @@ TEST(EvaluationTestSuite, NullComparisonTest) {
         {"false == nil", false},
         {"5 == nil", false},
         {"5 != nil", true},
-        {"a == nil", true},
         {"nil == nil", true},
         {"nil != nil", false},
     };

@@ -173,8 +173,19 @@ void Evaluator::Visit(StringLiteral& node) {
 }
 
 void Evaluator::Visit(Identifier& ident) {
-    // TODO:
-    last_evaluated_value_ = NullType{};
+    if (!env_.Has(ident.name)) {
+        throw lang_exceptions::NameError{ident.token};
+    }
+    
+    last_evaluated_value_ = env_.Get(ident.name); // TODO: reference for heavy types, copy for primitives
+}
+
+void Evaluator::Visit(AssignStatement& stmt) {
+    env_.Set(stmt.ident->name, Eval(*stmt.expr));
+}
+
+void Evaluator::Visit(FunctionLiteral& func) {
+    last_evaluated_value_ = Function{};
 }
 
 void Evaluator::Visit(IfExpression& expr) {

@@ -108,3 +108,19 @@ TEST(EvaluationTestSuite, IfElseIfAndNoElseTest) {
         ASSERT_EQ(evaluated, expected);
     }
 }
+
+TEST(EvaluationTestSuite, IfTruphyAndUntruphyConditionsTest) {
+    std::vector<std::pair<std::string, IsValue>> expressions = {
+        {"if 1 then 10 end if", IsValue{10}},
+        {"if 0 then 10 end if", IsValue{itmoscript::NullType{}}},
+        {"if \"hello\" then 10 end if", IsValue{10}},
+        {"if \"\" then 10 end if", IsValue{itmoscript::NullType{}}},
+        {"if function() end function then 10 end if", IsValue{10}},
+        {"if nil then 10 end if", IsValue{itmoscript::NullType{}}},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        ASSERT_EQ(evaluated, expected);
+    }
+}

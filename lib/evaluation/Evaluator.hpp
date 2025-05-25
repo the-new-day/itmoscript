@@ -12,11 +12,13 @@
 #include "evaluation/Value.hpp"
 #include "evaluation/TypeSystem.hpp"
 #include "evaluation/OperatorRegistry.hpp"
+#include "evaluation/Environment.hpp"
 #include "utils.hpp"
 
 #include "exceptions/OperatorTypeError.hpp"
 #include "exceptions/ZeroDivisionError.hpp"
 #include "exceptions/SequenceMultiplicationError.hpp"
+#include "exceptions/NameError.hpp"
 
 namespace itmoscript {
     
@@ -38,14 +40,15 @@ public:
     void Visit(FloatLiteral&) override;
     void Visit(StringLiteral&) override;
 
-    void Visit(Identifier&) override; // TODO: implement
+    // TODO: implement
+    void Visit(Identifier&) override;
+    void Visit(FunctionLiteral&) override;
 
     void Visit(IfExpression&) override;
     void Visit(BlockStatement&) override;
+    void Visit(AssignStatement&) override;
 
-    void Visit(AssignStatement&) override {}
     void Visit(ReturnStatement&) override {}
-    void Visit(FunctionLiteral&) override {}
     void Visit(CallExpression&) override {}
     void Visit(WhileStatement&) override {}
     void Visit(ForStatement&) override {}
@@ -58,6 +61,7 @@ private:
 
     TypeSystem types_;
     OperatorRegistry operator_registry_;
+    Environment env_;
 
     std::optional<Value> HandleUnaryOper(const std::string& oper, const Value& right);
     std::optional<Value> HandleBinaryOper(const std::string& oper, const Value& left, const Value& right);
