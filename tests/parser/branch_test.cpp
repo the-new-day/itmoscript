@@ -72,7 +72,7 @@ TEST(ParserTestSuite, ElseIfExpressionTest) {
     std::string code = R"(
         if foobar > fizzbuzz then 
             aboba 
-        else if foobar < fizzbuzz then
+        elseif foobar < fizzbuzz then
             bibaboba
         else
             456

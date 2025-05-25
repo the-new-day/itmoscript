@@ -115,21 +115,12 @@ private:
     template<typename T>
     std::unique_ptr<T> MakeNode();
 
-    std::unique_ptr<Statement> ParseStatement();
-    std::unique_ptr<AssignStatement> ParseAssignStatement();
-    std::unique_ptr<ReturnStatement> ParseReturnStatement();
-    std::unique_ptr<ExpressionStatement> ParseExpressionStatement();
-    std::unique_ptr<BreakStatement> ParseBreakStatement();
-    std::unique_ptr<ContinueStatement> ParseContinueStatement();
-    std::unique_ptr<WhileStatement> ParseWhileStatement();
-    std::unique_ptr<ForStatement> ParseForStatement();
-
     bool IsCurrentToken(TokenType type) const;
     bool IsPeekToken(TokenType type) const;
 
     /**
      * @brief Checks whether the current token can be an end of a block statement or not.
-     * Specifically, checks if type is TokenType::kEnd or a TokenType::kElse (for if blocks).
+     * Specifically, checks if type is TokenType::kEnd, a TokenType::kElse, or TokenType::kElseIf (for if blocks).
      */
     bool IsCurrentTokenEndOfBlock() const;
 
@@ -178,7 +169,8 @@ private:
      * @param precedence Minimal priority for stop.
      * @return AST node representing the expression.
      * 
-     * @details Algorithm follows the "Pratt parsing" principle:<br>
+     * @details Algorithm follows the "Pratt parsing" principle:
+     * 
      * 1. First, parse the prefix part (number, identifier, etc.)
      * 2. Then parse infix parts while the current token precedence is higher than the given precedence.
      */
@@ -198,6 +190,15 @@ private:
     std::unique_ptr<BlockStatement> ParseBlockStatement();
     std::unique_ptr<FunctionLiteral> ParseFunctionLiteral();
     std::unique_ptr<CallExpression> ParseCallExpression(std::unique_ptr<Expression> function);
+
+    std::unique_ptr<Statement> ParseStatement();
+    std::unique_ptr<AssignStatement> ParseAssignStatement();
+    std::unique_ptr<ReturnStatement> ParseReturnStatement();
+    std::unique_ptr<ExpressionStatement> ParseExpressionStatement();
+    std::unique_ptr<BreakStatement> ParseBreakStatement();
+    std::unique_ptr<ContinueStatement> ParseContinueStatement();
+    std::unique_ptr<WhileStatement> ParseWhileStatement();
+    std::unique_ptr<ForStatement> ParseForStatement();
 
     std::vector<std::unique_ptr<Identifier>> ParseFunctionParameters();
     std::vector<std::unique_ptr<Expression>> ParseCallArguments();

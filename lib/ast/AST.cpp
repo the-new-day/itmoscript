@@ -71,7 +71,6 @@ std::string InfixExpression::String() const {
 std::string IfBranch::String() const {
     std::string result;
     if (condition != nullptr) {
-        result += "if ";
         result += condition->String();
         result += " then ";
     }
@@ -88,7 +87,11 @@ std::string IfExpression::String() const {
     result += alternatives[0].consequence->String();
 
     for (size_t i = 1; i < alternatives.size(); ++i) {
-        result += " else ";
+        if (alternatives[i].condition == nullptr) {
+            result += " else ";
+        } else {
+            result += " elseif ";
+        }
         result += alternatives[i].String();
     }
 

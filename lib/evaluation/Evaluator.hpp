@@ -25,7 +25,7 @@ public:
     Evaluator();
 
     void Interpret(Program& root);
-    Value GetResult() const;
+    Value GetLastEvaluatedValue() const;
 
     void Visit(Program&) override;
     void Visit(ExpressionStatement&) override;
@@ -38,12 +38,13 @@ public:
     void Visit(FloatLiteral&) override;
     void Visit(StringLiteral&) override;
 
-    void Visit(Identifier&) override;
+    void Visit(Identifier&) override; // TODO: implement
+
+    void Visit(IfExpression&) override;
+    void Visit(BlockStatement&) override;
 
     void Visit(AssignStatement&) override {}
     void Visit(ReturnStatement&) override {}
-    void Visit(BlockStatement&) override {}
-    void Visit(IfExpression&) override {}
     void Visit(FunctionLiteral&) override {}
     void Visit(CallExpression&) override {}
     void Visit(WhileStatement&) override {}
@@ -52,7 +53,7 @@ public:
     void Visit(ContinueStatement&) override {}
 
 private:
-    Value result_;
+    Value last_evaluated_value_;
     Token current_token_;
 
     TypeSystem types_;

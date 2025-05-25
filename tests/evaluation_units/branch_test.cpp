@@ -6,8 +6,8 @@ TEST(EvaluationTestSuite, IfTest) {
         {"if false then 10 end if", IsValue{itmoscript::NullType{}}},
         {"if 1 then 10 end if", IsValue{10}},
         {"if 0 then 10 end if", IsValue{itmoscript::NullType{}}},
-        {"if 1 > 2 then 10 end if", IsValue{10}},
-        {"if 1 < 2 then 10 end if", IsValue{itmoscript::NullType{}}},
+        {"if 1 < 2 then 10 end if", IsValue{10}},
+        {"if 1 > 2 then 10 end if", IsValue{itmoscript::NullType{}}},
     };
 
     for (const auto& [input, expected] : expressions) {
@@ -33,7 +33,7 @@ TEST(EvaluationTestSuite, IfElseIfElseTest) {
         {R"(
             if 1 == 2 then
                 10
-            else if 2 == 2 then
+            elseif 2 == 2 then
                 5
             else
                 15
@@ -41,8 +41,21 @@ TEST(EvaluationTestSuite, IfElseIfElseTest) {
         )", IsValue{5}},
         {R"(
             if 1 == 2 then
+                1
+            elseif 3 == 2 then
+                2
+            elseif 4 == 2 then
+                3
+            elseif 2 == 2 then
+                4
+            else
+                5
+            end if
+        )", IsValue{4}},
+        {R"(
+            if 1 == 2 then
                 10
-            else if 3 == 2 then
+            elseif 3 == 2 then
                 5
             else
                 15
@@ -51,10 +64,41 @@ TEST(EvaluationTestSuite, IfElseIfElseTest) {
         {R"(
             if 2 == 2 then
                 10
-            else if 3 == 2 then
+            elseif 3 == 2 then
                 5
             else
                 15
+            end if
+        )", IsValue{10}},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        ASSERT_EQ(evaluated, expected);
+    }
+}
+
+TEST(EvaluationTestSuite, IfElseIfAndNoElseTest) {
+    std::vector<std::pair<std::string, IsValue>> expressions = {
+        {R"(
+            if 1 == 2 then
+                10
+            elseif 2 == 2 then
+                5
+            end if
+        )", IsValue{5}},
+        {R"(
+            if 1 == 2 then
+                10
+            elseif 3 == 2 then
+                5
+            end if
+        )", IsValue{itmoscript::NullType{}}},
+        {R"(
+            if 2 == 2 then
+                10
+            elseif 3 == 2 then
+                5
             end if
         )", IsValue{10}},
     };

@@ -64,7 +64,7 @@ void REPL::Eval(std::ostream& output) {
     Evaluator evaluator;
     evaluator.Interpret(program);
 
-    output << evaluator.GetResult();
+    output << evaluator.GetLastEvaluatedValue();
     output << '\n';
 }
 

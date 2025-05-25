@@ -20,7 +20,7 @@ static itmoscript::Value Eval(const std::string& input) {
     itmoscript::Evaluator evaluator;
     itmoscript::Program program = GetParsedProgram(input);
     evaluator.Interpret(program);
-    return evaluator.GetResult();
+    return evaluator.GetLastEvaluatedValue();
 }
 
 template<typename T>

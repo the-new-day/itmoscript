@@ -184,7 +184,8 @@ bool Parser::IsEndOfExpression(TokenType type) {
 
 bool Parser::IsCurrentTokenEndOfBlock() const {
     return IsCurrentToken(TokenType::kEnd)
-        || IsCurrentToken(TokenType::kElse);
+        || IsCurrentToken(TokenType::kElse)
+        || IsCurrentToken(TokenType::kElseIf);
 }
 
 Precedence Parser::PeekPrecedence() const {
@@ -323,14 +324,21 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
 
     expr->alternatives[0].consequence = ParseBlockStatement();
 
-    while (IsCurrentToken(TokenType::kElse)) {
+    bool has_final_else = false;
+
+    while (IsCurrentToken(TokenType::kElse) || IsCurrentToken(TokenType::kElseIf)) {
+        if (has_final_else) {
+            ThrowError("unexpected branch beginning");
+        }
+
         IfBranch branch{current_token_};
 
-        if (IsPeekToken(TokenType::kIf)) {
-            AdvanceToken();
+        if (IsCurrentToken(TokenType::kElseIf)) {
             AdvanceToken();
             branch.condition = ParseExpression(Precedence::kLowest);
             Consume(TokenType::kThen);
+        } else {
+            has_final_else = true;
         }
 
         branch.consequence = ParseBlockStatement();

@@ -52,7 +52,7 @@ std::optional<Value> Evaluator::HandleBinaryOper(const std::string& oper, const 
 
 Value Evaluator::Eval(Node& node) {
     node.Accept(*this);
-    return result_;
+    return last_evaluated_value_;
 }
 
 void Evaluator::RegisterTypeConversions() {
@@ -136,8 +136,8 @@ void Evaluator::RegisterLogicalOps() {
     });
 }
 
-Value Evaluator::GetResult() const {
-    return result_;
+Value Evaluator::GetLastEvaluatedValue() const {
+    return last_evaluated_value_;
 }
 
 void Evaluator::Visit(Program& program) {
@@ -149,32 +149,55 @@ void Evaluator::Visit(Program& program) {
 
 void Evaluator::Visit(IntegerLiteral& node) {
     current_token_ = node.token;
-    result_ = node.value;
+    last_evaluated_value_ = node.value;
 }
 
 void Evaluator::Visit(BooleanLiteral& node) {
     current_token_ = node.token;
-    result_ = node.value;
+    last_evaluated_value_ = node.value;
 }
 
 void Evaluator::Visit(NullTypeLiteral& node) {
     current_token_ = node.token;
-    result_ = std::monostate{};
+    last_evaluated_value_ = std::monostate{};
 }
 
 void Evaluator::Visit(FloatLiteral& node) {
     current_token_ = node.token;
-    result_ = node.value;
+    last_evaluated_value_ = node.value;
 }
 
 void Evaluator::Visit(StringLiteral& node) {
     current_token_ = node.token;
-    result_ = node.value;
+    last_evaluated_value_ = node.value;
 }
 
 void Evaluator::Visit(Identifier& ident) {
     // TODO:
-    result_ = NullType{};
+    last_evaluated_value_ = NullType{};
+}
+
+void Evaluator::Visit(IfExpression& expr) {
+    for (const auto& alternative : expr.alternatives) {
+        if (alternative.condition == nullptr) { // final else branch, guaranteed to be last
+            Eval(*alternative.consequence);
+            return;
+        }
+
+        Value condition = Eval(*alternative.condition);
+        if (condition.IsTruphy()) {
+            Eval(*alternative.consequence);
+            return;
+        }
+    }
+
+    last_evaluated_value_ = NullType{};
+}
+
+void Evaluator::Visit(BlockStatement& block) {
+    for (const auto& stmt : block.GetStatements()) {
+        Eval(*stmt);
+    }
 }
 
 void Evaluator::Visit(ExpressionStatement& node) {
@@ -187,7 +210,7 @@ void Evaluator::Visit(PrefixExpression& node) {
     Value right = Eval(*node.right);
     
     if (auto new_value = HandleUnaryOper(node.oper, right)) {
-        result_ = *new_value;
+        last_evaluated_value_ = *new_value;
     } else {
         throw lang_exceptions::OperatorTypeError{current_token_, node.oper, right.type()};
     }
@@ -199,7 +222,7 @@ void Evaluator::Visit(InfixExpression& node) {
     Value right = Eval(*node.right);
 
     if (auto new_value = HandleBinaryOper(node.oper, left, right)) {
-        result_ = *new_value;
+        last_evaluated_value_ = *new_value;
     } else {
         throw lang_exceptions::OperatorTypeError{current_token_, node.oper, left.type(), right.type()};
     }
