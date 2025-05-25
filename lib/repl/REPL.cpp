@@ -61,10 +61,9 @@ void REPL::Eval(std::ostream& output) {
     Parser parser{lexer};
     Program program = parser.ParseProgram();
 
-    Evaluator evaluator;
-    evaluator.Interpret(program);
+    evaluator_.Interpret(program);
 
-    output << evaluator.GetLastEvaluatedValue();
+    output << evaluator_.GetLastEvaluatedValue();
     output << '\n';
 }
 

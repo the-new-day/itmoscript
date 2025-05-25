@@ -28,6 +28,8 @@ private:
     ReplMode mode_;
     std::string current_line_;
 
+    Evaluator evaluator_;
+
     void EvalLexer(std::ostream& output);
     void EvalParser(std::ostream& output);
     void Eval(std::ostream& output);
