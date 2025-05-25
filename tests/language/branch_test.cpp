@@ -37,7 +37,6 @@ TEST(BranchTestSuite, SimpleElseIfTest) {
     ASSERT_EQ(output.str(), expected);
 }
 
-
 TEST(BranchTestSuite, ComplexIfTest) {
     std::string code = R"(
         v = 100 * 2 + 10 * 3 + 9
@@ -61,46 +60,9 @@ TEST(BranchTestSuite, ComplexIfTest) {
     ASSERT_EQ(output.str(), expected);
 }
 
-
 TEST(BranchTestSuite, OneLineIfTest) {
     std::string code = "if 2 * 2 == 4 then print(\"2 * 2 == 4\") else print(\"omg\") end if";
     std::string expected = "\"2 * 2 == 4\"";
-
-    std::istringstream input(code);
-    std::ostringstream output;
-
-    ASSERT_TRUE(interpret(input, output));
-    ASSERT_EQ(output.str(), expected);
-}
-
-
-TEST(LoopTestSuit, ForLoop) {
-    std::string code = R"(
-        for i in range(0,5,1)
-            print(i)
-        end for
-    )";
-
-    std::string expected = "01234";
-
-    std::istringstream input(code);
-    std::ostringstream output;
-
-    ASSERT_TRUE(interpret(input, output));
-    ASSERT_EQ(output.str(), expected);
-}
-
-
-TEST(LoopTestSuit, WhileLoop) {
-    std::string code = R"(
-        s = "ITMO"
-        while  len(s) < 12
-            s = s * 2
-        end while
-        print(s)
-    )";
-
-    std::string expected = "ITMOITMOITMOITMO";
 
     std::istringstream input(code);
     std::ostringstream output;

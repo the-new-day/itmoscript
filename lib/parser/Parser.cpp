@@ -324,10 +324,10 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
     expr->alternatives[0].consequence = ParseBlockStatement();
 
     while (IsCurrentToken(TokenType::kElse)) {
-        AdvanceToken();
         IfBranch branch{current_token_};
 
-        if (IsCurrentToken(TokenType::kIf)) {
+        if (IsPeekToken(TokenType::kIf)) {
+            AdvanceToken();
             AdvanceToken();
             branch.condition = ParseExpression(Precedence::kLowest);
             Consume(TokenType::kThen);

@@ -14,10 +14,11 @@ enable_testing()
 
 add_executable(
   itmoscript_tests
-  function_test.cpp
-  types_test.cpp
-  loop_and_branch_test.cpp
-  illegal_ops_test.cpp
+  language/function_test.cpp
+  language/types_test.cpp
+  language/loop_test.cpp
+  language/branch_test.cpp
+  language/illegal_ops_test.cpp
 
   utils_test.cpp
 
@@ -32,11 +33,12 @@ add_executable(
   parser/functions_test.cpp
   parser/loop_test.cpp
 
-  evaluation/literals_test.cpp
-  evaluation/prefix_expressions_test.cpp
-  evaluation/infix_expressions_test.cpp
-  evaluation/type_system_test.cpp
-  evaluation/string_operators_test.cpp
+  evaluation_units/literals_test.cpp
+  evaluation_units/prefix_expressions_test.cpp
+  evaluation_units/infix_expressions_test.cpp
+  evaluation_units/type_system_test.cpp
+  evaluation_units/string_operators_test.cpp
+  evaluation_units/branch_test.cpp
 )
 
 target_link_libraries(
