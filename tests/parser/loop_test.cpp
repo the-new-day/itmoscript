@@ -26,7 +26,7 @@ itmoscript::ForStatement* GetForStmt(const itmoscript::Program& program) {
     return for_stmt;
 }
 
-TEST(ParserTestSuite, SimpleWhileTest) {
+TEST(ParserTestSuite, WhileSimpleTest) {
     std::string code = R"(
         while i < 10
             i = i + 1
@@ -51,7 +51,7 @@ TEST(ParserTestSuite, SimpleWhileTest) {
     TestStatement<itmoscript::BreakStatement>(block_statements[2], expected[2]);
 }
 
-TEST(ParserTestSuite, SimpleForTest) {
+TEST(ParserTestSuite, ForSimpleTest) {
     std::string code = R"(
         for i in array
             i = i + 1

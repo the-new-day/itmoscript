@@ -26,7 +26,7 @@ itmoscript::CallExpression* GetCallExpr(const itmoscript::Program& program) {
     return call_expr;
 }
 
-TEST(ParserTestSuite, SimpleFunctionTest) {
+TEST(ParserTestSuite, FunctionSimpleTest) {
     std::string code = R"(
         function (x, y)
             x + y

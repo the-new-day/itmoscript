@@ -83,11 +83,11 @@ std::string IfBranch::String() const {
 std::string IfExpression::String() const {
     std::string result;
     result += " if ";
-    result += main_condition->String();
+    result += alternatives[0].condition->String();
     result += " then ";
-    result += main_consequence->String();
+    result += alternatives[0].consequence->String();
 
-    for (size_t i = 0; i < alternatives.size(); ++i) {
+    for (size_t i = 1; i < alternatives.size(); ++i) {
         result += " else ";
         result += alternatives[i].String();
     }

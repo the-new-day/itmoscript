@@ -156,8 +156,6 @@ struct IfExpression : public Expression {
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
-    std::unique_ptr<Expression> main_condition;
-    std::unique_ptr<BlockStatement> main_consequence;
     std::vector<IfBranch> alternatives;
 };
 

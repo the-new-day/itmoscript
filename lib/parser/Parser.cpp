@@ -316,10 +316,11 @@ std::unique_ptr<IfExpression> Parser::ParseIfExpression() {
     auto expr = MakeNode<IfExpression>();
     AdvanceToken();
 
-    expr->main_condition = ParseExpression();
+    expr->alternatives.resize(1);
+    expr->alternatives[0].condition = ParseExpression();
     Consume(TokenType::kThen);
 
-    expr->main_consequence = ParseBlockStatement();
+    expr->alternatives[0].consequence = ParseBlockStatement();
 
     while (IsCurrentToken(TokenType::kElse)) {
         AdvanceToken();
