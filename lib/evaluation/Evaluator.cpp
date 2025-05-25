@@ -7,6 +7,9 @@
 namespace itmoscript {
 
 Evaluator::Evaluator() {
+    types_.RegisterConversion<Int, Float>([](Int value) { return static_cast<Float>(value); });
+    types_.RegisterConversion<Float, Int>([](Float value) { return static_cast<Int>(value); });
+
     RegisterCommonAriphmeticOps<Int>();
     RegisterCommonAriphmeticOps<Float>();
 
