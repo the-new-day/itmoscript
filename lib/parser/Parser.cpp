@@ -47,8 +47,14 @@ Parser::Parser(Lexer& lexer)
     infix_parse_funcs_[TokenType::kGreaterOrEqual] = infix_parser;
     infix_parse_funcs_[TokenType::kAnd] = infix_parser;
     infix_parse_funcs_[TokenType::kOr] = infix_parser;
-    infix_parse_funcs_[TokenType::kLParen] = [this](std::unique_ptr<Expression> function) { 
-        return this->ParseCallExpression(std::move(function)); 
+    infix_parse_funcs_[TokenType::kLParen] = [this](std::unique_ptr<Expression> function) {
+        auto expr = this->ParseCallExpression(std::move(function));
+
+        if (auto ident = dynamic_cast<Identifier*>(expr->function.get())) {
+            expr->function_name = ident->name;
+        }
+
+        return expr;
     };
 }
 

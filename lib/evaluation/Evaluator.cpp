@@ -96,35 +96,12 @@ void Evaluator::AssignIdentifier(const Identifier& ident, Value value) {
     }
 }
 
-const Value& Evaluator::CallFunction(const Function& func, std::vector<Value>& args) {
-    if (args.size() != func->parameters->size()) {
-        ThrowRuntimeError<lang_exceptions::ParametersCountError>(func->parameters->size(), args.size());
-    }
-
-    CallFrame frame;
-    frame.entry_token = current_token_;
-    frame.function_name = "<Anonymous function>"; // TODO: real func name if exists
-
-    for (size_t i = 0; i < func->parameters->size(); ++i) {
-        const std::string& name = func->parameters->at(i).name;
-        frame.local_env.Set(name, std::move(args[i]));
-    }
-    
-    call_stack_.push_back(std::move(frame));
-
-    EvalFunctionBody(func);
-    auto& frame_result = call_stack_.back();
-
-    if (frame_result.return_value.has_value()) {
-        last_evaluated_value_ = std::move(*frame_result.return_value);
-    }
-    
-    call_stack_.pop_back();
-    return last_evaluated_value_;
-}
-
 void Evaluator::EvalFunctionBody(const Function& func) {
     Eval(*func->body);
+}
+
+std::string Evaluator::GetFunctionName(const std::optional<std::string>& name) {
+    return name.has_value() ? *name : "<anonymous function>";
 }
 
 void Evaluator::Visit(Program& program) {
@@ -176,7 +153,34 @@ void Evaluator::Visit(CallExpression& expr) {
     }
 
     Function func = Eval(*expr.function).Get<Function>();
-    CallFunction(func, args);
+    CallFunction(GetFunctionName(expr.function_name), func, args);
+}
+
+const Value& Evaluator::CallFunction(std::string name, const Function& func, std::vector<Value>& args) {
+    if (args.size() != func->parameters->size()) {
+        ThrowRuntimeError<lang_exceptions::ParametersCountError>(func->parameters->size(), args.size());
+    }
+
+    CallFrame frame;
+    frame.entry_token = current_token_;
+    frame.function_name = std::move(name);
+
+    for (size_t i = 0; i < func->parameters->size(); ++i) {
+        const std::string& name = func->parameters->at(i).name;
+        frame.local_env.Set(name, std::move(args[i]));
+    }
+    
+    call_stack_.push_back(std::move(frame));
+
+    EvalFunctionBody(func);
+    auto& frame_result = call_stack_.back();
+
+    if (frame_result.return_value.has_value()) {
+        last_evaluated_value_ = std::move(*frame_result.return_value);
+    }
+    
+    call_stack_.pop_back();
+    return last_evaluated_value_;
 }
 
 void Evaluator::Visit(ReturnStatement& stmt) {

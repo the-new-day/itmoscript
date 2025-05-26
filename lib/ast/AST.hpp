@@ -175,7 +175,7 @@ struct CallExpression : public Expression {
 
     std::unique_ptr<Expression> function; // Identifier or FunctionLiteral
     std::vector<std::unique_ptr<Expression>> arguments;
-    bool is_named = false;
+    std::optional<std::string> function_name; // Filled if called by name, not by function literal
 };
 
 struct WhileStatement : public Statement {

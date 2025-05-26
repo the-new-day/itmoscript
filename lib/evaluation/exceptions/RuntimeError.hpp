@@ -30,6 +30,7 @@ public:
             result += *utils::MultiplyStr(" ", kErrorDetailsIndent);
             result += frame.function_name;
             result += std::format(", on line {}", frame.entry_token.line);
+            result += '\n';
         }
 
         return result;

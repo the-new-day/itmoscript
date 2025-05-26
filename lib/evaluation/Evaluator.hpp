@@ -74,8 +74,9 @@ private:
     const Value& ResolveIdentifier(const Identifier& ident);
     void AssignIdentifier(const Identifier& ident, Value value);
 
-    const Value& CallFunction(const Function& func, std::vector<Value>& args);
+    const Value& CallFunction(std::string name, const Function& func, std::vector<Value>& args);
     void EvalFunctionBody(const Function& func);
+    std::string GetFunctionName(const std::optional<std::string>& name);
 
     const Value& Eval(Node& node);
 
@@ -92,10 +93,10 @@ private:
     void RegisterStringOps();
     void RegisterLogicalOps();
 
-    template<typename Exc, typename ...Args>
+    template<typename ErrorType, typename ...Args>
     void ThrowRuntimeError(Args&&... args) const noexcept(false);
 
-    template<typename Exc, typename ...Args>
+    template<typename ErrorType, typename ...Args>
     void ThrowRuntimeError(Token token, Args&&... args) const noexcept(false);
 };
 
@@ -143,22 +144,14 @@ void Evaluator::RegisterStringMultiplication() {
     });
 }
 
-template<typename Exc, typename ...Args>
+template<typename ErrorType, typename ...Args>
 void Evaluator::ThrowRuntimeError(Token token, Args&&... args) const {
-    if (call_stack_.empty()) {
-        throw Exc{token, call_stack_, std::forward<Args>(args)...};
-    } else {
-        throw Exc{call_stack_.back().entry_token, call_stack_, std::forward<Args>(args)...};
-    }
+    throw ErrorType{token, call_stack_, std::forward<Args>(args)...};
 }
 
-template<typename Exc, typename ...Args>
+template<typename ErrorType, typename ...Args>
 void Evaluator::ThrowRuntimeError(Args&&... args) const {
-    if (call_stack_.empty()) {
-        throw Exc{current_token_, call_stack_, std::forward<Args>(args)...};
-    } else {
-        throw Exc{call_stack_.back().entry_token, call_stack_, std::forward<Args>(args)...};
-    }
+    throw ErrorType{current_token_, call_stack_, std::forward<Args>(args)...};
 }
 
 } // namespace itmoscript

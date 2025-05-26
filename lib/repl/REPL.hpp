@@ -48,7 +48,7 @@ void REPL::PrintException(std::ostream& output, const T& e, const std::string& l
     }
 
     output << std::format(
-        "{} on line {}, column {}:\n{}",
+        "{} on line {}, column {}:\n",
         label,
         e.line(),
         e.column(),
