@@ -15,6 +15,9 @@ public:
     void Set(const std::string& name, const Value& value);
     void Set(const std::string& name, Value&& value);
 
+    size_t size() const;
+    const std::unordered_map<std::string, Value>& storage() const;
+
 private:
     std::unordered_map<std::string, Value> storage_;
 };

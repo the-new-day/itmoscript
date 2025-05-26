@@ -44,18 +44,24 @@ TEST(ParserTestSuite, ReturnSimpleTest) {
         return 5
         return 10
         return x
+        return
     )";
 
     auto program = GetParsedProgram(code);
     const auto& statements = program.GetStatements();
 
-    ASSERT_EQ(statements.size(), 3);
+    ASSERT_EQ(statements.size(), 4);
 
-    std::vector<std::string> expected_exprs = {"5", "10", "x"};
+    std::vector<std::string> expected_exprs = {"5", "10", "x", ""};
 
     for (size_t i = 0; i < statements.size(); ++i) {
         auto* return_stmt = dynamic_cast<itmoscript::ReturnStatement*>(statements[i].get());
         ASSERT_NE(return_stmt, nullptr) << "Statement " << i << " is not a ReturnStatement";
-        ASSERT_EQ(return_stmt->expr->String(), expected_exprs[i]);
+
+        if (expected_exprs[i].empty()) {
+            ASSERT_EQ(return_stmt->expr, nullptr);
+        } else {
+            ASSERT_EQ(return_stmt->expr->String(), expected_exprs[i]);
+        }
     }
 }

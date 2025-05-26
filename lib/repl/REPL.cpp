@@ -20,18 +20,11 @@ void REPL::Start(std::istream& input, std::ostream& output) {
             } else if (mode_ == ReplMode::kEval) {
                 Eval(output);
             }
+        } catch (const lang_exceptions::RuntimeError& e) {
+            PrintException(output, e, "Runtime error");
+            evaluator_.ClearCallStack();
         } catch (const lang_exceptions::Exception& e) {
-            std::cerr << std::format(
-                "Unhandled error on line {}, column {}:\n{}", 
-                e.line(), 
-                e.column(), 
-                *utils::MultiplyStr(" ", lang_exceptions::kErrorDetailsIndent)
-            );
-            std::cerr << std::format("{}: {}", e.error_type(), e.what()) << std::endl;
-
-            std::cout << current_line_ << std::endl;
-            std::cout << *utils::MultiplyStr(" ", e.column());
-            std::cout << '^' << std::endl;
+            PrintException(output, e, "Unhandled error");
         }
     }
 }

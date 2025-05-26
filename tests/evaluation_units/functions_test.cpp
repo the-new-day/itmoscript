@@ -23,3 +23,51 @@ TEST(EvaluationTestSuite, FunctionParametersTest) {
         }
     }
 }
+
+TEST(EvaluationTestSuite, FunctionCallSimpleTest) {
+    std::vector<std::pair<std::string, IsValue>> expressions = {
+        {"add = function(x, y) x + y end function \n add(10, 15)", IsValue{25}},
+        {"add = function(x, y) return x + y end function \n add(10, 15)", IsValue{25}},
+        {"add = function(x, y) return x + y end function \n add(10, 15)", IsValue{25}},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        ASSERT_EQ(evaluated, expected) << "input: " << input;
+    }
+}
+
+TEST(EvaluationTestSuite, FunctionGlobalScopeTest) {
+    std::vector<std::pair<std::string, IsValue>> expressions = {
+        {"x = 10 \n add = function(x, y) x + y end function \n add(-15, 15)", IsValue{0}},
+        {"x = 10 add = function(y) x + y end function \n add(15)", IsValue{25}},
+        {"x = 10 getX = function() x end function \n getX()", IsValue{10}},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        ASSERT_EQ(evaluated, expected) << "input: " << input;
+    }
+}
+
+TEST(EvaluationTestSuite, FunctionInnerScopeTest) {
+    std::vector<std::pair<std::string, IsValue>> expressions = {
+        {R"(
+            add = function(x, y)
+                z = 10000
+                add2 = function(x, z)
+                    return x + z
+                end function
+
+                return add2(x, y)
+            end function
+
+            add(1, 2)
+        )", IsValue{3}}
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        ASSERT_EQ(evaluated, expected) << "input: " << input;
+    }
+}

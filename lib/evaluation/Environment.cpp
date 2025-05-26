@@ -12,11 +12,19 @@ const Value& Environment::Get(const std::string& name) const {
 }
 
 void Environment::Set(const std::string& name, const Value& value) {
-    storage_.insert({name, value});
+    storage_[name] = value;
 }
 
 void Environment::Set(const std::string& name, Value&& value) {
-    storage_.insert({name, std::move(value)});
+    storage_[name] = std::move(value);
+}
+
+size_t Environment::size() const {
+    return storage_.size();
+}
+
+const std::unordered_map<std::string,Value>& Environment::storage() const {
+    return storage_;
 }
     
 } // namespace itmoscript

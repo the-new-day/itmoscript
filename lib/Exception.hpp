@@ -53,6 +53,8 @@ public:
         return token_.column;
     }
 
+    virtual ~Exception() = default;
+
 protected:
     Token token_;
     std::string message_;

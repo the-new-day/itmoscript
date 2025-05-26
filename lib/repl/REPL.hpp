@@ -6,6 +6,7 @@
 
 #include <string>
 #include <iostream>
+#include <type_traits>
 
 namespace itmoscript {
 
@@ -35,6 +36,28 @@ private:
     void Eval(std::ostream& output);
 
     void PrintToken(std::ostream& output, const Token& token);
+
+    template<typename T>
+    void PrintException(std::ostream& output, const T& e, const std::string& error_type);
 };
     
+template<typename T>
+void REPL::PrintException(std::ostream& output, const T& e, const std::string& label) {
+    if constexpr (std::is_same_v<T, lang_exceptions::RuntimeError>) {
+        output << e.GetCallStackMessage() << std::endl;
+    }
+
+    output << std::format(
+        "{} on line {}, column {}:\n{}",
+        label,
+        e.line(),
+        e.column(),
+        *utils::MultiplyStr(" ", lang_exceptions::kErrorDetailsIndent)
+    );
+
+    output << std::format("{}: {}", e.error_type(), e.what()) << std::endl;
+    // output << current_line_ << std::endl;
+    // output << *utils::MultiplyStr(" ", e.column()) << '^' << std::endl;
+}
+
 } // namespace itmoscript

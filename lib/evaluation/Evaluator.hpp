@@ -11,26 +11,27 @@
 
 #include "ast/Visitor.hpp"
 #include "ast/AST.hpp"
+
 #include "evaluation/Value.hpp"
 #include "evaluation/TypeSystem.hpp"
 #include "evaluation/OperatorRegistry.hpp"
 #include "evaluation/Environment.hpp"
-
 #include "evaluation/FunctionObject.hpp"
+#include "evaluation/CallFrame.hpp"
 
-#include "exceptions/OperatorTypeError.hpp"
 #include "exceptions/ZeroDivisionError.hpp"
 #include "exceptions/SequenceMultiplicationError.hpp"
-#include "exceptions/NameError.hpp"
 
 namespace itmoscript {
-    
+
 class Evaluator : public Visitor {
 public:
     Evaluator();
 
     void Interpret(Program& root);
     const Value& GetLastEvaluatedValue() const;
+
+    void ClearCallStack();
 
     void Visit(Program&) override;
     void Visit(ExpressionStatement&) override;
@@ -42,32 +43,39 @@ public:
     void Visit(NullTypeLiteral&) override;
     void Visit(FloatLiteral&) override;
     void Visit(StringLiteral&) override;
-
-    // TODO: implement
-    void Visit(Identifier&) override;
     void Visit(FunctionLiteral&) override;
+    void Visit(Identifier&) override;
 
     void Visit(IfExpression&) override;
     void Visit(BlockStatement&) override;
     void Visit(AssignStatement&) override;
+    void Visit(CallExpression&) override;
+    void Visit(ReturnStatement&) override;
 
-    void Visit(ReturnStatement&) override {}
-    void Visit(CallExpression&) override {}
     void Visit(WhileStatement&) override {}
     void Visit(ForStatement&) override {}
     void Visit(BreakStatement&) override {}
     void Visit(ContinueStatement&) override {}
 
 private:
-    Value last_evaluated_value_;
     Token current_token_;
 
-    TypeSystem types_;
+    TypeSystem type_system_;
     OperatorRegistry operator_registry_;
-    Environment env_;
+
+    Environment global_env_;
+    CallStack call_stack_;
+
+    Value last_evaluated_value_;
 
     std::optional<Value> HandleUnaryOper(const std::string& oper, const Value& right);
     std::optional<Value> HandleBinaryOper(const std::string& oper, const Value& left, const Value& right);
+
+    const Value& ResolveIdentifier(const Identifier& ident);
+    void AssignIdentifier(const Identifier& ident, Value value);
+
+    const Value& CallFunction(const Function& func, std::vector<Value>& args);
+    void EvalFunctionBody(const Function& func);
 
     const Value& Eval(Node& node);
 
@@ -83,6 +91,12 @@ private:
     void RegisterComparisonOps();
     void RegisterStringOps();
     void RegisterLogicalOps();
+
+    template<typename Exc, typename ...Args>
+    void ThrowRuntimeError(Args&&... args) const noexcept(false);
+
+    template<typename Exc, typename ...Args>
+    void ThrowRuntimeError(Token token, Args&&... args) const noexcept(false);
 };
 
 template<NumericValueType T>
@@ -98,7 +112,7 @@ void Evaluator::RegisterCommonAriphmeticOps() {
 
     operator_registry_.RegisterBinaryOper<T, T>("/", [this](const Value& left, const Value& right) { 
         if (right.Get<T>() == 0) {
-            throw lang_exceptions::ZeroDivisionError{current_token_};
+            ThrowRuntimeError<lang_exceptions::ZeroDivisionError>();
         }
         
         return left.Get<T>() / right.Get<T>();
@@ -116,18 +130,35 @@ void Evaluator::RegisterStringMultiplication() {
 
         std::optional<std::string> result = utils::MultiplyStr(str, number);
         if (!result) {
-            throw lang_exceptions::SequenceMultiplicationError{
-                current_token_, 
+            ThrowRuntimeError<lang_exceptions::SequenceMultiplicationError>(
                 std::format(
                     "cannot multiply string {} by negative value {}",
                     str,
                     number
                 )
-            };
+            );
         }
 
         return result.value();
     });
+}
+
+template<typename Exc, typename ...Args>
+void Evaluator::ThrowRuntimeError(Token token, Args&&... args) const {
+    if (call_stack_.empty()) {
+        throw Exc{token, call_stack_, std::forward<Args>(args)...};
+    } else {
+        throw Exc{call_stack_.back().entry_token, call_stack_, std::forward<Args>(args)...};
+    }
+}
+
+template<typename Exc, typename ...Args>
+void Evaluator::ThrowRuntimeError(Args&&... args) const {
+    if (call_stack_.empty()) {
+        throw Exc{current_token_, call_stack_, std::forward<Args>(args)...};
+    } else {
+        throw Exc{call_stack_.back().entry_token, call_stack_, std::forward<Args>(args)...};
+    }
 }
 
 } // namespace itmoscript

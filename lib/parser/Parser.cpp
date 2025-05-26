@@ -109,7 +109,11 @@ std::unique_ptr<AssignStatement> Parser::ParseAssignStatement() {
 std::unique_ptr<ReturnStatement> Parser::ParseReturnStatement() {
     auto statement = MakeNode<ReturnStatement>();
     AdvanceToken();
-    statement->expr = ParseExpression();
+
+    if (!IsCurrentToken(TokenType::kEOF) && !IsCurrentToken(TokenType::kNewLine)) {
+        statement->expr = ParseExpression();
+    }
+
     return statement;
 }
 
@@ -297,7 +301,6 @@ std::unique_ptr<BlockStatement> Parser::ParseBlockStatement() {
     auto block = MakeNode<BlockStatement>();
     AdvanceToken();
 
-    // TODO: check for block type ("while true else while" shouldn't be accepted)
     while (!IsCurrentTokenEndOfBlock()) {
         if (IsCurrentToken(TokenType::kNewLine)) {
             AdvanceToken();
@@ -450,7 +453,7 @@ std::vector<std::unique_ptr<Identifier>> Parser::ParseFunctionParameters() {
         }
 
         AdvanceToken();
-        AdvanceToken();
+        Consume(TokenType::kIdentifier);
 
         ident = ParseIdentifier();
         identifiers.push_back(std::move(ident));

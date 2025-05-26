@@ -175,6 +175,7 @@ struct CallExpression : public Expression {
 
     std::unique_ptr<Expression> function; // Identifier or FunctionLiteral
     std::vector<std::unique_ptr<Expression>> arguments;
+    bool is_named = false;
 };
 
 struct WhileStatement : public Statement {

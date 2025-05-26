@@ -17,13 +17,11 @@ class Environment;
 struct FunctionObject {
     FunctionObject(
         std::shared_ptr<std::vector<Identifier>> parameters,
-        std::shared_ptr<BlockStatement> body,
-        std::shared_ptr<Environment> env
-    ) : parameters(parameters), body(body), env(env) {}
+        std::shared_ptr<BlockStatement> body
+    ) : parameters(parameters), body(body) {}
 
     std::shared_ptr<std::vector<Identifier>> parameters;
     std::shared_ptr<BlockStatement> body;
-    std::shared_ptr<Environment> env;
 
     bool operator==(const FunctionObject& other) const {
         return this == &other;

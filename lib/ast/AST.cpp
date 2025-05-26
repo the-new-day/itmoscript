@@ -49,7 +49,7 @@ std::string AssignStatement::String() const {
 }
 
 std::string ReturnStatement::String() const {
-    return std::format("return {}", expr->String());
+    return std::format("return {}", (expr ? expr->String() : ""));
 }
 
 std::string ExpressionStatement::String() const {
