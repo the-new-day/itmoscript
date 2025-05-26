@@ -109,7 +109,7 @@ const Value& Evaluator::CallFunction(const Function& func, std::vector<Value>& a
         const std::string& name = func->parameters->at(i).name;
         frame.local_env.Set(name, std::move(args[i]));
     }
-
+    
     call_stack_.push_back(std::move(frame));
 
     EvalFunctionBody(func);
@@ -175,7 +175,7 @@ void Evaluator::Visit(CallExpression& expr) {
         args.push_back(Eval(*arg));
     }
 
-    const Function& func = Eval(*expr.function).Get<Function>();
+    Function func = Eval(*expr.function).Get<Function>();
     CallFunction(func, args);
 }
 
