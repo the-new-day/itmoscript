@@ -56,8 +56,6 @@ void REPL::PrintException(std::ostream& output, const T& e, const std::string& l
     );
 
     output << std::format("{}: {}", e.error_type(), e.what()) << std::endl;
-    // output << current_line_ << std::endl;
-    // output << *utils::MultiplyStr(" ", e.column()) << '^' << std::endl;
 }
 
 } // namespace itmoscript

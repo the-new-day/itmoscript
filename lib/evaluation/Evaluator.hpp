@@ -52,7 +52,8 @@ public:
     void Visit(CallExpression&) override;
     void Visit(ReturnStatement&) override;
 
-    void Visit(WhileStatement&) override {}
+    void Visit(WhileStatement&) override;
+
     void Visit(ForStatement&) override {}
     void Visit(BreakStatement&) override {}
     void Visit(ContinueStatement&) override {}

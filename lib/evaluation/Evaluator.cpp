@@ -63,7 +63,7 @@ const Value& Evaluator::GetLastEvaluatedValue() const {
 }
 
 void Evaluator::ClearCallStack() {
-    call_stack_.clear();   
+    call_stack_.clear();
 }
 
 const Value& Evaluator::ResolveIdentifier(const Identifier& ident) {
@@ -192,6 +192,12 @@ void Evaluator::Visit(ReturnStatement& stmt) {
 
     if (stmt.expr != nullptr)
         current_frame.return_value = Eval(*stmt.expr);
+}
+
+void Evaluator::Visit(WhileStatement& stmt) {
+    while (Eval(*stmt.condition).IsTruphy()) {
+        Eval(*stmt.body);
+    }
 }
 
 void Evaluator::Visit(FunctionLiteral& func) {
