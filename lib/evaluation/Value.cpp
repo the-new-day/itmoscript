@@ -38,10 +38,10 @@ std::string Value::ToString() const {
         case ValueType::kFunction:
             return std::format(
                 "<Function object>({})",
-                utils::Join<Identifier, std::string>(
+                utils::Join<std::shared_ptr<Identifier>, std::string>(
                     *Get<Function>()->parameters, 
                     ", ", 
-                    [](const Identifier& ident) { return ident.name; }
+                    [](const std::shared_ptr<Identifier>& ident) { return ident->name; }
                 )
             );
         default:

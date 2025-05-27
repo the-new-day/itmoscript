@@ -33,14 +33,14 @@ struct Expression : public Node {
 class Program : public Node {
 public:
     using Node::Node;
-    const std::vector<std::unique_ptr<Statement>>& GetStatements() const;
-    void AddStatement(std::unique_ptr<Statement> statement);
+    const std::vector<std::shared_ptr<Statement>>& GetStatements() const;
+    void AddStatement(std::shared_ptr<Statement> statement);
 
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
 private:
-    std::vector<std::unique_ptr<Statement>> statements_;
+    std::vector<std::shared_ptr<Statement>> statements_;
 };
 
 struct ExpressionStatement : public Statement {
@@ -48,14 +48,14 @@ struct ExpressionStatement : public Statement {
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
-    std::unique_ptr<Expression> expr;
+    std::shared_ptr<Expression> expr;
 };
 
 struct Identifier : public Expression {
     using Expression::Expression;
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
-    
+
     std::string name;
 };
 
@@ -63,9 +63,9 @@ struct AssignStatement : public Statement {
     using Statement::Statement;
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
-    
-    std::unique_ptr<Identifier> ident;
-    std::unique_ptr<Expression> expr;
+
+    std::shared_ptr<Identifier> ident;
+    std::shared_ptr<Expression> expr;
 };
 
 struct ReturnStatement : public Statement {
@@ -73,7 +73,7 @@ struct ReturnStatement : public Statement {
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
-    std::unique_ptr<Expression> expr;
+    std::shared_ptr<Expression> expr;
 };
 
 struct PrefixExpression : public Expression {
@@ -82,7 +82,7 @@ struct PrefixExpression : public Expression {
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
     std::string oper;
-    std::unique_ptr<Expression> right;
+    std::shared_ptr<Expression> right;
 };
 
 struct InfixExpression : public Expression {
@@ -91,8 +91,8 @@ struct InfixExpression : public Expression {
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
     std::string oper;
-    std::unique_ptr<Expression> right;
-    std::unique_ptr<Expression> left;
+    std::shared_ptr<Expression> right;
+    std::shared_ptr<Expression> left;
 };
 
 struct IntegerLiteral : public Expression {
@@ -119,7 +119,7 @@ struct StringLiteral : public Expression {
 struct BooleanLiteral : public Expression {
     using Expression::Expression;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
-    
+
     bool value;
 };
 
@@ -131,19 +131,19 @@ struct NullTypeLiteral : public Expression {
 class BlockStatement : public Statement {
 public:
     using Statement::Statement;
-    const std::vector<std::unique_ptr<Statement>>& GetStatements() const;
-    void AddStatement(std::unique_ptr<Statement> statement);
+    const std::vector<std::shared_ptr<Statement>>& GetStatements() const;
+    void AddStatement(std::shared_ptr<Statement> statement);
 
     std::string String() const;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
-    
+
 private:
-    std::vector<std::unique_ptr<Statement>> statements_;
+    std::vector<std::shared_ptr<Statement>> statements_;
 };
 
 struct IfBranch {
-    std::unique_ptr<Expression> condition;
-    std::unique_ptr<BlockStatement> consequence;
+    std::shared_ptr<Expression> condition;
+    std::shared_ptr<BlockStatement> consequence;
     Token token;
 
     std::string String() const;
@@ -164,8 +164,8 @@ struct FunctionLiteral : public Expression {
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
-    std::vector<std::unique_ptr<Identifier>> parameters;
-    std::unique_ptr<BlockStatement> body;
+    std::vector<std::shared_ptr<Identifier>> parameters;
+    std::shared_ptr<BlockStatement> body;
 };
 
 struct CallExpression : public Expression {
@@ -173,9 +173,9 @@ struct CallExpression : public Expression {
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
-    std::unique_ptr<Expression> function; // Identifier or FunctionLiteral
-    std::vector<std::unique_ptr<Expression>> arguments;
-    std::optional<std::string> function_name; // Filled if called by name, not by function literal
+    std::shared_ptr<Expression> function;
+    std::vector<std::shared_ptr<Expression>> arguments;
+    std::optional<std::string> function_name;
 };
 
 struct WhileStatement : public Statement {
@@ -183,8 +183,8 @@ struct WhileStatement : public Statement {
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
-    std::unique_ptr<Expression> condition;
-    std::unique_ptr<BlockStatement> body;
+    std::shared_ptr<Expression> condition;
+    std::shared_ptr<BlockStatement> body;
 };
 
 struct ForStatement : public Statement {
@@ -192,9 +192,9 @@ struct ForStatement : public Statement {
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
-    std::unique_ptr<Identifier> iter;
-    std::unique_ptr<Expression> range;
-    std::unique_ptr<BlockStatement> body;
+    std::shared_ptr<Identifier> iter;
+    std::shared_ptr<Expression> range;
+    std::shared_ptr<BlockStatement> body;
 };
 
 struct BreakStatement : public Statement {

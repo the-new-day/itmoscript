@@ -6,6 +6,7 @@
 #include <optional>
 #include <functional>
 #include <map>
+#include <memory>
 
 namespace itmoscript {
 
@@ -110,10 +111,10 @@ private:
 
     /**
      * @brief Creates a node of the given type and includes current token to it.
-     * @return std::unique_ptr with the new node.
+     * @return std::shared_ptr with the new node.
      */
     template<typename T>
-    std::unique_ptr<T> MakeNode();
+    std::shared_ptr<T> MakeNode();
 
     bool IsCurrentToken(TokenType type) const;
     bool IsPeekToken(TokenType type) const;
@@ -157,8 +158,8 @@ private:
      */
     Precedence GetCurrentPrecedence() const;
 
-    using PrefixParseFunc = std::function<std::unique_ptr<Expression>(void)>;
-    using InfixParseFunc = std::function<std::unique_ptr<Expression>(std::unique_ptr<Expression>)>;
+    using PrefixParseFunc = std::function<std::shared_ptr<Expression>(void)>;
+    using InfixParseFunc = std::function<std::shared_ptr<Expression>(std::shared_ptr<Expression>)>;
 
     std::map<TokenType, PrefixParseFunc> prefix_parse_funcs_;
     std::map<TokenType, InfixParseFunc> infix_parse_funcs_;
@@ -174,34 +175,34 @@ private:
      * 1. First, parse the prefix part (number, identifier, etc.)
      * 2. Then parse infix parts while the current token precedence is higher than the given precedence.
      */
-    std::unique_ptr<Expression> ParseExpression(Precedence precedence = Precedence::kLowest);
+    std::shared_ptr<Expression> ParseExpression(Precedence precedence = Precedence::kLowest);
 
-    std::unique_ptr<PrefixExpression> ParsePrefixExpression();
-    std::unique_ptr<InfixExpression> ParseInfixExpression(std::unique_ptr<Expression> left);
+    std::shared_ptr<PrefixExpression> ParsePrefixExpression();
+    std::shared_ptr<InfixExpression> ParseInfixExpression(std::shared_ptr<Expression> left);
 
-    std::unique_ptr<Identifier> ParseIdentifier();
-    std::unique_ptr<IntegerLiteral> ParseIntegerLiteral();
-    std::unique_ptr<FloatLiteral> ParseFloatLiteral();
-    std::unique_ptr<StringLiteral> ParseStringLiteral();
-    std::unique_ptr<BooleanLiteral> ParseBooleanLiteral();
-    std::unique_ptr<NullTypeLiteral> ParseNullTypeLiteral();
-    std::unique_ptr<Expression> ParseGroupedExpression();
-    std::unique_ptr<IfExpression> ParseIfExpression();
-    std::unique_ptr<BlockStatement> ParseBlockStatement();
-    std::unique_ptr<FunctionLiteral> ParseFunctionLiteral();
-    std::unique_ptr<CallExpression> ParseCallExpression(std::unique_ptr<Expression> function);
+    std::shared_ptr<Identifier> ParseIdentifier();
+    std::shared_ptr<IntegerLiteral> ParseIntegerLiteral();
+    std::shared_ptr<FloatLiteral> ParseFloatLiteral();
+    std::shared_ptr<StringLiteral> ParseStringLiteral();
+    std::shared_ptr<BooleanLiteral> ParseBooleanLiteral();
+    std::shared_ptr<NullTypeLiteral> ParseNullTypeLiteral();
+    std::shared_ptr<Expression> ParseGroupedExpression();
+    std::shared_ptr<IfExpression> ParseIfExpression();
+    std::shared_ptr<BlockStatement> ParseBlockStatement();
+    std::shared_ptr<FunctionLiteral> ParseFunctionLiteral();
+    std::shared_ptr<CallExpression> ParseCallExpression(std::shared_ptr<Expression> function);
 
-    std::unique_ptr<Statement> ParseStatement();
-    std::unique_ptr<AssignStatement> ParseAssignStatement();
-    std::unique_ptr<ReturnStatement> ParseReturnStatement();
-    std::unique_ptr<ExpressionStatement> ParseExpressionStatement();
-    std::unique_ptr<BreakStatement> ParseBreakStatement();
-    std::unique_ptr<ContinueStatement> ParseContinueStatement();
-    std::unique_ptr<WhileStatement> ParseWhileStatement();
-    std::unique_ptr<ForStatement> ParseForStatement();
+    std::shared_ptr<Statement> ParseStatement();
+    std::shared_ptr<AssignStatement> ParseAssignStatement();
+    std::shared_ptr<ReturnStatement> ParseReturnStatement();
+    std::shared_ptr<ExpressionStatement> ParseExpressionStatement();
+    std::shared_ptr<BreakStatement> ParseBreakStatement();
+    std::shared_ptr<ContinueStatement> ParseContinueStatement();
+    std::shared_ptr<WhileStatement> ParseWhileStatement();
+    std::shared_ptr<ForStatement> ParseForStatement();
 
-    std::vector<std::unique_ptr<Identifier>> ParseFunctionParameters();
-    std::vector<std::unique_ptr<Expression>> ParseCallArguments();
+    std::vector<std::shared_ptr<Identifier>> ParseFunctionParameters();
+    std::vector<std::shared_ptr<Expression>> ParseCallArguments();
 
     /**
      * @brief Replaces all recognized escape sequences (e.g., \\n, \t) in the string
@@ -218,8 +219,8 @@ private:
 };
     
 template<typename T>
-std::unique_ptr<T> Parser::MakeNode() {
-    return std::make_unique<T>(current_token_);
+std::shared_ptr<T> Parser::MakeNode() {
+    return std::make_shared<T>(current_token_);
 }
 
 } // namespace itmoscript

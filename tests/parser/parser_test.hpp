@@ -30,7 +30,7 @@ static itmoscript::Program GetParsedProgram(const std::string& code) {
     return program;
 }
 
-static void TestIntegerLiteral(std::unique_ptr<itmoscript::Expression>& int_literal_expr, int64_t expected_value) {
+static void TestIntegerLiteral(std::shared_ptr<itmoscript::Expression>& int_literal_expr, int64_t expected_value) {
     auto* literal = dynamic_cast<itmoscript::IntegerLiteral*>(int_literal_expr.get());
     ASSERT_NE(literal, nullptr);
 
@@ -38,24 +38,24 @@ static void TestIntegerLiteral(std::unique_ptr<itmoscript::Expression>& int_lite
     ASSERT_EQ(literal->token.literal, std::to_string(expected_value));
 }
 
-static void TestFloatLiteral(std::unique_ptr<itmoscript::Expression>& float_literal_expr, double expected_value) {
+static void TestFloatLiteral(std::shared_ptr<itmoscript::Expression>& float_literal_expr, double expected_value) {
     auto* literal = dynamic_cast<itmoscript::FloatLiteral*>(float_literal_expr.get());
     ASSERT_NE(literal, nullptr);
     ASSERT_EQ(literal->value, expected_value);
 }
 
-static void TestStringLiteral(std::unique_ptr<itmoscript::Expression>& string_literal_expr, std::string expected_value) {
+static void TestStringLiteral(std::shared_ptr<itmoscript::Expression>& string_literal_expr, std::string expected_value) {
     auto* literal = dynamic_cast<itmoscript::StringLiteral*>(string_literal_expr.get());
     ASSERT_NE(literal, nullptr);
     ASSERT_EQ(literal->value, expected_value);
 }
 
-static void TestNullTypeLiteral(std::unique_ptr<itmoscript::Expression>& null_literal_expr) {
+static void TestNullTypeLiteral(std::shared_ptr<itmoscript::Expression>& null_literal_expr) {
     auto* literal = dynamic_cast<itmoscript::NullTypeLiteral*>(null_literal_expr.get());
     ASSERT_NE(literal, nullptr);
 }
 
-static void TestIdentifier(std::unique_ptr<itmoscript::Expression>& ident_expr, const std::string& expected_value) {
+static void TestIdentifier(std::shared_ptr<itmoscript::Expression>& ident_expr, const std::string& expected_value) {
     auto* ident = dynamic_cast<itmoscript::Identifier*>(ident_expr.get());
     ASSERT_NE(ident, nullptr);
 
@@ -64,7 +64,7 @@ static void TestIdentifier(std::unique_ptr<itmoscript::Expression>& ident_expr, 
     ASSERT_EQ(ident->token.literal, expected_value);
 }
 
-static void TestBooleanLiteral(std::unique_ptr<itmoscript::Expression>& int_literal_expr, bool expected_value) {
+static void TestBooleanLiteral(std::shared_ptr<itmoscript::Expression>& int_literal_expr, bool expected_value) {
     auto* bool_literal = dynamic_cast<itmoscript::BooleanLiteral*>(int_literal_expr.get());
     ASSERT_NE(bool_literal, nullptr);
 
@@ -74,7 +74,7 @@ static void TestBooleanLiteral(std::unique_ptr<itmoscript::Expression>& int_lite
 }
 
 template<typename T>
-void TestLiteralExpression(std::unique_ptr<itmoscript::Expression>& expr, T expected) {
+void TestLiteralExpression(std::shared_ptr<itmoscript::Expression>& expr, T expected) {
     if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, const char*>) {
         TestIdentifier(expr, expected);
     } else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, int>) {
@@ -87,7 +87,7 @@ void TestLiteralExpression(std::unique_ptr<itmoscript::Expression>& expr, T expe
 }
 
 template<typename L, typename R>
-void TestInfixExpression(std::unique_ptr<itmoscript::Expression>& expr, L left, std::string oper, R right) {
+void TestInfixExpression(std::shared_ptr<itmoscript::Expression>& expr, L left, std::string oper, R right) {
     auto* infix_expr = dynamic_cast<itmoscript::InfixExpression*>(expr.get());
     ASSERT_NE(infix_expr, nullptr);
     ASSERT_NE(infix_expr->right, nullptr);
@@ -137,20 +137,20 @@ void TestPrefixLiteralsExpressions(const std::vector<PrefixOpExpr<L>>& expressio
 }
 
 template<typename T>
-void TestStatement(const std::unique_ptr<itmoscript::Statement>& stmt, const std::string& expected) {
+void TestStatement(const std::shared_ptr<itmoscript::Statement>& stmt, const std::string& expected) {
     auto* body = dynamic_cast<T*>(stmt.get());
     ASSERT_NE(body, nullptr);
     ASSERT_EQ(body->String(), expected);
 }
 
-static itmoscript::ExpressionStatement* GetExpressionStatement(const std::unique_ptr<itmoscript::Statement>& stmt) {
+static itmoscript::ExpressionStatement* GetExpressionStatement(const std::shared_ptr<itmoscript::Statement>& stmt) {
     auto* expr_stmt = dynamic_cast<itmoscript::ExpressionStatement*>(stmt.get());
     EXPECT_NE(expr_stmt, nullptr);
     EXPECT_NE(expr_stmt->expr, nullptr);
     return expr_stmt;
 }
 
-static itmoscript::BlockStatement* GetBlockStatement(const std::unique_ptr<itmoscript::Statement>& stmt) {
+static itmoscript::BlockStatement* GetBlockStatement(const std::shared_ptr<itmoscript::Statement>& stmt) {
     auto* block_stmt = dynamic_cast<itmoscript::BlockStatement*>(stmt.get());
     EXPECT_NE(block_stmt, nullptr);
     return block_stmt;

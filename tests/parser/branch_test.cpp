@@ -1,6 +1,6 @@
 #include "parser_test.hpp"
 
-itmoscript::IfExpression* GetIfExpression(const std::unique_ptr<itmoscript::Statement>& stmt) {
+itmoscript::IfExpression* GetIfExpression(const std::shared_ptr<itmoscript::Statement>& stmt) {
     auto* expr_stmt = GetExpressionStatement(stmt);
 
     auto* if_expr = dynamic_cast<itmoscript::IfExpression*>(expr_stmt->expr.get());

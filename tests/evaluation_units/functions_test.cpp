@@ -19,14 +19,14 @@ TEST(EvaluationTestSuite, FunctionParametersTest) {
 
         ASSERT_EQ(expected.size(), params->size());
         for (size_t i = 0; i < params->size(); ++i) {
-            ASSERT_EQ(expected[i].name, params->at(i).name) << i;
+            ASSERT_EQ(expected[i].name, params->at(i)->name) << i;
         }
     }
 }
 
 TEST(EvaluationTestSuite, FunctionCallSimpleTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {"add = function(x, y) x + y end function \n add(10, 15)", IsValue{25}},
+        {"add = function(x, y) return x + y end function \n add(10, 15)", IsValue{25}},
         {"add = function(x, y) return x + y end function \n add(10, 15)", IsValue{25}},
         {"add = function(x, y) return x + y end function \n add(10, 15)", IsValue{25}},
     };
@@ -39,9 +39,9 @@ TEST(EvaluationTestSuite, FunctionCallSimpleTest) {
 
 TEST(EvaluationTestSuite, FunctionGlobalScopeTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {"x = 10 \n add = function(x, y) x + y end function \n add(-15, 15)", IsValue{0}},
-        {"x = 10 add = function(y) x + y end function \n add(15)", IsValue{25}},
-        {"x = 10 getX = function() x end function \n getX()", IsValue{10}},
+        {"x = 10 \n add = function(x, y) return x + y end function \n add(-15, 15)", IsValue{0}},
+        {"x = 10 add = function(y) return x + y end function \n add(15)", IsValue{25}},
+        {"x = 10 getX = function() return x end function \n getX()", IsValue{10}},
     };
 
     for (const auto& [input, expected] : expressions) {

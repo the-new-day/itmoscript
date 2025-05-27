@@ -4,11 +4,11 @@
 
 namespace itmoscript {
 
-const std::vector<std::unique_ptr<Statement>>& Program::GetStatements() const {
+const std::vector<std::shared_ptr<Statement>>& Program::GetStatements() const {
     return statements_;
 }
 
-void Program::AddStatement(std::unique_ptr<Statement> statement) {
+void Program::AddStatement(std::shared_ptr<Statement> statement) {
     statements_.push_back(std::move(statement));
 }
 
@@ -24,11 +24,11 @@ std::string Program::String() const {
     return result;
 }
 
-const std::vector<std::unique_ptr<Statement>>& BlockStatement::GetStatements() const {
+const std::vector<std::shared_ptr<Statement>>& BlockStatement::GetStatements() const {
     return statements_;
 }
 
-void BlockStatement::AddStatement(std::unique_ptr<Statement> statement) {
+void BlockStatement::AddStatement(std::shared_ptr<Statement> statement) {
     statements_.push_back(std::move(statement));
 }
 

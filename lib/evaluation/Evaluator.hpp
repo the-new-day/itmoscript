@@ -78,13 +78,14 @@ private:
 
     CallStack call_stack_;
     std::vector<Environment> env_stack_;
-    std::vector<ExecResult> result_stack_;
+
+    ExecResult last_exec_result_;
 
     Environment& env();
     void PushEnv();
     void PopEnv();
 
-    ExecResult Eval(Node& node);
+    const ExecResult& Eval(Node& node);
 
     std::optional<Value> HandleUnaryOper(const std::string& oper, const Value& right);
     std::optional<Value> HandleBinaryOper(const std::string& oper, const Value& left, const Value& right);
