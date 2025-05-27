@@ -4,28 +4,31 @@
 namespace itmoscript {
 
 bool Environment::Has(const std::string& name) const {
-    return storage_.contains(name);
+    return storage_.contains(name) || (parent_ != nullptr && parent_->Has(name));
 }
 
 const Value& Environment::Get(const std::string& name) const {
-    return storage_.at(name);
+    if (storage_.contains(name)) {
+        return storage_.at(name);
+    } else {
+        return parent_->Get(name);
+    }
 }
 
 void Environment::Set(const std::string& name, const Value& value) {
-    storage_[name] = value;
+    if (parent_ != nullptr && parent_->Has(name)) {
+        parent_->Set(name, value);
+    } else {
+        storage_[name] = value;
+    }
 }
 
 void Environment::Set(const std::string& name, Value&& value) {
-    storage_[name] = std::move(value);
-}
-
-size_t Environment::size() const {
-    return storage_.size();
-}
-
-const std::unordered_map<std::string,Value>& Environment::storage() const {
-    return storage_;
+    if (parent_ != nullptr && parent_->Has(name)) {
+        parent_->Set(name, value);
+    } else {
+        storage_[name] = std::move(value);
+    }
 }
     
 } // namespace itmoscript
-

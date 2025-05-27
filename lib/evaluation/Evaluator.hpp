@@ -31,8 +31,6 @@ public:
     void Interpret(Program& root);
     const Value& GetLastEvaluatedValue() const;
 
-    void ClearCallStack();
-
     void Visit(Program&) override;
     void Visit(ExpressionStatement&) override;
     void Visit(PrefixExpression&) override;
@@ -53,10 +51,10 @@ public:
     void Visit(ReturnStatement&) override;
 
     void Visit(WhileStatement&) override;
+    void Visit(BreakStatement&) override;
+    void Visit(ContinueStatement&) override;
 
     void Visit(ForStatement&) override {}
-    void Visit(BreakStatement&) override {}
-    void Visit(ContinueStatement&) override {}
 
 private:
     Token current_token_;
@@ -64,10 +62,29 @@ private:
     TypeSystem type_system_;
     OperatorRegistry operator_registry_;
 
-    Environment global_env_;
-    CallStack call_stack_;
+    bool inside_loop_ = false;
 
-    Value last_evaluated_value_;
+    enum class ControlFlowState {
+        kNormal,
+        kReturn,
+        kBreak,
+        kContinue,
+    };
+
+    struct ExecResult {
+        Value value;
+        ControlFlowState control = ControlFlowState::kNormal;
+    };
+
+    CallStack call_stack_;
+    std::vector<Environment> env_stack_;
+    std::vector<ExecResult> result_stack_;
+
+    Environment& env();
+    void PushEnv();
+    void PopEnv();
+
+    ExecResult Eval(Node& node);
 
     std::optional<Value> HandleUnaryOper(const std::string& oper, const Value& right);
     std::optional<Value> HandleBinaryOper(const std::string& oper, const Value& left, const Value& right);
@@ -75,11 +92,8 @@ private:
     const Value& ResolveIdentifier(const Identifier& ident);
     void AssignIdentifier(const Identifier& ident, Value value);
 
-    const Value& CallFunction(std::string name, const Function& func, std::vector<Value>& args);
-    void EvalFunctionBody(const Function& func);
+    Value CallFunction(std::string name, const Function& func, std::vector<Value>& args);
     std::string GetFunctionName(const std::optional<std::string>& name);
-
-    const Value& Eval(Node& node);
 
     template<NumericValueType T>
     void RegisterCommonAriphmeticOps();
@@ -134,7 +148,7 @@ void Evaluator::RegisterStringMultiplication() {
         if (!result) {
             ThrowRuntimeError<lang_exceptions::SequenceMultiplicationError>(
                 std::format(
-                    "cannot multiply string {} by negative value {}",
+                    "cannot multiply string \"{}\" by negative value {}",
                     str,
                     number
                 )

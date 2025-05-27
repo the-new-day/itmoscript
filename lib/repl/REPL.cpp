@@ -22,7 +22,6 @@ void REPL::Start(std::istream& input, std::ostream& output) {
             }
         } catch (const lang_exceptions::RuntimeError& e) {
             PrintException(output, e, "Runtime error");
-            evaluator_.ClearCallStack();
         } catch (const lang_exceptions::Exception& e) {
             PrintException(output, e, "Unhandled error");
             output << current_line_ << std::endl;

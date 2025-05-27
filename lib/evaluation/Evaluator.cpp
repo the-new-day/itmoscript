@@ -20,10 +20,13 @@ Evaluator::Evaluator() {
     RegisterComparisonOps();
     RegisterStringOps();
     RegisterLogicalOps();
+
+    env_stack_.emplace_back(std::make_shared<Environment>(nullptr));
 }
 
 void Evaluator::Interpret(Program& root) {
-    root.Accept(*this);
+    call_stack_.clear();
+    Eval(root);
 }
 
 std::optional<Value> Evaluator::HandleUnaryOper(const std::string& oper, const Value& right) {
@@ -53,55 +56,40 @@ std::optional<Value> Evaluator::HandleBinaryOper(const std::string& oper, const 
     return std::nullopt;
 }
 
-const Value& Evaluator::Eval(Node& node) {
+Environment& Evaluator::env() {
+    return env_stack_.back();
+}
+
+void Evaluator::PushEnv() {
+    env_stack_.emplace_back(std::make_shared<Environment>(env()));
+}
+
+void Evaluator::PopEnv() {
+    env_stack_.pop_back();
+}
+
+Evaluator::ExecResult Evaluator::Eval(Node& node) {
+    result_stack_.emplace_back();
     node.Accept(*this);
-    return last_evaluated_value_;
+    ExecResult res = std::move(result_stack_.back());
+    result_stack_.pop_back();
+    return res;
 }
 
 const Value& Evaluator::GetLastEvaluatedValue() const {
-    return last_evaluated_value_;
-}
-
-void Evaluator::ClearCallStack() {
-    call_stack_.clear();
+    return result_stack_.back().value;
 }
 
 const Value& Evaluator::ResolveIdentifier(const Identifier& ident) {
-    if (!call_stack_.empty()) {
-        const auto& local_env = call_stack_.back().local_env;
-        if (local_env.Has(ident.name)) {
-            return local_env.Get(ident.name);
-        }
-    }
-
-    if (!global_env_.Has(ident.name)) {
+    if (!env().Has(ident.name)) {
         ThrowRuntimeError<lang_exceptions::UndefinedNameError>(ident.token);
     }
 
-    return global_env_.Get(ident.name);
+    return env().Get(ident.name);
 }
 
 void Evaluator::AssignIdentifier(const Identifier& ident, Value value) {
-    if (call_stack_.empty()) {
-        global_env_.Set(ident.name, std::move(value));
-        return;
-    }
-    
-    auto& local_env = call_stack_.back().local_env;
-
-    if (local_env.Has(ident.name) || !global_env_.Has(ident.name)) {
-        local_env.Set(ident.name, std::move(value));
-    } else if (global_env_.Has(ident.name)) {
-        global_env_.Set(ident.name, std::move(value));
-    }
-}
-
-void Evaluator::EvalFunctionBody(const Function& func) {
-    Eval(*func->body);
-}
-
-std::string Evaluator::GetFunctionName(const std::optional<std::string>& name) {
-    return name.has_value() ? *name : "<anonymous function>";
+    env().Set(ident.name, std::move(value));
 }
 
 void Evaluator::Visit(Program& program) {
@@ -113,35 +101,48 @@ void Evaluator::Visit(Program& program) {
 
 void Evaluator::Visit(IntegerLiteral& node) {
     current_token_ = node.token;
-    last_evaluated_value_ = node.value;
+    auto& top = result_stack_.back();
+    top.value = node.value;
+    top.control = ControlFlowState::kNormal;
 }
 
 void Evaluator::Visit(BooleanLiteral& node) {
     current_token_ = node.token;
-    last_evaluated_value_ = node.value;
+    auto& top = result_stack_.back();
+    top.value = node.value;
+    top.control = ControlFlowState::kNormal;
 }
 
 void Evaluator::Visit(NullTypeLiteral& node) {
     current_token_ = node.token;
-    last_evaluated_value_ = std::monostate{};
+    auto& top = result_stack_.back();
+    top.value = NullType{};
+    top.control = ControlFlowState::kNormal;
 }
 
 void Evaluator::Visit(FloatLiteral& node) {
     current_token_ = node.token;
-    last_evaluated_value_ = node.value;
+    auto& top = result_stack_.back();
+    top.value = node.value;
+    top.control = ControlFlowState::kNormal;
 }
 
 void Evaluator::Visit(StringLiteral& node) {
     current_token_ = node.token;
-    last_evaluated_value_ = node.value;
+    auto& top = result_stack_.back();
+    top.value = node.value;
+    top.control = ControlFlowState::kNormal;
 }
 
-void Evaluator::Visit(Identifier& ident) {
-    last_evaluated_value_ = ResolveIdentifier(ident);
+void Evaluator::Visit(Identifier& node) {
+    current_token_ = node.token;
+    auto& top = result_stack_.back();
+    top.value = ResolveIdentifier(node);
+    top.control = ControlFlowState::kNormal;
 }
 
 void Evaluator::Visit(AssignStatement& stmt) {
-    AssignIdentifier(*stmt.ident, Eval(*stmt.expr));
+    AssignIdentifier(*stmt.ident, Eval(*stmt.expr).value);
 }
 
 void Evaluator::Visit(CallExpression& expr) {
@@ -149,38 +150,39 @@ void Evaluator::Visit(CallExpression& expr) {
     args.reserve(expr.arguments.size());
     
     for (auto& arg : expr.arguments) {
-        args.push_back(Eval(*arg));
+        args.push_back(Eval(*arg).value);
     }
 
-    Function func = Eval(*expr.function).Get<Function>();
-    CallFunction(GetFunctionName(expr.function_name), func, args);
+    Function func = Eval(*expr.function).value.Get<Function>();
+
+    auto& top = result_stack_.back();
+    top.value = CallFunction(GetFunctionName(expr.function_name), func, args);
+    top.control = ControlFlowState::kNormal;
 }
 
-const Value& Evaluator::CallFunction(std::string name, const Function& func, std::vector<Value>& args) {
+Value Evaluator::CallFunction(std::string name, const Function& func, std::vector<Value>& args) {
     if (args.size() != func->parameters->size()) {
         ThrowRuntimeError<lang_exceptions::ParametersCountError>(func->parameters->size(), args.size());
     }
 
-    CallFrame frame;
-    frame.entry_token = current_token_;
-    frame.function_name = std::move(name);
+    PushEnv();
+    
+    call_stack_.push_back(CallFrame{.function_name = std::move(name), .entry_token = current_token_});
 
     for (size_t i = 0; i < func->parameters->size(); ++i) {
         const std::string& name = func->parameters->at(i).name;
-        frame.local_env.Set(name, std::move(args[i]));
+        env().Set(name, std::move(args[i]));
     }
-    
-    call_stack_.push_back(std::move(frame));
 
-    EvalFunctionBody(func);
-    auto& frame_result = call_stack_.back();
-
-    if (frame_result.return_value.has_value()) {
-        last_evaluated_value_ = std::move(*frame_result.return_value);
-    }
-    
+    ExecResult res = Eval(*func->body);
+    PopEnv();
     call_stack_.pop_back();
-    return last_evaluated_value_;
+
+    if (res.control == ControlFlowState::kReturn) {
+        return res.value;
+    } else {
+        return NullType{};
+    }
 }
 
 void Evaluator::Visit(ReturnStatement& stmt) {
@@ -188,16 +190,54 @@ void Evaluator::Visit(ReturnStatement& stmt) {
         ThrowRuntimeError<lang_exceptions::UnexpectedReturnError>();
     }
 
-    auto& current_frame = call_stack_.back();
+    ExecResult val;
+    if (stmt.expr != nullptr) {
+        val = Eval(*stmt.expr);
+    } else {
+        val.value = NullType{};
+    }
 
-    if (stmt.expr != nullptr)
-        current_frame.return_value = Eval(*stmt.expr);
+    val.control = ControlFlowState::kReturn;
+    result_stack_.back() = std::move(val);
 }
 
 void Evaluator::Visit(WhileStatement& stmt) {
-    while (Eval(*stmt.condition).IsTruphy()) {
-        Eval(*stmt.body);
+    bool prev_loop = inside_loop_;
+    inside_loop_ = true;
+
+    auto& top = result_stack_.back();
+    top.value = NullType{};
+    top.control = ControlFlowState::kNormal;
+
+    while (Eval(*stmt.condition).value.IsTruphy()) {
+        ExecResult res = Eval(*stmt.body);
+        
+        if (res.control == ControlFlowState::kContinue) {
+            continue;
+        } else if (res.control == ControlFlowState::kBreak) {
+            top.control = ControlFlowState::kNormal;
+            break;
+        } else if (res.control == ControlFlowState::kReturn) {
+            top = std::move(res);
+            break;
+        }
     }
+
+    inside_loop_ = prev_loop;
+}
+
+void Evaluator::Visit(BreakStatement& stmt) {
+    if (!inside_loop_) {
+        // TODO: error
+    }
+    result_stack_.back().control = ControlFlowState::kBreak;
+}
+
+void Evaluator::Visit(ContinueStatement& stmt) {
+    if (!inside_loop_) {
+        // TODO: error
+    }
+    result_stack_.back().control = ControlFlowState::kContinue;
 }
 
 void Evaluator::Visit(FunctionLiteral& func) {
@@ -217,33 +257,51 @@ void Evaluator::Visit(FunctionLiteral& func) {
         parameters->push_back(std::move(*std::move(param)));
     }
 
-    last_evaluated_value_ = std::make_shared<FunctionObject>(parameters, body);
+    result_stack_.back().value = std::make_shared<FunctionObject>(parameters, body);
+    result_stack_.back().control = ControlFlowState::kNormal;
 }
 
 void Evaluator::Visit(IfExpression& expr) {
     for (const auto& alternative : expr.alternatives) {
-        if (alternative.condition == nullptr) { // final else branch, guaranteed to be last
-            Eval(*alternative.consequence);
+        if (alternative.condition == nullptr) { // else-branch, guaranteed to be last
+            result_stack_.back() = Eval(*alternative.consequence);
             return;
         }
 
-        Value condition = Eval(*alternative.condition);
-        if (condition.IsTruphy()) {
-            Eval(*alternative.consequence);
+        ExecResult cond_res = Eval(*alternative.condition);
+
+        if (cond_res.value.IsTruphy()) {
+            result_stack_.back() = Eval(*alternative.consequence);
+            return;
+        }
+
+        if (cond_res.control != ControlFlowState::kNormal) {
+            result_stack_.back() = std::move(cond_res);
             return;
         }
     }
 
-    last_evaluated_value_ = NullType{};
+    auto& top = result_stack_.back();
+    top.value = NullType{};
+    top.control = ControlFlowState::kNormal;
 }
 
 void Evaluator::Visit(BlockStatement& block) {
+    PushEnv();
+
     for (const auto& stmt : block.GetStatements()) {
-        Eval(*stmt);
-        if (!call_stack_.empty() && call_stack_.back().return_value.has_value()) {
+        ExecResult res = Eval(*stmt);
+        if (res.control != ControlFlowState::kNormal) {
+            result_stack_.back() = std::move(res);
+            PopEnv();
             return;
         }
     }
+
+    auto& top = result_stack_.back();
+    top.value = NullType{};
+    top.control = ControlFlowState::kNormal;
+    PopEnv();
 }
 
 void Evaluator::Visit(ExpressionStatement& node) {
@@ -252,26 +310,48 @@ void Evaluator::Visit(ExpressionStatement& node) {
 }
 
 void Evaluator::Visit(PrefixExpression& node) {
-    current_token_ = node.token;
-    Value right = Eval(*node.right);
-    
-    if (auto new_value = HandleUnaryOper(node.oper, right)) {
-        last_evaluated_value_ = *new_value;
+    ExecResult right = Eval(*node.right);
+
+    if (right.control != ControlFlowState::kNormal) {
+        result_stack_.back() = std::move(right);
+        return;
+    }
+
+    if (auto new_value = HandleUnaryOper(node.oper, right.value)) {
+        auto& top = result_stack_.back();
+        top.value = std::move(*new_value);
+        top.control = ControlFlowState::kNormal;
     } else {
-        ThrowRuntimeError<lang_exceptions::OperatorTypeError>(node.oper, right.type());
+        ThrowRuntimeError<lang_exceptions::OperatorTypeError>(node.oper, right.value.type());
     }
 }
 
 void Evaluator::Visit(InfixExpression& node) {
-    current_token_ = node.token;
-    Value left = Eval(*node.left);
-    Value right = Eval(*node.right);
+    ExecResult left = Eval(*node.left);
 
-    if (auto new_value = HandleBinaryOper(node.oper, left, right)) {
-        last_evaluated_value_ = *new_value;
-    } else {
-        ThrowRuntimeError<lang_exceptions::OperatorTypeError>(node.oper, left.type(), right.type());
+    if (left.control != ControlFlowState::kNormal) {
+        result_stack_.back() = std::move(left);
+        return;
     }
+
+    ExecResult right = Eval(*node.right);
+
+    if (right.control != ControlFlowState::kNormal) {
+        result_stack_.back() = std::move(right);
+        return;
+    }
+
+    if (auto new_value = HandleBinaryOper(node.oper, left.value, right.value)) {
+        auto& top = result_stack_.back();
+        top.value = std::move(*new_value);
+        top.control = ControlFlowState::kNormal;
+    } else {
+        ThrowRuntimeError<lang_exceptions::OperatorTypeError>(node.oper, left.value.type(), right.value.type());
+    }
+}
+
+std::string Evaluator::GetFunctionName(const std::optional<std::string>& name) {
+    return name.has_value() ? *name : "<anonymous function>";
 }
 
 void Evaluator::RegisterTypeConversions() {

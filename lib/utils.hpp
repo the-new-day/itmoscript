@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <concepts>
 #include <sstream>
+#include <functional>
 
 namespace itmoscript {
 
@@ -91,11 +92,12 @@ static std::optional<std::string> MultiplyStr(const std::string& str, double tim
     return result;
 }
 
-template<typename T>
-std::string Join(const std::vector<T>& objects, const std::string& glue) {
+template<typename T, typename Out = T>
+std::string Join(const std::vector<T>& objects, const std::string& glue, const std::function<Out(const T&)>& getter) {
     std::ostringstream result;
     for (size_t i = 0; i < objects.size(); ++i) {
-        result << objects[i];
+        result << std::invoke(getter, objects[i]);
+        if (i != objects.size() - 1) result << glue;
     }
     return result.str();
 }

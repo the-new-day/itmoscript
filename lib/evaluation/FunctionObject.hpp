@@ -29,4 +29,3 @@ struct FunctionObject {
 };
     
 } // namespace itmoscript
-

@@ -1,5 +1,6 @@
 #include "Value.hpp"
 #include "FunctionObject.hpp"
+#include "utils.hpp"
 
 namespace itmoscript {
 
@@ -35,7 +36,14 @@ std::string Value::ToString() const {
         case ValueType::kBool:
             return Get<Bool>() ? "true" : "false";
         case ValueType::kFunction:
-            return "<Function object>";
+            return std::format(
+                "<Function object>({})",
+                utils::Join<Identifier, std::string>(
+                    *Get<Function>()->parameters, 
+                    ", ", 
+                    [](const Identifier& ident) { return ident.name; }
+                )
+            );
         default:
             return "<UnknownType>";
     }

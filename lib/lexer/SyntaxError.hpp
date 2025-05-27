@@ -19,4 +19,3 @@ public:
 } // namespace lang_exceptions
     
 } // namespace itmoscript
-

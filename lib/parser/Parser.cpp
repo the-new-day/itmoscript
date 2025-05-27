@@ -430,13 +430,11 @@ std::unique_ptr<ForStatement> Parser::ParseForStatement() {
 
 std::unique_ptr<BreakStatement> Parser::ParseBreakStatement() {
     auto stmt = MakeNode<BreakStatement>();
-    AdvanceToken();
     return stmt;
 }
 
 std::unique_ptr<ContinueStatement> Parser::ParseContinueStatement() {
     auto stmt = MakeNode<ContinueStatement>();
-    AdvanceToken();
     return stmt;
 }
 
