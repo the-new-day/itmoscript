@@ -48,10 +48,15 @@ Parser::Parser(Lexer& lexer)
     infix_parse_funcs_[TokenType::kAnd] = infix_parser;
     infix_parse_funcs_[TokenType::kOr] = infix_parser;
     infix_parse_funcs_[TokenType::kLParen] = [this](std::shared_ptr<Expression> function) {
+        Token token = function->token;
         auto expr = this->ParseCallExpression(std::move(function));
 
         if (auto ident = dynamic_cast<Identifier*>(expr->function.get())) {
             expr->function_name = ident->name;
+        } else if (dynamic_cast<FunctionLiteral*>(expr->function.get()) == nullptr) {
+            ThrowError(std::format(
+                "Object {} is not callable. This incident will be reported", token.literal
+            ));
         }
 
         return expr;

@@ -173,9 +173,9 @@ struct CallExpression : public Expression {
     std::string String() const override;
     void Accept(Visitor& visitor) override { visitor.Visit(*this); }
 
-    std::shared_ptr<Expression> function;
+    std::shared_ptr<Expression> function; // Identifier or FunctionLiteral
     std::vector<std::shared_ptr<Expression>> arguments;
-    std::optional<std::string> function_name;
+    std::optional<std::string> function_name; // Filled if function is an Identifier
 };
 
 struct WhileStatement : public Statement {

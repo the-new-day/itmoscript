@@ -133,7 +133,6 @@ void Evaluator::Visit(AssignStatement& stmt) {
 }
 
 void Evaluator::Visit(CallExpression& expr) {
-    // TODO: error if expr.function is not a function: 1(a, b, c) is causing an "internal error" now
     std::vector<Value> args;
     args.reserve(expr.arguments.size());
     
