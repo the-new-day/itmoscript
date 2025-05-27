@@ -6,6 +6,7 @@
 #include <functional>
 #include <unordered_map>
 #include <typeindex>
+#include <stack>
 
 #include "utils.hpp"
 
@@ -77,7 +78,7 @@ private:
     };
 
     CallStack call_stack_;
-    std::vector<Environment> env_stack_;
+    std::stack<std::shared_ptr<Environment>> env_stack_;
 
     ExecResult last_exec_result_;
 

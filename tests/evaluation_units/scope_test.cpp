@@ -25,7 +25,7 @@ TEST(EvaluationTestSuite, FunctionNestedScopeToGlobalTest) {
     }
 }
 
-TEST(EvaluationTestSuite, IfBlockScopeSimpleTest) {
+TEST(EvaluationTestSuite, LocalScopeSimpleTest) {
     std::string expr = R"(
         x = 10
         if x == 0 then
@@ -35,4 +35,27 @@ TEST(EvaluationTestSuite, IfBlockScopeSimpleTest) {
     )";
 
     ASSERT_THROW(Eval(expr), itmoscript::lang_exceptions::UndefinedNameError);
+}
+
+TEST(EvaluationTestSuite, UpdateOuterScopeVarTest) {
+    std::vector<std::pair<std::string, IsValue>> expressions = {
+        {R"(
+            x = 10
+            if x then
+                if x then
+                    if x then
+                        if x then
+                            x = 99
+                        end if
+                    end if
+                end if
+            end if
+            x
+        )", IsValue{99}},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        ASSERT_EQ(evaluated, expected) << "input: " << input;
+    }
 }

@@ -21,7 +21,7 @@ Evaluator::Evaluator() {
     RegisterStringOps();
     RegisterLogicalOps();
 
-    env_stack_.emplace_back(std::make_shared<Environment>(nullptr));
+    env_stack_.emplace(std::make_shared<Environment>(nullptr));
 }
 
 void Evaluator::Interpret(Program& root) {
@@ -57,15 +57,15 @@ std::optional<Value> Evaluator::HandleBinaryOper(const std::string& oper, const 
 }
 
 Environment& Evaluator::env() {
-    return env_stack_.back();
+    return *env_stack_.top();
 }
 
 void Evaluator::PushEnv() {
-    env_stack_.emplace_back(std::make_shared<Environment>(env()));
+    env_stack_.emplace(std::make_shared<Environment>(env_stack_.top()));
 }
 
 void Evaluator::PopEnv() {
-    env_stack_.pop_back();
+    env_stack_.pop();
 }
 
 const Evaluator::ExecResult& Evaluator::Eval(Node& node) {
@@ -128,7 +128,8 @@ void Evaluator::Visit(Identifier& node) {
 }
 
 void Evaluator::Visit(AssignStatement& stmt) {
-    AssignIdentifier(*stmt.ident, Eval(*stmt.expr).value);
+    Eval(*stmt.expr);
+    env().Set(stmt.ident->name, last_exec_result_.value);
 }
 
 void Evaluator::Visit(CallExpression& expr) {

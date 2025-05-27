@@ -15,17 +15,11 @@ const Value& Environment::Get(const std::string& name) const {
     }
 }
 
-void Environment::Set(const std::string& name, const Value& value) {
-    if (parent_ != nullptr && parent_->Has(name)) {
-        parent_->Set(name, value);
-    } else {
-        storage_[name] = value;
-    }
-}
-
-void Environment::Set(const std::string& name, Value&& value) {
-    if (parent_ != nullptr && parent_->Has(name)) {
-        parent_->Set(name, value);
+void Environment::Set(const std::string& name, Value value) {
+    if (storage_.contains(name)) {
+        storage_[name] = std::move(value);
+    } else if (parent_ != nullptr && parent_->Has(name)) {
+        parent_->Set(name, std::move(value));
     } else {
         storage_[name] = std::move(value);
     }
