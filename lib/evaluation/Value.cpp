@@ -38,10 +38,10 @@ std::string Value::ToString() const {
         case ValueType::kFunction:
             return std::format(
                 "<Function object>({})",
-                utils::Join<std::shared_ptr<Identifier>, std::string>(
+                utils::Join<std::shared_ptr<ast::Identifier>, std::string>(
                     *Get<Function>()->parameters, 
                     ", ", 
-                    [](const std::shared_ptr<Identifier>& ident) { return ident->name; }
+                    [](const std::shared_ptr<ast::Identifier>& ident) { return ident->name; }
                 )
             );
         default:
@@ -53,7 +53,7 @@ bool Value::operator==(const Value& other) const {
     return type() == other.type() && data_ == other.data_;
 }
 
-const std::string Value::GetTypeName() const {
+const std::string& Value::GetTypeName() const {
     return kValueTypeNames.at(type());
 }
 

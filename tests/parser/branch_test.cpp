@@ -1,15 +1,15 @@
 #include "parser_test.hpp"
 
-itmoscript::IfExpression* GetIfExpression(const std::shared_ptr<itmoscript::Statement>& stmt) {
+itmoscript::ast::IfExpression* GetIfExpression(const std::shared_ptr<itmoscript::ast::Statement>& stmt) {
     auto* expr_stmt = GetExpressionStatement(stmt);
 
-    auto* if_expr = dynamic_cast<itmoscript::IfExpression*>(expr_stmt->expr.get());
+    auto* if_expr = dynamic_cast<itmoscript::ast::IfExpression*>(expr_stmt->expr.get());
     EXPECT_NE(if_expr, nullptr);
 
     return if_expr;
 }
 
-itmoscript::IfExpression* GetIfExpression(const itmoscript::Program& program) {
+itmoscript::ast::IfExpression* GetIfExpression(const itmoscript::ast::Program& program) {
     const auto& statements = program.GetStatements();
     EXPECT_EQ(statements.size(), 1);
 

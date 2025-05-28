@@ -29,7 +29,7 @@ Parser::Parser(Lexer& lexer)
     prefix_parse_funcs_[TokenType::kIf] = [this]() { return this->ParseIfExpression(); };
     prefix_parse_funcs_[TokenType::kFunction] = [this]() { return this->ParseFunctionLiteral(); };
 
-    auto infix_parser = [this](std::shared_ptr<Expression> expr) {
+    auto infix_parser = [this](std::shared_ptr<ast::Expression> expr) {
         return this->ParseInfixExpression(std::move(expr));
     };
 
@@ -47,13 +47,13 @@ Parser::Parser(Lexer& lexer)
     infix_parse_funcs_[TokenType::kGreaterOrEqual] = infix_parser;
     infix_parse_funcs_[TokenType::kAnd] = infix_parser;
     infix_parse_funcs_[TokenType::kOr] = infix_parser;
-    infix_parse_funcs_[TokenType::kLParen] = [this](std::shared_ptr<Expression> function) {
+    infix_parse_funcs_[TokenType::kLParen] = [this](std::shared_ptr<ast::Expression> function) {
         Token token = function->token;
         auto expr = this->ParseCallExpression(std::move(function));
 
-        if (auto ident = dynamic_cast<Identifier*>(expr->function.get())) {
+        if (auto ident = dynamic_cast<ast::Identifier*>(expr->function.get())) {
             expr->function_name = ident->name;
-        } else if (dynamic_cast<FunctionLiteral*>(expr->function.get()) == nullptr) {
+        } else if (dynamic_cast<ast::FunctionLiteral*>(expr->function.get()) == nullptr) {
             ThrowError(std::format(
                 "Object {} is not callable. This incident will be reported", token.literal
             ));
@@ -68,8 +68,8 @@ void Parser::AdvanceToken() {
     peek_token_ = lexer_.GetNextToken();
 }
 
-Program Parser::ParseProgram() {
-    Program program;
+ast::Program Parser::ParseProgram() {
+    ast::Program program;
 
     while (!IsCurrentToken(TokenType::kEOF)) {
         if (IsCurrentToken(TokenType::kNewLine)) {
@@ -84,7 +84,7 @@ Program Parser::ParseProgram() {
     return program;
 }
 
-std::shared_ptr<Statement> Parser::ParseStatement() {
+std::shared_ptr<ast::Statement> Parser::ParseStatement() {
     if (IsCurrentToken(TokenType::kIdentifier)) {
         if (IsPeekToken(TokenType::kAssign)) {
             return ParseAssignStatement();
@@ -104,10 +104,10 @@ std::shared_ptr<Statement> Parser::ParseStatement() {
     return ParseExpressionStatement();
 }
 
-std::shared_ptr<AssignStatement> Parser::ParseAssignStatement() {
-    auto statement = MakeNode<AssignStatement>();
+std::shared_ptr<ast::AssignStatement> Parser::ParseAssignStatement() {
+    auto statement = MakeNode<ast::AssignStatement>();
 
-    statement->ident = MakeNode<Identifier>();
+    statement->ident = MakeNode<ast::Identifier>();
     statement->ident->name = current_token_.literal;
 
     Consume(TokenType::kAssign);
@@ -117,8 +117,8 @@ std::shared_ptr<AssignStatement> Parser::ParseAssignStatement() {
     return statement;
 }
 
-std::shared_ptr<ReturnStatement> Parser::ParseReturnStatement() {
-    auto statement = MakeNode<ReturnStatement>();
+std::shared_ptr<ast::ReturnStatement> Parser::ParseReturnStatement() {
+    auto statement = MakeNode<ast::ReturnStatement>();
     AdvanceToken();
 
     if (!IsCurrentToken(TokenType::kEOF) && !IsCurrentToken(TokenType::kNewLine)) {
@@ -128,13 +128,13 @@ std::shared_ptr<ReturnStatement> Parser::ParseReturnStatement() {
     return statement;
 }
 
-std::shared_ptr<ExpressionStatement> Parser::ParseExpressionStatement() {
-    auto statement = MakeNode<ExpressionStatement>();
+std::shared_ptr<ast::ExpressionStatement> Parser::ParseExpressionStatement() {
+    auto statement = MakeNode<ast::ExpressionStatement>();
     statement->expr = ParseExpression();
     return statement;
 }
 
-std::shared_ptr<Expression> Parser::ParseExpression(Precedence precedence) {
+std::shared_ptr<ast::Expression> Parser::ParseExpression(Precedence precedence) {
     if (!prefix_parse_funcs_.contains(current_token_.type)) {
         throw lang_exceptions::ParsingError{
             current_token_.line, 
@@ -146,7 +146,7 @@ std::shared_ptr<Expression> Parser::ParseExpression(Precedence precedence) {
         };
     }
 
-    std::shared_ptr<Expression> left = std::invoke(prefix_parse_funcs_.at(current_token_.type));
+    std::shared_ptr<ast::Expression> left = std::invoke(prefix_parse_funcs_.at(current_token_.type));
 
     while (!IsEndOfExpression(peek_token_.type) && precedence < PeekPrecedence()) {
         if (!infix_parse_funcs_.contains(peek_token_.type)) {
@@ -219,13 +219,13 @@ Precedence Parser::GetCurrentPrecedence() const {
     }
 }
 
-std::shared_ptr<Identifier> Parser::ParseIdentifier() {
-    auto ident = MakeNode<Identifier>();
+std::shared_ptr<ast::Identifier> Parser::ParseIdentifier() {
+    auto ident = MakeNode<ast::Identifier>();
     ident->name = current_token_.literal;
     return ident;
 }
 
-std::shared_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
+std::shared_ptr<ast::IntegerLiteral> Parser::ParseIntegerLiteral() {
     // TODO: parsing with base other than 10
     std::expected<int64_t, std::errc> parsing_result = utils::ParseNumber<int64_t>(current_token_.literal);
 
@@ -238,12 +238,12 @@ std::shared_ptr<IntegerLiteral> Parser::ParseIntegerLiteral() {
         }
     }
 
-    auto int_literal = MakeNode<IntegerLiteral>();
+    auto int_literal = MakeNode<ast::IntegerLiteral>();
     int_literal->value = parsing_result.value();
     return int_literal;
 }
 
-std::shared_ptr<FloatLiteral> Parser::ParseFloatLiteral() {
+std::shared_ptr<ast::FloatLiteral> Parser::ParseFloatLiteral() {
     std::expected<double, std::errc> parsing_result = utils::ParseNumber<double>(current_token_.literal);
 
     if (!parsing_result.has_value()) {
@@ -255,13 +255,13 @@ std::shared_ptr<FloatLiteral> Parser::ParseFloatLiteral() {
         }
     }
 
-    auto float_literal = MakeNode<FloatLiteral>();
+    auto float_literal = MakeNode<ast::FloatLiteral>();
     float_literal->value = parsing_result.value();
     return float_literal;
 }
 
-std::shared_ptr<StringLiteral> Parser::ParseStringLiteral() {
-    auto string_literal = MakeNode<StringLiteral>();
+std::shared_ptr<ast::StringLiteral> Parser::ParseStringLiteral() {
+    auto string_literal = MakeNode<ast::StringLiteral>();
 
     std::string_view literal = string_literal->token.literal;
     literal = literal.substr(1, literal.size() - 2);
@@ -270,18 +270,18 @@ std::shared_ptr<StringLiteral> Parser::ParseStringLiteral() {
     return string_literal;
 }
 
-std::shared_ptr<BooleanLiteral> Parser::ParseBooleanLiteral() {
-    auto bool_literal = MakeNode<BooleanLiteral>();
+std::shared_ptr<ast::BooleanLiteral> Parser::ParseBooleanLiteral() {
+    auto bool_literal = MakeNode<ast::BooleanLiteral>();
     bool_literal->value = IsCurrentToken(TokenType::kTrue);
     return bool_literal;
 }
 
-std::shared_ptr<NullTypeLiteral> Parser::ParseNullTypeLiteral() {
-    return MakeNode<NullTypeLiteral>();
+std::shared_ptr<ast::NullTypeLiteral> Parser::ParseNullTypeLiteral() {
+    return MakeNode<ast::NullTypeLiteral>();
 }
 
-std::shared_ptr<PrefixExpression> Parser::ParsePrefixExpression() {
-    auto expr = MakeNode<PrefixExpression>();
+std::shared_ptr<ast::PrefixExpression> Parser::ParsePrefixExpression() {
+    auto expr = MakeNode<ast::PrefixExpression>();
     expr->oper = current_token_.literal;
     AdvanceToken();
 
@@ -289,8 +289,8 @@ std::shared_ptr<PrefixExpression> Parser::ParsePrefixExpression() {
     return expr;
 }
 
-std::shared_ptr<InfixExpression> Parser::ParseInfixExpression(std::shared_ptr<Expression> left) {
-    auto infix_expr = MakeNode<InfixExpression>();
+std::shared_ptr<ast::InfixExpression> Parser::ParseInfixExpression(std::shared_ptr<ast::Expression> left) {
+    auto infix_expr = MakeNode<ast::InfixExpression>();
     infix_expr->oper = current_token_.literal;
     infix_expr->left = std::move(left);
 
@@ -301,15 +301,15 @@ std::shared_ptr<InfixExpression> Parser::ParseInfixExpression(std::shared_ptr<Ex
     return infix_expr;
 }
 
-std::shared_ptr<Expression> Parser::ParseGroupedExpression() {
+std::shared_ptr<ast::Expression> Parser::ParseGroupedExpression() {
     AdvanceToken();
     auto expr = ParseExpression();
     Consume(TokenType::kRParen);
     return expr;
 }
 
-std::shared_ptr<BlockStatement> Parser::ParseBlockStatement() {
-    auto block = MakeNode<BlockStatement>();
+std::shared_ptr<ast::BlockStatement> Parser::ParseBlockStatement() {
+    auto block = MakeNode<ast::BlockStatement>();
     AdvanceToken();
 
     while (!IsCurrentTokenEndOfBlock()) {
@@ -328,8 +328,8 @@ std::shared_ptr<BlockStatement> Parser::ParseBlockStatement() {
     return block;
 }
 
-std::shared_ptr<IfExpression> Parser::ParseIfExpression() {
-    auto expr = MakeNode<IfExpression>();
+std::shared_ptr<ast::IfExpression> Parser::ParseIfExpression() {
+    auto expr = MakeNode<ast::IfExpression>();
     AdvanceToken();
 
     expr->alternatives.resize(1);
@@ -345,7 +345,7 @@ std::shared_ptr<IfExpression> Parser::ParseIfExpression() {
             ThrowError("unexpected branch beginning");
         }
 
-        IfBranch branch{current_token_};
+        ast::IfBranch branch{current_token_};
 
         if (IsCurrentToken(TokenType::kElseIf)) {
             AdvanceToken();
@@ -367,8 +367,8 @@ std::shared_ptr<IfExpression> Parser::ParseIfExpression() {
     return expr;
 }
 
-std::shared_ptr<FunctionLiteral> Parser::ParseFunctionLiteral() {
-    auto function_lit = MakeNode<FunctionLiteral>();
+std::shared_ptr<ast::FunctionLiteral> Parser::ParseFunctionLiteral() {
+    auto function_lit = MakeNode<ast::FunctionLiteral>();
     Consume(TokenType::kLParen);
 
     function_lit->parameters = ParseFunctionParameters();
@@ -378,15 +378,15 @@ std::shared_ptr<FunctionLiteral> Parser::ParseFunctionLiteral() {
     return function_lit;
 }
 
-std::shared_ptr<CallExpression> Parser::ParseCallExpression(std::shared_ptr<Expression> function) {
-    auto expr = MakeNode<CallExpression>();
+std::shared_ptr<ast::CallExpression> Parser::ParseCallExpression(std::shared_ptr<ast::Expression> function) {
+    auto expr = MakeNode<ast::CallExpression>();
     expr->function = std::move(function);
     expr->arguments = ParseCallArguments();
     return expr;
 }
 
-std::vector<std::shared_ptr<Expression>> Parser::ParseCallArguments() {
-    std::vector<std::shared_ptr<Expression>> args;
+std::vector<std::shared_ptr<ast::Expression>> Parser::ParseCallArguments() {
+    std::vector<std::shared_ptr<ast::Expression>> args;
     AdvanceToken();
 
     if (IsCurrentToken(TokenType::kRParen)) {
@@ -406,8 +406,8 @@ std::vector<std::shared_ptr<Expression>> Parser::ParseCallArguments() {
     return args;
 }
 
-std::shared_ptr<WhileStatement> Parser::ParseWhileStatement() {
-    auto stmt = MakeNode<WhileStatement>();
+std::shared_ptr<ast::WhileStatement> Parser::ParseWhileStatement() {
+    auto stmt = MakeNode<ast::WhileStatement>();
     AdvanceToken();
 
     stmt->condition = ParseExpression();
@@ -417,8 +417,8 @@ std::shared_ptr<WhileStatement> Parser::ParseWhileStatement() {
     return stmt;
 }
 
-std::shared_ptr<ForStatement> Parser::ParseForStatement() {
-    auto stmt = MakeNode<ForStatement>();
+std::shared_ptr<ast::ForStatement> Parser::ParseForStatement() {
+    auto stmt = MakeNode<ast::ForStatement>();
     Consume(TokenType::kIdentifier);
 
     stmt->iter = ParseIdentifier();
@@ -433,18 +433,18 @@ std::shared_ptr<ForStatement> Parser::ParseForStatement() {
     return stmt;
 }
 
-std::shared_ptr<BreakStatement> Parser::ParseBreakStatement() {
-    auto stmt = MakeNode<BreakStatement>();
+std::shared_ptr<ast::BreakStatement> Parser::ParseBreakStatement() {
+    auto stmt = MakeNode<ast::BreakStatement>();
     return stmt;
 }
 
-std::shared_ptr<ContinueStatement> Parser::ParseContinueStatement() {
-    auto stmt = MakeNode<ContinueStatement>();
+std::shared_ptr<ast::ContinueStatement> Parser::ParseContinueStatement() {
+    auto stmt = MakeNode<ast::ContinueStatement>();
     return stmt;
 }
 
-std::vector<std::shared_ptr<Identifier>> Parser::ParseFunctionParameters() {
-    std::vector<std::shared_ptr<Identifier>> identifiers;
+std::vector<std::shared_ptr<ast::Identifier>> Parser::ParseFunctionParameters() {
+    std::vector<std::shared_ptr<ast::Identifier>> identifiers;
 
     if (IsPeekToken(TokenType::kRParen)) {
         AdvanceToken();

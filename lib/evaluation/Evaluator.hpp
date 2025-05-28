@@ -10,7 +10,7 @@
 
 #include "utils.hpp"
 
-#include "ast/Visitor.hpp"
+#include "ast/AstVisitor.hpp"
 #include "ast/AST.hpp"
 
 #include "evaluation/Value.hpp"
@@ -25,37 +25,31 @@
 
 namespace itmoscript {
 
-class Evaluator : public Visitor {
+/**
+ * @class Evaluator
+ * @brief Walks through the AST and evaluates every node. Controls the flow of evaluation,
+ * block scopes. Holds registered identifiers and their values.
+ * 
+ * @details Implements the AstVisitor interface, making walking through the tree easy.
+ * All Visit() methods are private, the Node class is a friend of AstVisitor.
+ */
+class Evaluator : public ast::AstVisitor {
 public:
+    /**
+     * @brief Consturcts the evaluator.
+     * Registers all operators and sets up the environment stack, initializing the global scope.
+     */
     Evaluator();
 
-    void Interpret(Program& root);
+    /**
+     * @brief Walks through the AST from given root.
+     * Clears the call stack before execution.
+     * 
+     * All AST nodes, which control flow reaches, are evaluated.
+     */
+    void Interpret(ast::Program& root);
+
     const Value& GetLastEvaluatedValue() const;
-
-    void Visit(Program&) override;
-    void Visit(ExpressionStatement&) override;
-    void Visit(PrefixExpression&) override;
-    void Visit(InfixExpression&) override;
-
-    void Visit(IntegerLiteral&) override;
-    void Visit(BooleanLiteral&) override;
-    void Visit(NullTypeLiteral&) override;
-    void Visit(FloatLiteral&) override;
-    void Visit(StringLiteral&) override;
-    void Visit(FunctionLiteral&) override;
-    void Visit(Identifier&) override;
-
-    void Visit(IfExpression&) override;
-    void Visit(BlockStatement&) override;
-    void Visit(AssignStatement&) override;
-    void Visit(CallExpression&) override;
-    void Visit(ReturnStatement&) override;
-
-    void Visit(WhileStatement&) override;
-    void Visit(BreakStatement&) override;
-    void Visit(ContinueStatement&) override;
-
-    void Visit(ForStatement&) override {}
 
 private:
     Token current_token_;
@@ -83,18 +77,67 @@ private:
     ExecResult last_exec_result_;
 
     Environment& env();
+
+    /**
+     * @brief "Enters" new scope. Pushes new environment to the env_stack_,
+     * with parent link to the current scope.
+     */
     void PushEnv();
+
+    /**
+     * @brief "Leaves" the current scope. Erases all identifiers registed inside of it.
+     */
     void PopEnv();
 
-    const ExecResult& Eval(Node& node);
+    /**
+     * @brief Evaluates the given node by calling node.Accept(*this).
+     * Also sets the current_token_.
+     */
+    const ExecResult& Eval(ast::Node& node);
 
+    /**
+     * @brief Calls the matching handler for the operator with given value if it exists.
+     * @return Evaluated value if the handler was found, std::nullopt otherwise.
+     */
     std::optional<Value> HandleUnaryOper(const std::string& oper, const Value& right);
+
+    /**
+     * @brief Calls the matching handler for the operator with given values if it exists.
+     * @return Evaluated value if the handler was found, std::nullopt otherwise.
+     */
     std::optional<Value> HandleBinaryOper(const std::string& oper, const Value& left, const Value& right);
 
-    const Value& ResolveIdentifier(const Identifier& ident);
-    void AssignIdentifier(const Identifier& ident, Value value);
+    /**
+     * @brief Checks if the given identifier is registered either in the current scope or in any
+     * of the outer scopes. If it is, returns const ref to it's value.
+     * @throw UndefinedNameError If the identifier is not found in all of the scope chain.
+     */
+    const Value& ResolveIdentifier(const ast::Identifier& ident);
 
+    /**
+     * @brief Assigns the identifier with the given value.
+     * If the identifier exists in the current scope or in any outer scope, changes it's value.
+     * 
+     * Otherwise, registers the new identifier with the given value.
+     */
+    void AssignIdentifier(const ast::Identifier& ident, Value value);
+
+    /**
+     * @brief Calls the function with given arguments.
+     * @param name Name of the function for the stacktrace. Used only for printing the stacktrace.
+     * @param func Function object to call. Must contains valid parameters and body fields.
+     * @param args Arguments to pass to the function
+     * 
+     * @details When the control flow enters the function, it creates it's local scope with parameters
+     * set to the corresponing values passed to the function.
+     * So, local function parameters "shadow" parameters from the outer scope.
+     */
     Value CallFunction(std::string name, const Function& func, std::vector<Value>& args);
+
+    /**
+     * @brief Returns the identifier associated with the function if it's named,
+     * "<anonymous function>" otherwise.
+     */
     std::string GetFunctionName(const std::optional<std::string>& name);
 
     template<NumericValueType T>
@@ -110,11 +153,46 @@ private:
     void RegisterStringOps();
     void RegisterLogicalOps();
 
+    /**
+     * @brief Throws RuntimeError's inheritant exception with given type and arguments.
+     * Also includes current token and current call stack to the exception constructor.
+     */
     template<typename ErrorType, typename ...Args>
     void ThrowRuntimeError(Args&&... args) const noexcept(false);
 
+    /**
+     * @brief Throws RuntimeError's inheritant exception with given type and arguments.
+     * Also includes the passed token and current call stack to the exception constructor.
+     */
     template<typename ErrorType, typename ...Args>
     void ThrowRuntimeError(Token token, Args&&... args) const noexcept(false);
+
+    // Visitor implementation
+
+    void Visit(ast::Program&) override;
+    void Visit(ast::ExpressionStatement&) override;
+    void Visit(ast::PrefixExpression&) override;
+    void Visit(ast::InfixExpression&) override;
+
+    void Visit(ast::IntegerLiteral&) override;
+    void Visit(ast::BooleanLiteral&) override;
+    void Visit(ast::NullTypeLiteral&) override;
+    void Visit(ast::FloatLiteral&) override;
+    void Visit(ast::StringLiteral&) override;
+    void Visit(ast::FunctionLiteral&) override;
+    void Visit(ast::Identifier&) override;
+
+    void Visit(ast::IfExpression&) override;
+    void Visit(ast::BlockStatement&) override;
+    void Visit(ast::AssignStatement&) override;
+    void Visit(ast::CallExpression&) override;
+    void Visit(ast::ReturnStatement&) override;
+
+    void Visit(ast::WhileStatement&) override;
+    void Visit(ast::BreakStatement&) override;
+    void Visit(ast::ContinueStatement&) override;
+
+    void Visit(ast::ForStatement&) override {}
 };
 
 template<NumericValueType T>

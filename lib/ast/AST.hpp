@@ -6,9 +6,11 @@
 #include <cstdint>
 
 #include "lexer/Lexer.hpp"
-#include "Visitor.hpp"
+#include "AstVisitor.hpp"
 
 namespace itmoscript {
+
+namespace ast {
 
 struct Node {
     Node(const Token& token)
@@ -17,7 +19,7 @@ struct Node {
 
     virtual ~Node() = default;
     virtual std::string String() const { return token.literal; }
-    virtual void Accept(Visitor& visitor) = 0;
+    virtual void Accept(AstVisitor& visitor) = 0;
 
     Token token;
 };
@@ -37,7 +39,7 @@ public:
     void AddStatement(std::shared_ptr<Statement> statement);
 
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
 private:
     std::vector<std::shared_ptr<Statement>> statements_;
@@ -46,7 +48,7 @@ private:
 struct ExpressionStatement : public Statement {
     using Statement::Statement;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::shared_ptr<Expression> expr;
 };
@@ -54,7 +56,7 @@ struct ExpressionStatement : public Statement {
 struct Identifier : public Expression {
     using Expression::Expression;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::string name;
 };
@@ -62,7 +64,7 @@ struct Identifier : public Expression {
 struct AssignStatement : public Statement {
     using Statement::Statement;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::shared_ptr<Identifier> ident;
     std::shared_ptr<Expression> expr;
@@ -71,7 +73,7 @@ struct AssignStatement : public Statement {
 struct ReturnStatement : public Statement {
     using Statement::Statement;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::shared_ptr<Expression> expr;
 };
@@ -79,7 +81,7 @@ struct ReturnStatement : public Statement {
 struct PrefixExpression : public Expression {
     using Expression::Expression;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::string oper;
     std::shared_ptr<Expression> right;
@@ -88,7 +90,7 @@ struct PrefixExpression : public Expression {
 struct InfixExpression : public Expression {
     using Expression::Expression;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::string oper;
     std::shared_ptr<Expression> right;
@@ -97,35 +99,35 @@ struct InfixExpression : public Expression {
 
 struct IntegerLiteral : public Expression {
     using Expression::Expression;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     int64_t value;
 };
 
 struct FloatLiteral : public Expression {
     using Expression::Expression;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     double value;
 };
 
 struct StringLiteral : public Expression {
     using Expression::Expression;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::string value;
 };
 
 struct BooleanLiteral : public Expression {
     using Expression::Expression;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     bool value;
 };
 
 struct NullTypeLiteral : public Expression {
     using Expression::Expression;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 };
 
 class BlockStatement : public Statement {
@@ -135,7 +137,7 @@ public:
     void AddStatement(std::shared_ptr<Statement> statement);
 
     std::string String() const;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
 private:
     std::vector<std::shared_ptr<Statement>> statements_;
@@ -154,7 +156,7 @@ struct IfBranch {
 struct IfExpression : public Expression {
     using Expression::Expression;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::vector<IfBranch> alternatives;
 };
@@ -162,7 +164,7 @@ struct IfExpression : public Expression {
 struct FunctionLiteral : public Expression {
     using Expression::Expression;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::vector<std::shared_ptr<Identifier>> parameters;
     std::shared_ptr<BlockStatement> body;
@@ -171,7 +173,7 @@ struct FunctionLiteral : public Expression {
 struct CallExpression : public Expression {
     using Expression::Expression;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::shared_ptr<Expression> function; // Identifier or FunctionLiteral
     std::vector<std::shared_ptr<Expression>> arguments;
@@ -181,7 +183,7 @@ struct CallExpression : public Expression {
 struct WhileStatement : public Statement {
     using Statement::Statement;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::shared_ptr<Expression> condition;
     std::shared_ptr<BlockStatement> body;
@@ -190,7 +192,7 @@ struct WhileStatement : public Statement {
 struct ForStatement : public Statement {
     using Statement::Statement;
     std::string String() const override;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::shared_ptr<Identifier> iter;
     std::shared_ptr<Expression> range;
@@ -199,12 +201,14 @@ struct ForStatement : public Statement {
 
 struct BreakStatement : public Statement {
     using Statement::Statement;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 };
 
 struct ContinueStatement : public Statement {
     using Statement::Statement;
-    void Accept(Visitor& visitor) override { visitor.Visit(*this); }
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 };
+
+} // namespace ast
 
 } // namespace itmoscript

@@ -31,7 +31,7 @@ TEST(ParserTestSuite, VariableAssignmentSimpleTest) {
     ASSERT_EQ(statements.size(), expected_identifiers.size());
 
     for (size_t i = 0; i < statements.size(); ++i) {
-        auto* assign_stmt = dynamic_cast<itmoscript::AssignStatement*>(statements[i].get());
+        auto* assign_stmt = dynamic_cast<itmoscript::ast::AssignStatement*>(statements[i].get());
         ASSERT_NE(assign_stmt, nullptr) << "Statement " << i << " is not an AssignStatement";
 
         ASSERT_EQ(assign_stmt->ident->name, expected_identifiers[i]);
@@ -55,7 +55,7 @@ TEST(ParserTestSuite, ReturnSimpleTest) {
     std::vector<std::string> expected_exprs = {"5", "10", "x", ""};
 
     for (size_t i = 0; i < statements.size(); ++i) {
-        auto* return_stmt = dynamic_cast<itmoscript::ReturnStatement*>(statements[i].get());
+        auto* return_stmt = dynamic_cast<itmoscript::ast::ReturnStatement*>(statements[i].get());
         ASSERT_NE(return_stmt, nullptr) << "Statement " << i << " is not a ReturnStatement";
 
         if (expected_exprs[i].empty()) {

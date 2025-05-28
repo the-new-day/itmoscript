@@ -2,6 +2,9 @@
 
 namespace itmoscript {
 
+namespace ast {
+
+struct Node;
 struct Program;
 struct ExpressionStatement;
 struct Identifier;
@@ -23,9 +26,14 @@ struct ForStatement;
 struct BreakStatement;
 struct ContinueStatement;
 
-class Visitor {
+/**
+ * @class AstVisitor
+ * @brief Interface for all AST visitors. Allows polymorphic Accept() methods
+ * in the nodes, implementing the Visitor pattern.
+ */
+class AstVisitor {
 public:
-    virtual ~Visitor() = default;
+    virtual ~AstVisitor() = default;
     
     virtual void Visit(Program&) = 0;
     virtual void Visit(Identifier&) = 0;
@@ -47,6 +55,10 @@ public:
     virtual void Visit(ForStatement&) = 0;
     virtual void Visit(BreakStatement&) = 0;
     virtual void Visit(ContinueStatement&) = 0;
+
+    friend struct Node;
 };
+    
+} // namespace ast
 
 } // namespace itmoscript

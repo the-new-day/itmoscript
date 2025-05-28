@@ -92,7 +92,7 @@ public:
      *   y = x
      * Would produce a Program node with two child statements.
      */
-    Program ParseProgram();
+    ast::Program ParseProgram();
 
     /**
      * @brief Checks whether a token can be an end of an expression or not.
@@ -158,8 +158,8 @@ private:
      */
     Precedence GetCurrentPrecedence() const;
 
-    using PrefixParseFunc = std::function<std::shared_ptr<Expression>(void)>;
-    using InfixParseFunc = std::function<std::shared_ptr<Expression>(std::shared_ptr<Expression>)>;
+    using PrefixParseFunc = std::function<std::shared_ptr<ast::Expression>(void)>;
+    using InfixParseFunc = std::function<std::shared_ptr<ast::Expression>(std::shared_ptr<ast::Expression>)>;
 
     std::map<TokenType, PrefixParseFunc> prefix_parse_funcs_;
     std::map<TokenType, InfixParseFunc> infix_parse_funcs_;
@@ -175,34 +175,34 @@ private:
      * 1. First, parse the prefix part (number, identifier, etc.)
      * 2. Then parse infix parts while the current token precedence is higher than the given precedence.
      */
-    std::shared_ptr<Expression> ParseExpression(Precedence precedence = Precedence::kLowest);
+    std::shared_ptr<ast::Expression> ParseExpression(Precedence precedence = Precedence::kLowest);
 
-    std::shared_ptr<PrefixExpression> ParsePrefixExpression();
-    std::shared_ptr<InfixExpression> ParseInfixExpression(std::shared_ptr<Expression> left);
+    std::shared_ptr<ast::PrefixExpression> ParsePrefixExpression();
+    std::shared_ptr<ast::InfixExpression> ParseInfixExpression(std::shared_ptr<ast::Expression> left);
 
-    std::shared_ptr<Identifier> ParseIdentifier();
-    std::shared_ptr<IntegerLiteral> ParseIntegerLiteral();
-    std::shared_ptr<FloatLiteral> ParseFloatLiteral();
-    std::shared_ptr<StringLiteral> ParseStringLiteral();
-    std::shared_ptr<BooleanLiteral> ParseBooleanLiteral();
-    std::shared_ptr<NullTypeLiteral> ParseNullTypeLiteral();
-    std::shared_ptr<Expression> ParseGroupedExpression();
-    std::shared_ptr<IfExpression> ParseIfExpression();
-    std::shared_ptr<BlockStatement> ParseBlockStatement();
-    std::shared_ptr<FunctionLiteral> ParseFunctionLiteral();
-    std::shared_ptr<CallExpression> ParseCallExpression(std::shared_ptr<Expression> function);
+    std::shared_ptr<ast::Identifier> ParseIdentifier();
+    std::shared_ptr<ast::IntegerLiteral> ParseIntegerLiteral();
+    std::shared_ptr<ast::FloatLiteral> ParseFloatLiteral();
+    std::shared_ptr<ast::StringLiteral> ParseStringLiteral();
+    std::shared_ptr<ast::BooleanLiteral> ParseBooleanLiteral();
+    std::shared_ptr<ast::NullTypeLiteral> ParseNullTypeLiteral();
+    std::shared_ptr<ast::Expression> ParseGroupedExpression();
+    std::shared_ptr<ast::IfExpression> ParseIfExpression();
+    std::shared_ptr<ast::BlockStatement> ParseBlockStatement();
+    std::shared_ptr<ast::FunctionLiteral> ParseFunctionLiteral();
+    std::shared_ptr<ast::CallExpression> ParseCallExpression(std::shared_ptr<ast::Expression> function);
 
-    std::shared_ptr<Statement> ParseStatement();
-    std::shared_ptr<AssignStatement> ParseAssignStatement();
-    std::shared_ptr<ReturnStatement> ParseReturnStatement();
-    std::shared_ptr<ExpressionStatement> ParseExpressionStatement();
-    std::shared_ptr<BreakStatement> ParseBreakStatement();
-    std::shared_ptr<ContinueStatement> ParseContinueStatement();
-    std::shared_ptr<WhileStatement> ParseWhileStatement();
-    std::shared_ptr<ForStatement> ParseForStatement();
+    std::shared_ptr<ast::Statement> ParseStatement();
+    std::shared_ptr<ast::AssignStatement> ParseAssignStatement();
+    std::shared_ptr<ast::ReturnStatement> ParseReturnStatement();
+    std::shared_ptr<ast::ExpressionStatement> ParseExpressionStatement();
+    std::shared_ptr<ast::BreakStatement> ParseBreakStatement();
+    std::shared_ptr<ast::ContinueStatement> ParseContinueStatement();
+    std::shared_ptr<ast::WhileStatement> ParseWhileStatement();
+    std::shared_ptr<ast::ForStatement> ParseForStatement();
 
-    std::vector<std::shared_ptr<Identifier>> ParseFunctionParameters();
-    std::vector<std::shared_ptr<Expression>> ParseCallArguments();
+    std::vector<std::shared_ptr<ast::Identifier>> ParseFunctionParameters();
+    std::vector<std::shared_ptr<ast::Expression>> ParseCallArguments();
 
     /**
      * @brief Replaces all recognized escape sequences (e.g., \\n, \t) in the string

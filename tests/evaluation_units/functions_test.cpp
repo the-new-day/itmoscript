@@ -1,7 +1,7 @@
 #include "evaluation_units_test.hpp"
 
 TEST(EvaluationTestSuite, FunctionParametersTest) {
-    using ID = itmoscript::Identifier;
+    using ID = itmoscript::ast::Identifier;
 
     auto a = ID{}; a.name = "a";
     auto b = ID{}; b.name = "b";
@@ -64,6 +64,24 @@ TEST(EvaluationTestSuite, FunctionInnerScopeTest) {
 
             add(1, 2)
         )", IsValue{3}}
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        ASSERT_EQ(evaluated, expected) << "input: " << input;
+    }
+}
+
+TEST(EvaluationTestSuite, FunctionShadowingScopeTest) {
+    std::vector<std::pair<std::string, IsValue>> expressions = {
+        {R"(
+            x = 10
+            get = function(x)
+                return x
+            end function
+            get(5)
+            x    
+        )", IsValue{10}},
     };
 
     for (const auto& [input, expected] : expressions) {

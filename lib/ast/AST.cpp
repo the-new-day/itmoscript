@@ -4,6 +4,8 @@
 
 namespace itmoscript {
 
+namespace ast {
+
 const std::vector<std::shared_ptr<Statement>>& Program::GetStatements() const {
     return statements_;
 }
@@ -163,5 +165,7 @@ std::string ForStatement::String() const {
     result += " end for";
     return result;
 }
+    
+} // namespace ast
 
 } // namespace itmoscript

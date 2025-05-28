@@ -129,7 +129,16 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Converts the stored value to string.
+     * Can be used for debugging or printing.
+     */
     std::string ToString() const;
+
+    /**
+     * @brief Puts string representation of the stored value to the stream.
+     * Directly uses ToString().
+     */
     friend std::ostream& operator<<(std::ostream& stream, const Value& value);
 
     /**
@@ -138,7 +147,11 @@ public:
      */
     bool operator==(const Value& other) const;
 
-    const std::string GetTypeName() const;
+    /**
+     * @brief Returns string representation of the stored value's type.
+     * Can be used for debugging or dynamic type check in the language.
+     */
+    const std::string& GetTypeName() const;
 
 private:
     using Type = std::variant<

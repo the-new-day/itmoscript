@@ -1,12 +1,12 @@
 #include "parser_test.hpp"
 
 // Code must contain only function literal
-itmoscript::FunctionLiteral* GetFuncLiteral(const itmoscript::Program& program) {
+itmoscript::ast::FunctionLiteral* GetFuncLiteral(const itmoscript::ast::Program& program) {
     const auto& statements = program.GetStatements();
     EXPECT_EQ(statements.size(), 1);
 
     auto* expr_stmt = GetExpressionStatement(statements[0]);
-    auto* function_literal = dynamic_cast<itmoscript::FunctionLiteral*>(expr_stmt->expr.get());
+    auto* function_literal = dynamic_cast<itmoscript::ast::FunctionLiteral*>(expr_stmt->expr.get());
     EXPECT_NE(function_literal, nullptr);
     EXPECT_NE(function_literal->body, nullptr);
 
@@ -14,12 +14,12 @@ itmoscript::FunctionLiteral* GetFuncLiteral(const itmoscript::Program& program) 
 }
 
 // Code must contain only call expression
-itmoscript::CallExpression* GetCallExpr(const itmoscript::Program& program) {
+itmoscript::ast::CallExpression* GetCallExpr(const itmoscript::ast::Program& program) {
     const auto& statements = program.GetStatements();
     EXPECT_EQ(statements.size(), 1);
 
     auto* expr_stmt = GetExpressionStatement(statements[0]);
-    auto* call_expr = dynamic_cast<itmoscript::CallExpression*>(expr_stmt->expr.get());
+    auto* call_expr = dynamic_cast<itmoscript::ast::CallExpression*>(expr_stmt->expr.get());
     EXPECT_NE(call_expr, nullptr);
     EXPECT_NE(call_expr->function, nullptr);
 

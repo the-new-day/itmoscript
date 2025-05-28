@@ -24,7 +24,7 @@ Evaluator::Evaluator() {
     env_stack_.emplace(std::make_shared<Environment>(nullptr));
 }
 
-void Evaluator::Interpret(Program& root) {
+void Evaluator::Interpret(ast::Program& root) {
     call_stack_.clear();
     last_exec_result_ = Eval(root);
 }
@@ -68,7 +68,7 @@ void Evaluator::PopEnv() {
     env_stack_.pop();
 }
 
-const Evaluator::ExecResult& Evaluator::Eval(Node& node) {
+const Evaluator::ExecResult& Evaluator::Eval(ast::Node& node) {
     current_token_ = node.token;
     node.Accept(*this);
     return last_exec_result_;
@@ -78,7 +78,7 @@ const Value& Evaluator::GetLastEvaluatedValue() const {
     return last_exec_result_.value;
 }
 
-const Value& Evaluator::ResolveIdentifier(const Identifier& ident) {
+const Value& Evaluator::ResolveIdentifier(const ast::Identifier& ident) {
     if (!env().Has(ident.name)) {
         ThrowRuntimeError<lang_exceptions::UndefinedNameError>(ident.token);
     }
@@ -86,53 +86,53 @@ const Value& Evaluator::ResolveIdentifier(const Identifier& ident) {
     return env().Get(ident.name);
 }
 
-void Evaluator::AssignIdentifier(const Identifier& ident, Value value) {
+void Evaluator::AssignIdentifier(const ast::Identifier& ident, Value value) {
     env().Set(ident.name, std::move(value));
 }
 
-void Evaluator::Visit(Program& program) {
+void Evaluator::Visit(ast::Program& program) {
     for (const auto& stmt : program.GetStatements()) {
         current_token_ = program.token;
         stmt->Accept(*this);
     }
 }
 
-void Evaluator::Visit(IntegerLiteral& node) {
+void Evaluator::Visit(ast::IntegerLiteral& node) {
     last_exec_result_.value = node.value;
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
-void Evaluator::Visit(BooleanLiteral& node) {
+void Evaluator::Visit(ast::BooleanLiteral& node) {
     last_exec_result_.value = node.value;
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
-void Evaluator::Visit(NullTypeLiteral& node) {
+void Evaluator::Visit(ast::NullTypeLiteral& node) {
     last_exec_result_.value = NullType{};
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
-void Evaluator::Visit(FloatLiteral& node) {
+void Evaluator::Visit(ast::FloatLiteral& node) {
     last_exec_result_.value = node.value;
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
-void Evaluator::Visit(StringLiteral& node) {
+void Evaluator::Visit(ast::StringLiteral& node) {
     last_exec_result_.value = node.value;
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
-void Evaluator::Visit(Identifier& node) {
+void Evaluator::Visit(ast::Identifier& node) {
     last_exec_result_.value = ResolveIdentifier(node);
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
-void Evaluator::Visit(AssignStatement& stmt) {
+void Evaluator::Visit(ast::AssignStatement& stmt) {
     Eval(*stmt.expr);
-    env().Set(stmt.ident->name, last_exec_result_.value);
+    AssignIdentifier(*stmt.ident, last_exec_result_.value);
 }
 
-void Evaluator::Visit(CallExpression& expr) {
+void Evaluator::Visit(ast::CallExpression& expr) {
     std::vector<Value> args;
     args.reserve(expr.arguments.size());
     
@@ -157,7 +157,7 @@ Value Evaluator::CallFunction(std::string name, const Function& func, std::vecto
 
     for (size_t i = 0; i < func->parameters->size(); ++i) {
         const std::string& name = func->parameters->at(i)->name;
-        env().Set(name, std::move(args[i]));
+        env().SetInLocal(name, std::move(args[i]));
     }
 
     ExecResult res = Eval(*func->body);
@@ -171,7 +171,7 @@ Value Evaluator::CallFunction(std::string name, const Function& func, std::vecto
     }
 }
 
-void Evaluator::Visit(ReturnStatement& stmt) {
+void Evaluator::Visit(ast::ReturnStatement& stmt) {
     if (call_stack_.empty()) {
         ThrowRuntimeError<lang_exceptions::UnexpectedReturnError>();
     }
@@ -185,7 +185,7 @@ void Evaluator::Visit(ReturnStatement& stmt) {
     last_exec_result_.control = ControlFlowState::kReturn;
 }
 
-void Evaluator::Visit(WhileStatement& stmt) {
+void Evaluator::Visit(ast::WhileStatement& stmt) {
     bool prev_loop = inside_loop_;
     inside_loop_ = true;
 
@@ -209,24 +209,24 @@ void Evaluator::Visit(WhileStatement& stmt) {
     inside_loop_ = prev_loop;
 }
 
-void Evaluator::Visit(BreakStatement& stmt) {
+void Evaluator::Visit(ast::BreakStatement& stmt) {
     if (!inside_loop_) {
         // TODO: error
     }
     last_exec_result_.control = ControlFlowState::kBreak;
 }
 
-void Evaluator::Visit(ContinueStatement& stmt) {
+void Evaluator::Visit(ast::ContinueStatement& stmt) {
     if (!inside_loop_) {
         // TODO: error
     }
     last_exec_result_.control = ControlFlowState::kContinue;
 }
 
-void Evaluator::Visit(FunctionLiteral& func) {
+void Evaluator::Visit(ast::FunctionLiteral& func) {
     std::set<std::string> seen_params;
 
-    for (const std::shared_ptr<Identifier>& param : func.parameters) {
+    for (const std::shared_ptr<ast::Identifier>& param : func.parameters) {
         if (seen_params.contains(param->name)) {
             ThrowRuntimeError<lang_exceptions::DuplicateParameterError>(param->name);
         }
@@ -234,12 +234,12 @@ void Evaluator::Visit(FunctionLiteral& func) {
         seen_params.insert(param->name);
     }
 
-    auto parameters = std::make_shared<std::vector<std::shared_ptr<Identifier>>>(func.parameters);
+    auto parameters = std::make_shared<std::vector<std::shared_ptr<ast::Identifier>>>(func.parameters);
     last_exec_result_.value = std::make_shared<FunctionObject>(std::move(parameters), func.body);
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
-void Evaluator::Visit(IfExpression& expr) {
+void Evaluator::Visit(ast::IfExpression& expr) {
     for (const auto& alternative : expr.alternatives) {
         if (alternative.condition == nullptr) { // else-branch, guaranteed to be last
             Eval(*alternative.consequence);
@@ -262,7 +262,7 @@ void Evaluator::Visit(IfExpression& expr) {
     last_exec_result_.value = NullType{};
 }
 
-void Evaluator::Visit(BlockStatement& block) {
+void Evaluator::Visit(ast::BlockStatement& block) {
     PushEnv();
 
     for (const auto& stmt : block.GetStatements()) {
@@ -275,12 +275,12 @@ void Evaluator::Visit(BlockStatement& block) {
     PopEnv();
 }
 
-void Evaluator::Visit(ExpressionStatement& node) {
+void Evaluator::Visit(ast::ExpressionStatement& node) {
     current_token_ = node.token;
     node.expr->Accept(*this);
 }
 
-void Evaluator::Visit(PrefixExpression& node) {
+void Evaluator::Visit(ast::PrefixExpression& node) {
     ExecResult right_res = Eval(*node.right);
     
     if (auto new_value = HandleUnaryOper(node.oper, right_res.value)) {
@@ -290,7 +290,7 @@ void Evaluator::Visit(PrefixExpression& node) {
     }
 }
 
-void Evaluator::Visit(InfixExpression& node) {
+void Evaluator::Visit(ast::InfixExpression& node) {
     ExecResult left_res = Eval(*node.left);
     ExecResult right_res = Eval(*node.right);
     

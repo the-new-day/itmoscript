@@ -44,7 +44,7 @@ void REPL::EvalLexer(std::ostream& output) {
 void REPL::EvalParser(std::ostream& output) {
     Lexer lexer{current_line_};
     Parser parser{lexer};
-    Program program = parser.ParseProgram();
+    ast::Program program = parser.ParseProgram();
 
     output << program.String();
     output << '\n';
@@ -53,7 +53,7 @@ void REPL::EvalParser(std::ostream& output) {
 void REPL::Eval(std::ostream& output) {
     Lexer lexer{current_line_};
     Parser parser{lexer};
-    Program program = parser.ParseProgram();
+    ast::Program program = parser.ParseProgram();
 
     evaluator_.Interpret(program);
 

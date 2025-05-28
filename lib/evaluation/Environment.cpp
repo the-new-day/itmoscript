@@ -24,5 +24,9 @@ void Environment::Set(const std::string& name, Value value) {
         storage_[name] = std::move(value);
     }
 }
-    
+
+void Environment::SetInLocal(const std::string& name, Value value) {
+    storage_[name] = std::move(value);
+}
+
 } // namespace itmoscript

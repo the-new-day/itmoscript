@@ -97,11 +97,11 @@ TEST(ParserTestSuite, BooleanLiteralExpressionTest) {
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 2);
 
-    auto* expr_stmt1 = dynamic_cast<itmoscript::ExpressionStatement*>(statements[0].get());
+    auto* expr_stmt1 = dynamic_cast<itmoscript::ast::ExpressionStatement*>(statements[0].get());
     ASSERT_NE(expr_stmt1, nullptr);
     ASSERT_NE(expr_stmt1->expr, nullptr);
 
-    auto* expr_stmt2 = dynamic_cast<itmoscript::ExpressionStatement*>(statements[1].get());
+    auto* expr_stmt2 = dynamic_cast<itmoscript::ast::ExpressionStatement*>(statements[1].get());
     ASSERT_NE(expr_stmt2, nullptr);
     ASSERT_NE(expr_stmt2->expr, nullptr);
 

@@ -9,16 +9,16 @@
 using IsValue = itmoscript::Value;
 using IsValueType = itmoscript::ValueType;
 
-static itmoscript::Program GetParsedProgram(const std::string& code) {
+static itmoscript::ast::Program GetParsedProgram(const std::string& code) {
     itmoscript::Lexer lexer{code};
     itmoscript::Parser parser{lexer};
-    itmoscript::Program program = parser.ParseProgram();
+    itmoscript::ast::Program program = parser.ParseProgram();
     return program;
 }
 
 static itmoscript::Value Eval(const std::string& input) {
     itmoscript::Evaluator evaluator;
-    itmoscript::Program program = GetParsedProgram(input);
+    itmoscript::ast::Program program = GetParsedProgram(input);
     evaluator.Interpret(program);
     return evaluator.GetLastEvaluatedValue();
 }
