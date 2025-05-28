@@ -1,6 +1,6 @@
 #include "evaluation_units_test.hpp"
 
-TEST(EvaluationTestSuite, FunctionParametersTest) {
+TEST(EvaluationFunctionTestSuite, FunctionParametersTest) {
     using ID = itmoscript::ast::Identifier;
 
     auto a = ID{}; a.name = "a";
@@ -24,7 +24,7 @@ TEST(EvaluationTestSuite, FunctionParametersTest) {
     }
 }
 
-TEST(EvaluationTestSuite, FunctionCallSimpleTest) {
+TEST(EvaluationFunctionTestSuite, FunctionCallSimpleTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {"add = function(x, y) return x + y end function \n add(10, 15)", IsValue{25}},
         {"add = function(x, y) return x + y end function \n add(10, 15)", IsValue{25}},
@@ -37,7 +37,7 @@ TEST(EvaluationTestSuite, FunctionCallSimpleTest) {
     }
 }
 
-TEST(EvaluationTestSuite, FunctionGlobalScopeTest) {
+TEST(EvaluationFunctionTestSuite, FunctionGlobalScopeTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {"x = 10 \n add = function(x, y) return x + y end function \n add(-15, 15)", IsValue{0}},
         {"x = 10 add = function(y) return x + y end function \n add(15)", IsValue{25}},
@@ -50,7 +50,7 @@ TEST(EvaluationTestSuite, FunctionGlobalScopeTest) {
     }
 }
 
-TEST(EvaluationTestSuite, FunctionInnerScopeTest) {
+TEST(EvaluationFunctionTestSuite, FunctionInnerScopeTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {R"(
             add = function(x, y)
@@ -72,7 +72,7 @@ TEST(EvaluationTestSuite, FunctionInnerScopeTest) {
     }
 }
 
-TEST(EvaluationTestSuite, FunctionShadowingScopeTest) {
+TEST(EvaluationFunctionTestSuite, FunctionShadowingScopeTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {R"(
             x = 10

@@ -1,7 +1,6 @@
 #include "evaluation_units_test.hpp"
 
-TEST(EvaluationTestSuite, BangOperatorTest) {
-    // <input, expected>
+TEST(EvaluationPrefixTestSuite, BangOperatorTest) {
     std::vector<std::pair<std::string, bool>> expressions{
         {"!true", false},
         {"!false", true},
@@ -25,7 +24,7 @@ TEST(EvaluationTestSuite, BangOperatorTest) {
     }
 }
 
-TEST(EvaluationTestSuite, UnaryMinusOperatorTest) {
+TEST(EvaluationPrefixTestSuite, UnaryMinusOperatorTest) {
     std::vector<std::pair<std::string, int64_t>> int_expressions{
         {"-30", -30},
         {"-(-30)", 30},
@@ -47,7 +46,7 @@ TEST(EvaluationTestSuite, UnaryMinusOperatorTest) {
     }
 }
 
-TEST(EvaluationTestSuite, UnaryPlusOperatorTest) {
+TEST(EvaluationPrefixTestSuite, UnaryPlusOperatorTest) {
     std::vector<std::pair<std::string, int64_t>> int_expressions{
         {"+30", +30},
         {"+(-30)", -30},

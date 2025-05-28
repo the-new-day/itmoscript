@@ -1,6 +1,6 @@
 #include "parser_test.hpp"
 
-TEST(ParserTestSuite, VariableAssignmentSimpleTest) {
+TEST(ParserStatementsTestSuite, VariableAssignmentSimpleTest) {
     std::string code = R"(
         x = 5
         y = 10
@@ -39,7 +39,7 @@ TEST(ParserTestSuite, VariableAssignmentSimpleTest) {
     }
 }
 
-TEST(ParserTestSuite, ReturnSimpleTest) {
+TEST(ParserStatementsTestSuite, ReturnSimpleTest) {
     std::string code = R"(
         return 5
         return 10

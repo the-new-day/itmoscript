@@ -1,6 +1,6 @@
 #include "evaluation_units_test.hpp"
 
-TEST(EvaluationTestSuite, VariableNamingTest) {
+TEST(EvaluationNamingTestSuite, VariableNamingTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {"x = 10 x", IsValue{10}},
         {"x = nil x", IsValue{itmoscript::NullType{}}},
@@ -19,7 +19,7 @@ TEST(EvaluationTestSuite, VariableNamingTest) {
     }
 }
 
-TEST(EvaluationTestSuite, ValueChangeTest) {
+TEST(EvaluationNamingTestSuite, ValueChangeTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {"x = 5 x = 10 x", IsValue{10}},
         {"x = 100 x = nil x", IsValue{itmoscript::NullType{}}},

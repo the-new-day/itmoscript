@@ -70,6 +70,16 @@ struct AssignStatement : public Statement {
     std::shared_ptr<Expression> expr;
 };
 
+struct OperatorAssignStatement : public Statement {
+    using Statement::Statement;
+    std::string String() const override;
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
+
+    TokenType oper;
+    std::shared_ptr<Identifier> ident;
+    std::shared_ptr<Expression> expr;
+};
+
 struct ReturnStatement : public Statement {
     using Statement::Statement;
     std::string String() const override;
@@ -83,7 +93,7 @@ struct PrefixExpression : public Expression {
     std::string String() const override;
     void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
-    std::string oper;
+    TokenType oper;
     std::shared_ptr<Expression> right;
 };
 
@@ -92,7 +102,7 @@ struct InfixExpression : public Expression {
     std::string String() const override;
     void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
-    std::string oper;
+    TokenType oper;
     std::shared_ptr<Expression> right;
     std::shared_ptr<Expression> left;
 };

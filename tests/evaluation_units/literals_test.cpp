@@ -1,7 +1,6 @@
 #include "evaluation_units_test.hpp"
 
-TEST(EvaluationTestSuite, IntegerLiteralTest) {
-    // <input, expected>
+TEST(EvaluationLiteralsTestSuite, IntegerLiteralTest) {
     std::vector<std::pair<std::string, int64_t>> expressions{
         {"5", 5},
         {"10", 10},
@@ -15,8 +14,7 @@ TEST(EvaluationTestSuite, IntegerLiteralTest) {
     }
 }
 
-TEST(EvaluationTestSuite, BoolLiteralTest) {
-    // <input, expected>
+TEST(EvaluationLiteralsTestSuite, BoolLiteralTest) {
     std::vector<std::pair<std::string, bool>> expressions{
         {"true", true},
         {"false", false},
@@ -28,7 +26,7 @@ TEST(EvaluationTestSuite, BoolLiteralTest) {
     }
 }
 
-TEST(EvaluationTestSuite, NullTypeLiteralTest) {
+TEST(EvaluationLiteralsTestSuite, NullTypeLiteralTest) {
     std::vector<std::string> expressions{
         "nil",
     };
@@ -39,8 +37,7 @@ TEST(EvaluationTestSuite, NullTypeLiteralTest) {
     }
 }
 
-TEST(EvaluationTestSuite, FloatLiteralTest) {
-    // <input, expected>
+TEST(EvaluationLiteralsTestSuite, FloatLiteralTest) {
     std::vector<std::pair<std::string, double>> expressions{
         {"0.999", 0.999},
         {"3.14", 3.14},
@@ -58,8 +55,7 @@ TEST(EvaluationTestSuite, FloatLiteralTest) {
     }
 }
 
-TEST(EvaluationTestSuite, StringLiteralTest) {
-    // <input, expected>
+TEST(EvaluationLiteralsTestSuite, StringLiteralTest) {
     std::vector<std::pair<std::string, std::string>> expressions{
         {R"("Hello World!")", "Hello World!"},
         {R"("abcdef")", "abcdef"},

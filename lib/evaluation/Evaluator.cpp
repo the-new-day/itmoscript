@@ -29,7 +29,7 @@ void Evaluator::Interpret(ast::Program& root) {
     last_exec_result_ = Eval(root);
 }
 
-std::optional<Value> Evaluator::HandleUnaryOper(const std::string& oper, const Value& right) {
+std::optional<Value> Evaluator::HandleUnaryOper(TokenType oper, const Value& right) {
     if (auto handler = operator_registry_.FindExactHandler(oper, right.type())) {
         return std::invoke(*handler, right);
     }
@@ -37,7 +37,7 @@ std::optional<Value> Evaluator::HandleUnaryOper(const std::string& oper, const V
     return std::nullopt;
 }
 
-std::optional<Value> Evaluator::HandleBinaryOper(const std::string& oper, const Value& left, const Value& right) {
+std::optional<Value> Evaluator::HandleBinaryOper(TokenType oper, const Value& left, const Value& right) {
     if (auto handler = operator_registry_.FindExactHandler(oper, left.type(), right.type())) {
         return std::invoke(*handler, left, right);
     }
@@ -130,6 +130,22 @@ void Evaluator::Visit(ast::Identifier& node) {
 void Evaluator::Visit(ast::AssignStatement& stmt) {
     Eval(*stmt.expr);
     AssignIdentifier(*stmt.ident, last_exec_result_.value);
+}
+
+void Evaluator::Visit(ast::OperatorAssignStatement& stmt) {
+    ExecResult right_res = Eval(*stmt.expr);
+    Value ident_value = ResolveIdentifier(*stmt.ident);
+
+    if (auto new_value = HandleBinaryOper(kCompoundAssignOperators.at(stmt.oper), ident_value, right_res.value)) {
+        last_exec_result_.value = *new_value;
+        AssignIdentifier(*stmt.ident, last_exec_result_.value);
+    } else {
+        ThrowRuntimeError<lang_exceptions::OperatorTypeError>(
+            kTokenTypeNames.at(stmt.oper),
+            ident_value.type(),
+            right_res.value.type()
+        );
+    }
 }
 
 void Evaluator::Visit(ast::CallExpression& expr) {
@@ -286,7 +302,10 @@ void Evaluator::Visit(ast::PrefixExpression& node) {
     if (auto new_value = HandleUnaryOper(node.oper, right_res.value)) {
         last_exec_result_.value = *new_value;
     } else {
-        ThrowRuntimeError<lang_exceptions::OperatorTypeError>(node.oper, right_res.value.type());
+        ThrowRuntimeError<lang_exceptions::OperatorTypeError>(
+            kTokenTypeNames.at(node.oper), 
+            right_res.value.type()
+        );
     }
 }
 
@@ -297,7 +316,11 @@ void Evaluator::Visit(ast::InfixExpression& node) {
     if (auto new_value = HandleBinaryOper(node.oper, left_res.value, right_res.value)) {
         last_exec_result_.value = *new_value;
     } else {
-        ThrowRuntimeError<lang_exceptions::OperatorTypeError>(node.oper, left_res.value.type(), right_res.value.type());
+        ThrowRuntimeError<lang_exceptions::OperatorTypeError>(
+            kTokenTypeNames.at(node.oper),
+            left_res.value.type(), 
+            right_res.value.type()
+        );
     }
 }
 
@@ -314,25 +337,32 @@ void Evaluator::RegisterAriphmeticOps() {
     RegisterCommonAriphmeticOps<Int>();
     RegisterCommonAriphmeticOps<Float>();
 
-    operator_registry_.RegisterBinaryOper<Int, Int>("%", [](const Value& left, const Value& right) {
+    operator_registry_.RegisterBinaryOper<Int, Int>(TokenType::kPercent, [](const Value& left, const Value& right) {
         return left.Get<Int>() % right.Get<Int>();
     });
 
-    operator_registry_.RegisterBinaryOper<Int, Int>("^", [](const Value& left, const Value& right) -> Value {
+    operator_registry_.RegisterBinaryOper<Int, Int>(TokenType::kPow, [](const Value& left, const Value& right) -> Value {
         if (right.Get<Int>() < 0) {
             return utils::FastPowNeg(left.Get<Int>(), right.Get<Int>());
         }
         return utils::FastPow(left.Get<Int>(), right.Get<Int>());
     });
 
-    operator_registry_.RegisterBinaryOper<Float, Float>("^", [](const Value& left, const Value& right) {
+    operator_registry_.RegisterBinaryOper<Float, Float>(TokenType::kPow, [](const Value& left, const Value& right) {
         return std::pow(left.Get<Float>(), right.Get<Float>());
     });
 }
 
 void Evaluator::RegisterUnaryOps() {
-    operator_registry_.RegisterUnaryOperatorForAllTypes("!", [](const Value& right) { return !right.IsTruphy(); });
-    operator_registry_.RegisterUnaryOperatorForAllTypes("not", [](const Value& right) { return !right.IsTruphy(); });
+    operator_registry_.RegisterUnaryOperatorForAllTypes(
+        TokenType::kBang, 
+        [](const Value& right) { return !right.IsTruphy(); }
+    );
+
+    operator_registry_.RegisterUnaryOperatorForAllTypes(
+        TokenType::kNot, 
+        [](const Value& right) { return !right.IsTruphy(); }
+    );
 }
 
 void Evaluator::RegisterComparisonOps() {
@@ -340,50 +370,74 @@ void Evaluator::RegisterComparisonOps() {
     operator_registry_.RegisterAllComparisonOps<Float>();
     operator_registry_.RegisterAllComparisonOps<String>();
 
-    operator_registry_.RegisterCommutativeOperatorForAllTypes<Bool>("==", [](const Value& left, const Value& right) {
-        return left.IsTruphy() == right.IsTruphy();
-    });
+    operator_registry_.RegisterCommutativeOperatorForAllTypes<Bool>(
+        TokenType::kEqual, 
+        [](const Value& left, const Value& right) {
+            return left.IsTruphy() == right.IsTruphy();
+        }
+    );
 
-    operator_registry_.RegisterCommutativeOperatorForAllTypes<Bool>("!=", [](const Value& left, const Value& right) {
-        return left.IsTruphy() != right.IsTruphy();
-    });
+    operator_registry_.RegisterCommutativeOperatorForAllTypes<Bool>(
+        TokenType::kNotEqual, 
+        [](const Value& left, const Value& right) {
+            return left.IsTruphy() != right.IsTruphy();
+        }
+    );
 
-    operator_registry_.RegisterCommutativeOperatorForAllTypes<NullType>("==", [](const Value& left, const Value& right) {
-        return left.IsOfType<NullType>() && right.IsOfType<NullType>();
-    });
+    operator_registry_.RegisterCommutativeOperatorForAllTypes<NullType>(
+        TokenType::kEqual, 
+        [](const Value& left, const Value& right) {
+            return left.IsOfType<NullType>() && right.IsOfType<NullType>();
+        }
+    );
 
-    operator_registry_.RegisterCommutativeOperatorForAllTypes<NullType>("!=", [](const Value& left, const Value& right) {
-        return left.type() != right.type();
-    });
+    operator_registry_.RegisterCommutativeOperatorForAllTypes<NullType>(
+        TokenType::kNotEqual, 
+        [](const Value& left, const Value& right) {
+            return left.type() != right.type();
+        }
+    );
 
-    operator_registry_.RegisterBinaryOper<String, String>("+", [](const Value& left, const Value& right) {
-        return left.Get<String>() + right.Get<String>();
-    });
+    operator_registry_.RegisterBinaryOper<String, String>(
+        TokenType::kPlus, 
+        [](const Value& left, const Value& right) {
+            return left.Get<String>() + right.Get<String>();
+        }
+    );
 }
 
 void Evaluator::RegisterStringOps() {
     RegisterStringMultiplication<Int>();
     RegisterStringMultiplication<Float>();
 
-    operator_registry_.RegisterBinaryOper<String, String>("-", [](const Value& left, const Value& right) -> Value {
-        String str = left.Get<String>();
-        String suffix = right.Get<String>();
+    operator_registry_.RegisterBinaryOper<String, String>(
+        TokenType::kMinus, 
+        [](const Value& left, const Value& right) -> Value {
+            String str = left.Get<String>();
+            String suffix = right.Get<String>();
 
-        if (str.ends_with(suffix))
-            return str.substr(0, str.size() - suffix.size());
-        
-        return str;
-    });
+            if (str.ends_with(suffix))
+                return str.substr(0, str.size() - suffix.size());
+            
+            return str;
+        }
+    );
 }
 
 void Evaluator::RegisterLogicalOps() {
-    operator_registry_.RegisterCommutativeOperatorForAllPairsOfTypes("and", [](const Value& left, const Value& right) {
-        return left.IsTruphy() && right.IsTruphy();
-    });
+    operator_registry_.RegisterCommutativeOperatorForAllPairsOfTypes(
+        TokenType::kAnd, 
+        [](const Value& left, const Value& right) {
+            return left.IsTruphy() && right.IsTruphy();
+        }
+    );
 
-    operator_registry_.RegisterCommutativeOperatorForAllPairsOfTypes("or", [](const Value& left, const Value& right) {
-        return left.IsTruphy() || right.IsTruphy();
-    });
+    operator_registry_.RegisterCommutativeOperatorForAllPairsOfTypes(
+        TokenType::kOr, 
+        [](const Value& left, const Value& right) {
+            return left.IsTruphy() || right.IsTruphy();
+        }
+    );
 }
 
 } // namespace itmoscript

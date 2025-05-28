@@ -1,6 +1,6 @@
 #include "evaluation_units_test.hpp"
 
-TEST(EvaluationTestSuite, InfixIntegerExpressionTest) {
+TEST(EvaluationInfixTestSuite, InfixIntegerExpressionTest) {
     std::vector<std::pair<std::string, int64_t>> expressions{
         {"5 + 5", 10},
         {"10 * 2", 20},
@@ -26,7 +26,7 @@ TEST(EvaluationTestSuite, InfixIntegerExpressionTest) {
     }
 }
 
-TEST(EvaluationTestSuite, InfixBoolExpressionTest) {
+TEST(EvaluationInfixTestSuite, InfixBoolExpressionTest) {
     std::vector<std::pair<std::string, bool>> expressions{
         {"true", true},
         {"false", false},
@@ -60,7 +60,7 @@ TEST(EvaluationTestSuite, InfixBoolExpressionTest) {
     }
 }
 
-TEST(EvaluationTestSuite, InfixFloatExpressionTest) {
+TEST(EvaluationInfixTestSuite, InfixFloatExpressionTest) {
     std::vector<std::pair<std::string, double>> expressions{
         {"5 + 5.5", 10.5},
         {"10 * 2.5", 25.0},
@@ -74,7 +74,7 @@ TEST(EvaluationTestSuite, InfixFloatExpressionTest) {
     }
 }
 
-TEST(EvaluationTestSuite, StringComparisonTest) {
+TEST(EvaluationInfixTestSuite, StringComparisonTest) {
     std::vector<std::pair<std::string, bool>> expressions{
         {R"("hello" == "hello")", true},
         {R"("hello" == "goodbye")", false},
@@ -98,7 +98,7 @@ TEST(EvaluationTestSuite, StringComparisonTest) {
     }
 }
 
-TEST(EvaluationTestSuite, NullComparisonTest) {
+TEST(EvaluationInfixTestSuite, NullComparisonTest) {
     std::vector<std::pair<std::string, bool>> expressions{
         {"true == nil", false},
         {"false == nil", false},
@@ -114,7 +114,7 @@ TEST(EvaluationTestSuite, NullComparisonTest) {
     }
 }
 
-TEST(EvaluationTestSuite, LogicalOperatorsTest) {
+TEST(EvaluationInfixTestSuite, LogicalOperatorsTest) {
     std::vector<std::pair<std::string, bool>> expressions{
         {"true and true", true},
         {"true or true", true},

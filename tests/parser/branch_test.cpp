@@ -16,7 +16,7 @@ itmoscript::ast::IfExpression* GetIfExpression(const itmoscript::ast::Program& p
     return GetIfExpression(statements[0]);
 }
 
-TEST(ParserTestSuite, IfExpressionTest) {
+TEST(ParserBranchTestSuite, IfExpressionTest) {
     std::string code = R"(
         if foobar > fizzbuzz then 
             aboba 
@@ -29,7 +29,12 @@ TEST(ParserTestSuite, IfExpressionTest) {
     ASSERT_EQ(if_expr->alternatives.size(), 1);
     ASSERT_NE(if_expr->alternatives[0].condition, nullptr);
 
-    TestInfixExpression(if_expr->alternatives[0].condition, "foobar", ">", "fizzbuzz");
+    TestInfixExpression(
+        if_expr->alternatives[0].condition, 
+        "foobar", 
+        itmoscript::TokenType::kGreater, 
+        "fizzbuzz"
+    );
 
     const auto& block_statements = if_expr->alternatives[0].consequence->GetStatements();
     ASSERT_EQ(block_statements.size(), 1);
@@ -38,7 +43,7 @@ TEST(ParserTestSuite, IfExpressionTest) {
     TestIdentifier(consequence->expr, "aboba");
 }
 
-TEST(ParserTestSuite, IfElseExpressionTest) {
+TEST(ParserBranchTestSuite, IfElseExpressionTest) {
     std::string code = R"(
         if foobar > fizzbuzz then 
             aboba 
@@ -51,7 +56,12 @@ TEST(ParserTestSuite, IfElseExpressionTest) {
     auto* if_expr = GetIfExpression(program);
     ASSERT_EQ(if_expr->alternatives.size(), 2);
 
-    TestInfixExpression(if_expr->alternatives[0].condition, "foobar", ">", "fizzbuzz");
+    TestInfixExpression(
+        if_expr->alternatives[0].condition, 
+        "foobar", 
+        itmoscript::TokenType::kGreater, 
+        "fizzbuzz"
+    );
 
     const auto& block_statements = if_expr->alternatives[0].consequence->GetStatements();
     ASSERT_EQ(block_statements.size(), 1);
@@ -68,7 +78,7 @@ TEST(ParserTestSuite, IfElseExpressionTest) {
     TestIdentifier(alternative->expr, "bibaboba");
 }
 
-TEST(ParserTestSuite, ElseIfExpressionTest) {
+TEST(ParserBranchTestSuite, ElseIfExpressionTest) {
     std::string code = R"(
         if foobar > fizzbuzz then 
             aboba 
@@ -84,7 +94,12 @@ TEST(ParserTestSuite, ElseIfExpressionTest) {
     ASSERT_EQ(if_expr->alternatives.size(), 3);
 
     ASSERT_NE(if_expr->alternatives[0].condition, nullptr);
-    TestInfixExpression(if_expr->alternatives[0].condition, "foobar", ">", "fizzbuzz");
+    TestInfixExpression(
+        if_expr->alternatives[0].condition, 
+        "foobar", 
+        itmoscript::TokenType::kGreater, 
+        "fizzbuzz"
+    );
 
     const auto& consequence_block_statements = if_expr->alternatives[0].consequence->GetStatements();
     ASSERT_EQ(consequence_block_statements.size(), 1);
@@ -94,7 +109,12 @@ TEST(ParserTestSuite, ElseIfExpressionTest) {
 
     ASSERT_EQ(if_expr->alternatives[1].consequence->GetStatements().size(), 1);
 
-    TestInfixExpression(if_expr->alternatives[1].condition, "foobar", "<", "fizzbuzz");
+    TestInfixExpression(
+        if_expr->alternatives[1].condition, 
+        "foobar", 
+        itmoscript::TokenType::kLess, 
+        "fizzbuzz"
+    );
 
     auto* else_if_consequence = GetExpressionStatement(if_expr->alternatives[1].consequence->GetStatements()[0]);
     TestIdentifier(else_if_consequence->expr, "bibaboba");

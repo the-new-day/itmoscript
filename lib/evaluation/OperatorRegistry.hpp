@@ -29,10 +29,10 @@ public:
     using UnaryHandler = std::function<Value(const Value&)>;
 
     template<CoreValueType Right>
-    void RegisterUnaryOper(const std::string& oper, UnaryHandler handler);
+    void RegisterUnaryOper(TokenType oper, UnaryHandler handler);
 
     template<CoreValueType Left, CoreValueType Right>
-    void RegisterBinaryOper(const std::string& oper, BinaryHandler handler);
+    void RegisterBinaryOper(TokenType oper, BinaryHandler handler);
 
     /**
      * @brief Registers commutative operator, i.e. the operator that doesn't
@@ -43,7 +43,7 @@ public:
      * For example, if oper is "+", the operation will be registered for T + U and U + T
      */
     template<CoreValueType T, CoreValueType U>
-    void RegisterCommutativeOperator(const std::string& oper, BinaryHandler handler);
+    void RegisterCommutativeOperator(TokenType oper, BinaryHandler handler);
 
 
     /**
@@ -53,7 +53,7 @@ public:
      * where U is NullType, Int, Float etc. - for all core types.
      */
     template<CoreValueType T>
-    void RegisterCommutativeOperatorForAllTypes(const std::string& oper, BinaryHandler handler);
+    void RegisterCommutativeOperatorForAllTypes(TokenType oper, BinaryHandler handler);
 
     /**
      * @brief Registers commutative operator for all pairs of types.
@@ -61,7 +61,7 @@ public:
      * Specifically, calls RegisterCommutativeOperatorForAllTypes<U>(oper, handler)
      * for all U that satisfy CoreValueType concept.
      */
-    void RegisterCommutativeOperatorForAllPairsOfTypes(const std::string& oper, BinaryHandler handler);
+    void RegisterCommutativeOperatorForAllPairsOfTypes(TokenType oper, BinaryHandler handler);
 
     /**
      * @brief Registers unary operator for all types.
@@ -69,7 +69,7 @@ public:
      * Specifically, calls RegisterUnaryOper<U>(oper, handler)
      * for all U that satisfy CoreValueType concept.
      */
-    void RegisterUnaryOperatorForAllTypes(const std::string& oper, UnaryHandler handler);
+    void RegisterUnaryOperatorForAllTypes(TokenType oper, UnaryHandler handler);
 
     /**
      * @brief Registers all comparison operators for specified type.
@@ -83,17 +83,17 @@ public:
      * @brief Finds exact handler for given binary operator with given left and right types.
      * @return The handler if it was found for given types and operator, std::nullopt otherwise.
      */
-    std::optional<BinaryHandler> FindExactHandler(const std::string& oper, ValueType left, ValueType right);
+    std::optional<BinaryHandler> FindExactHandler(TokenType oper, ValueType left, ValueType right);
 
     /**
      * @brief Finds exact handler for given unary operator with given value type.
      * @return The handler if it was found for given type and operator, std::nullopt otherwise.
      */
-    std::optional<UnaryHandler> FindExactHandler(const std::string& oper, ValueType type);
+    std::optional<UnaryHandler> FindExactHandler(TokenType oper, ValueType type);
 
 private:
     std::unordered_map<
-        std::string, 
+        TokenType, 
         std::unordered_map<
             std::pair<ValueType, ValueType>,
             BinaryHandler,
@@ -102,7 +102,7 @@ private:
     > binary_ops_;
 
     std::unordered_map<
-        std::string, 
+        TokenType, 
         std::unordered_map<
             ValueType,
             UnaryHandler
@@ -111,24 +111,24 @@ private:
 };
 
 template<CoreValueType Right>
-void OperatorRegistry::RegisterUnaryOper(const std::string& oper, UnaryHandler handler) {
+void OperatorRegistry::RegisterUnaryOper(TokenType oper, UnaryHandler handler) {
     unary_ops_[oper][TypeSystem::GetValueType<Right>()] = handler;
 }
 
 template<CoreValueType Left, CoreValueType Right>
-void OperatorRegistry::RegisterBinaryOper(const std::string& oper, BinaryHandler handler) {
+void OperatorRegistry::RegisterBinaryOper(TokenType oper, BinaryHandler handler) {
     binary_ops_[oper][{TypeSystem::GetValueType<Left>(), TypeSystem::GetValueType<Right>()}] = handler;
 }
 
 template<CoreValueType T, CoreValueType U>
-void OperatorRegistry::RegisterCommutativeOperator(const std::string& oper, BinaryHandler handler) {
+void OperatorRegistry::RegisterCommutativeOperator(TokenType oper, BinaryHandler handler) {
     binary_ops_[oper][{TypeSystem::GetValueType<T>(), TypeSystem::GetValueType<U>()}] = handler;
     binary_ops_[oper][{TypeSystem::GetValueType<U>(), TypeSystem::GetValueType<T>()}] = handler;
 }
 
 template<CoreValueType T>
 void OperatorRegistry::RegisterCommutativeOperatorForAllTypes(
-    const std::string& oper, 
+    TokenType oper, 
     OperatorRegistry::BinaryHandler handler) 
 {
     RegisterCommutativeOperator<T, NullType>(oper, handler);
@@ -147,12 +147,12 @@ void OperatorRegistry::RegisterAllComparisonOps() {
         };
     };
     
-    RegisterBinaryOper<T, T>("==", cmp(std::equal_to{}));
-    RegisterBinaryOper<T, T>("!=", cmp(std::not_equal_to{}));
-    RegisterBinaryOper<T, T>("<", cmp(std::less{}));
-    RegisterBinaryOper<T, T>("<=", cmp(std::less_equal{}));
-    RegisterBinaryOper<T, T>(">", cmp(std::greater{}));
-    RegisterBinaryOper<T, T>(">=", cmp(std::greater_equal{}));
+    RegisterBinaryOper<T, T>(TokenType::kEqual, cmp(std::equal_to{}));
+    RegisterBinaryOper<T, T>(TokenType::kNotEqual, cmp(std::not_equal_to{}));
+    RegisterBinaryOper<T, T>(TokenType::kLess, cmp(std::less{}));
+    RegisterBinaryOper<T, T>(TokenType::kLessOrEqual, cmp(std::less_equal{}));
+    RegisterBinaryOper<T, T>(TokenType::kGreater, cmp(std::greater{}));
+    RegisterBinaryOper<T, T>(TokenType::kGreaterOrEqual, cmp(std::greater_equal{}));
 }
 
 } // namespace itmoscript

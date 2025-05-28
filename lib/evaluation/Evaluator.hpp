@@ -99,13 +99,13 @@ private:
      * @brief Calls the matching handler for the operator with given value if it exists.
      * @return Evaluated value if the handler was found, std::nullopt otherwise.
      */
-    std::optional<Value> HandleUnaryOper(const std::string& oper, const Value& right);
+    std::optional<Value> HandleUnaryOper(TokenType oper, const Value& right);
 
     /**
      * @brief Calls the matching handler for the operator with given values if it exists.
      * @return Evaluated value if the handler was found, std::nullopt otherwise.
      */
-    std::optional<Value> HandleBinaryOper(const std::string& oper, const Value& left, const Value& right);
+    std::optional<Value> HandleBinaryOper(TokenType oper, const Value& left, const Value& right);
 
     /**
      * @brief Checks if the given identifier is registered either in the current scope or in any
@@ -152,6 +152,7 @@ private:
     void RegisterComparisonOps();
     void RegisterStringOps();
     void RegisterLogicalOps();
+    void RegisterAssignmentOps();
 
     /**
      * @brief Throws RuntimeError's inheritant exception with given type and arguments.
@@ -185,6 +186,7 @@ private:
     void Visit(ast::IfExpression&) override;
     void Visit(ast::BlockStatement&) override;
     void Visit(ast::AssignStatement&) override;
+    void Visit(ast::OperatorAssignStatement&) override;
     void Visit(ast::CallExpression&) override;
     void Visit(ast::ReturnStatement&) override;
 
@@ -197,16 +199,16 @@ private:
 
 template<NumericValueType T>
 void Evaluator::RegisterCommonAriphmeticOps() {
-    operator_registry_.RegisterBinaryOper<T, T>("+", 
+    operator_registry_.RegisterBinaryOper<T, T>(TokenType::kPlus, 
         [](const Value& left, const Value& right) { return left.Get<T>() + right.Get<T>(); });
 
-    operator_registry_.RegisterBinaryOper<T, T>("-", 
+    operator_registry_.RegisterBinaryOper<T, T>(TokenType::kMinus, 
         [](const Value& left, const Value& right) { return left.Get<T>() - right.Get<T>(); });
 
-    operator_registry_.RegisterBinaryOper<T, T>("*", 
+    operator_registry_.RegisterBinaryOper<T, T>(TokenType::kAsterisk, 
         [](const Value& left, const Value& right) { return left.Get<T>() * right.Get<T>(); });
 
-    operator_registry_.RegisterBinaryOper<T, T>("/", [this](const Value& left, const Value& right) { 
+    operator_registry_.RegisterBinaryOper<T, T>(TokenType::kSlash, [this](const Value& left, const Value& right) { 
         if (right.Get<T>() == 0) {
             ThrowRuntimeError<lang_exceptions::ZeroDivisionError>();
         }
@@ -214,13 +216,15 @@ void Evaluator::RegisterCommonAriphmeticOps() {
         return left.Get<T>() / right.Get<T>();
     });
 
-    operator_registry_.RegisterUnaryOper<T>("+", [](const Value& right) { return right; });
-    operator_registry_.RegisterUnaryOper<T>("-", [](const Value& right) { return -right.Get<T>(); });
+    operator_registry_.RegisterUnaryOper<T>(TokenType::kPlus, [](const Value& right) { return right; });
+    operator_registry_.RegisterUnaryOper<T>(TokenType::kMinus, [](const Value& right) { return -right.Get<T>(); });
 }
 
 template<NumericValueType T>
 void Evaluator::RegisterStringMultiplication() {
-    operator_registry_.RegisterCommutativeOperator<String, T>("*", [this](const Value& left, const Value& right) -> Value {
+    operator_registry_.RegisterCommutativeOperator<String, T>(
+        TokenType::kAsterisk, 
+        [this](const Value& left, const Value& right) -> Value {
         String str = left.IsOfType<String>() ? left.Get<String>() : right.Get<String>();
         T number = left.IsOfType<String>() ? right.Get<T>() : left.Get<T>();
 

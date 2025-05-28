@@ -2,7 +2,7 @@
 
 #include "evaluation/exceptions/UndefinedNameError.hpp"
 
-TEST(EvaluationTestSuite, FunctionNestedScopeToGlobalTest) {
+TEST(EvaluationScopeTestSuite, FunctionNestedScopeToGlobalTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {"x = 10 \n getX = function() return x end function \n x = 25 \n getX()", IsValue{25}},
         {R"(
@@ -25,7 +25,7 @@ TEST(EvaluationTestSuite, FunctionNestedScopeToGlobalTest) {
     }
 }
 
-TEST(EvaluationTestSuite, LocalScopeSimpleTest) {
+TEST(EvaluationScopeTestSuite, LocalScopeSimpleTest) {
     std::string expr = R"(
         x = 10
         if x == 0 then
@@ -37,7 +37,7 @@ TEST(EvaluationTestSuite, LocalScopeSimpleTest) {
     ASSERT_THROW(Eval(expr), itmoscript::lang_exceptions::UndefinedNameError);
 }
 
-TEST(EvaluationTestSuite, UpdateOuterScopeVarTest) {
+TEST(EvaluationScopeTestSuite, UpdateOuterScopeVarTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {R"(
             x = 10

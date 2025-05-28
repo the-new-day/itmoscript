@@ -2,7 +2,7 @@
 
 namespace itmoscript {
 
-void OperatorRegistry::RegisterCommutativeOperatorForAllPairsOfTypes(const std::string& oper, BinaryHandler handler) {
+void OperatorRegistry::RegisterCommutativeOperatorForAllPairsOfTypes(TokenType oper, BinaryHandler handler) {
     RegisterCommutativeOperatorForAllTypes<NullType>(oper, handler);
     RegisterCommutativeOperatorForAllTypes<Int>(oper, handler);
     RegisterCommutativeOperatorForAllTypes<Float>(oper, handler);
@@ -11,7 +11,7 @@ void OperatorRegistry::RegisterCommutativeOperatorForAllPairsOfTypes(const std::
     RegisterCommutativeOperatorForAllTypes<Function>(oper, handler);
 }
 
-void OperatorRegistry::RegisterUnaryOperatorForAllTypes(const std::string& oper, UnaryHandler handler) {
+void OperatorRegistry::RegisterUnaryOperatorForAllTypes(TokenType oper, UnaryHandler handler) {
     RegisterUnaryOper<NullType>(oper, handler);
     RegisterUnaryOper<Int>(oper, handler);
     RegisterUnaryOper<Float>(oper, handler);
@@ -21,7 +21,7 @@ void OperatorRegistry::RegisterUnaryOperatorForAllTypes(const std::string& oper,
 }
 
 std::optional<OperatorRegistry::BinaryHandler>
-OperatorRegistry::FindExactHandler(const std::string& oper, ValueType left, ValueType right) {
+OperatorRegistry::FindExactHandler(TokenType oper, ValueType left, ValueType right) {
     auto key = std::make_pair(left, right);
     if (binary_ops_.contains(oper) && binary_ops_[oper].contains(key)) {
         return binary_ops_[oper][key];
@@ -31,7 +31,7 @@ OperatorRegistry::FindExactHandler(const std::string& oper, ValueType left, Valu
 }
 
 std::optional<OperatorRegistry::UnaryHandler>
-OperatorRegistry::FindExactHandler(const std::string& oper, ValueType right) {
+OperatorRegistry::FindExactHandler(TokenType oper, ValueType right) {
     if (unary_ops_.contains(oper) && unary_ops_[oper].contains(right)) {
         return unary_ops_[oper][right];
     }

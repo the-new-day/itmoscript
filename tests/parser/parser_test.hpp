@@ -10,14 +10,14 @@ using TT = itmoscript::TokenType;
 template<typename T>
 struct PrefixOpExpr {
     std::string input;
-    std::string oper;
+    itmoscript::TokenType oper;
     T value;
 };
 
 template<typename L, typename R = L>
 struct InfixOpExpr {
     std::string input;
-    std::string oper;
+    itmoscript::TokenType oper;
     L left_value;
     R right_value;
 };
@@ -93,7 +93,12 @@ void TestLiteralExpression(std::shared_ptr<itmoscript::ast::Expression>& expr, T
 }
 
 template<typename L, typename R>
-void TestInfixExpression(std::shared_ptr<itmoscript::ast::Expression>& expr, L left, std::string oper, R right) {
+void TestInfixExpression(
+    std::shared_ptr<itmoscript::ast::Expression>& expr, 
+    L left, 
+    itmoscript::TokenType oper, 
+    R right
+) {
     auto* infix_expr = dynamic_cast<itmoscript::ast::InfixExpression*>(expr.get());
     ASSERT_NE(infix_expr, nullptr);
     ASSERT_NE(infix_expr->right, nullptr);

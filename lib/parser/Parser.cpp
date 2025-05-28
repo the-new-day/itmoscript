@@ -88,6 +88,8 @@ std::shared_ptr<ast::Statement> Parser::ParseStatement() {
     if (IsCurrentToken(TokenType::kIdentifier)) {
         if (IsPeekToken(TokenType::kAssign)) {
             return ParseAssignStatement();
+        } else if (kCompoundAssignOperators.contains(peek_token_.type)) {
+            return ParseOperatorAssignStatement();
         }
     } else if (IsCurrentToken(TokenType::kReturn)) {
         return ParseReturnStatement();
@@ -112,6 +114,18 @@ std::shared_ptr<ast::AssignStatement> Parser::ParseAssignStatement() {
 
     Consume(TokenType::kAssign);
 
+    AdvanceToken();
+    statement->expr = ParseExpression();
+    return statement;
+}
+
+std::shared_ptr<ast::OperatorAssignStatement> Parser::ParseOperatorAssignStatement() {
+    auto statement = MakeNode<ast::OperatorAssignStatement>();
+    statement->oper = peek_token_.type;
+    statement->ident = MakeNode<ast::Identifier>();
+    statement->ident->name = current_token_.literal;
+
+    AdvanceToken();
     AdvanceToken();
     statement->expr = ParseExpression();
     return statement;
@@ -282,7 +296,7 @@ std::shared_ptr<ast::NullTypeLiteral> Parser::ParseNullTypeLiteral() {
 
 std::shared_ptr<ast::PrefixExpression> Parser::ParsePrefixExpression() {
     auto expr = MakeNode<ast::PrefixExpression>();
-    expr->oper = current_token_.literal;
+    expr->oper = current_token_.type;
     AdvanceToken();
 
     expr->right = ParseExpression(Precedence::kPrefix);
@@ -291,7 +305,7 @@ std::shared_ptr<ast::PrefixExpression> Parser::ParsePrefixExpression() {
 
 std::shared_ptr<ast::InfixExpression> Parser::ParseInfixExpression(std::shared_ptr<ast::Expression> left) {
     auto infix_expr = MakeNode<ast::InfixExpression>();
-    infix_expr->oper = current_token_.literal;
+    infix_expr->oper = current_token_.type;
     infix_expr->left = std::move(left);
 
     Precedence precedence = GetCurrentPrecedence();

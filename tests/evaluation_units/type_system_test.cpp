@@ -12,7 +12,7 @@ void RegisterConversions(itmoscript::TypeSystem& type_system) {
     });
 }
 
-TEST(EvaluationTestSuite, ExplicitConversionTest) {
+TEST(EvaluationTypesTestSuite, ExplicitConversionTest) {
     itmoscript::TypeSystem type_system;
     RegisterConversions(type_system);
 
@@ -38,7 +38,7 @@ TEST(EvaluationTestSuite, ExplicitConversionTest) {
     }
 }
 
-TEST(EvaluationTestSuite, CommonTypeTest) {
+TEST(EvaluationTypesTestSuite, CommonTypeTest) {
     itmoscript::TypeSystem type_system;
     RegisterConversions(type_system);
 

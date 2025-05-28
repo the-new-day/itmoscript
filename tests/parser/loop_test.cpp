@@ -26,7 +26,7 @@ itmoscript::ast::ForStatement* GetForStmt(const itmoscript::ast::Program& progra
     return for_stmt;
 }
 
-TEST(ParserTestSuite, WhileSimpleTest) {
+TEST(ParserLoopTestSuite, WhileSimpleTest) {
     std::string code = R"(
         while i < 10
             i = i + 1
@@ -37,7 +37,7 @@ TEST(ParserTestSuite, WhileSimpleTest) {
 
     auto program = GetParsedProgram(code);
     auto* while_stmt = GetWhileStmt(program);
-    TestInfixExpression(while_stmt->condition, "i", "<", 10);
+    TestInfixExpression(while_stmt->condition, "i", itmoscript::TokenType::kLess, 10);
 
     std::vector<std::string> expected = {
         "i = (i + 1)", "continue", "break"
@@ -51,7 +51,7 @@ TEST(ParserTestSuite, WhileSimpleTest) {
     TestStatement<itmoscript::ast::BreakStatement>(block_statements[2], expected[2]);
 }
 
-TEST(ParserTestSuite, ForSimpleTest) {
+TEST(ParserLoopTestSuite, ForSimpleTest) {
     std::string code = R"(
         for i in array
             i = i + 1
@@ -76,7 +76,7 @@ TEST(ParserTestSuite, ForSimpleTest) {
     TestStatement<itmoscript::ast::BreakStatement>(block_statements[2], expected[2]);
 }
 
-TEST(ParserTestSuite, EmptyForTest) {
+TEST(ParserLoopTestSuite, EmptyForTest) {
     std::string code = R"(
         for i in array
         end for
@@ -90,7 +90,7 @@ TEST(ParserTestSuite, EmptyForTest) {
     ASSERT_EQ(block_statements.size(), 0);
 }
 
-TEST(ParserTestSuite, EmptyWhileTest) {
+TEST(ParserLoopTestSuite, EmptyWhileTest) {
     std::string code = R"(
         while true
         end while

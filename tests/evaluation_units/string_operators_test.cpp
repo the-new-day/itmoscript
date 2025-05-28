@@ -7,7 +7,7 @@ void TestStringExpressions(const std::vector<std::pair<std::string, std::string>
     }
 }
 
-TEST(EvaluationTestSuite, StringAdditionTest) {
+TEST(EvaluationStringOpsTestSuite, StringAdditionTest) {
     std::vector<std::pair<std::string, std::string>> expressions = {
         {R"("hello" + "world")", "helloworld"},
         {R"("\n" + "\n")", "\n\n"},
@@ -18,7 +18,7 @@ TEST(EvaluationTestSuite, StringAdditionTest) {
     TestStringExpressions(expressions);
 }
 
-TEST(EvaluationTestSuite, StringMultiplicationTest) {
+TEST(EvaluationStringOpsTestSuite, StringMultiplicationTest) {
     std::vector<std::pair<std::string, std::string>> expressions = {
         {R"("hello" * 2)", "hellohello"},
         {R"("\n" * 4)", "\n\n\n\n"},
@@ -34,7 +34,7 @@ TEST(EvaluationTestSuite, StringMultiplicationTest) {
     TestStringExpressions(expressions);
 }
 
-TEST(EvaluationTestSuite, StringSubstractionsTest) {
+TEST(EvaluationStringOpsTestSuite, StringSubstractionsTest) {
     std::vector<std::pair<std::string, std::string>> expressions = {
         {R"("hello" - "llo")", "he"},
         {R"("hello" - "")", "hello"},

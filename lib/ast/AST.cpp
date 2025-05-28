@@ -50,6 +50,15 @@ std::string AssignStatement::String() const {
     return std::format("{} = {}", ident->name, expr->String());
 }
 
+std::string OperatorAssignStatement::String() const {
+    return std::format(
+        "{} {} {}", 
+        ident->name, 
+        kTokenTypeNames.at(oper), 
+        expr->String()
+    );
+}
+
 std::string ReturnStatement::String() const {
     return std::format("return {}", (expr ? expr->String() : ""));
 }
@@ -63,11 +72,11 @@ std::string Identifier::String() const {
 }
 
 std::string PrefixExpression::String() const {
-    return std::format("({}{})", oper, right->String());
+    return std::format("({}{})", kTokenTypeNames.at(oper), right->String());
 }
 
 std::string InfixExpression::String() const {
-    return std::format("({} {} {})", left->String(), oper, right->String());
+    return std::format("({} {} {})", left->String(), kTokenTypeNames.at(oper), right->String());
 }
 
 std::string IfBranch::String() const {

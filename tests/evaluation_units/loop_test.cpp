@@ -1,6 +1,6 @@
 #include "evaluation_units_test.hpp"
 
-TEST(EvaluationTestSuite, WhileLoopSimpleTest) {
+TEST(EvaluationLoopTestSuite, WhileLoopSimpleTest) {
     std::vector<std::pair<std::string, int64_t>> expressions = {
         {R"(
             x = 0
@@ -24,7 +24,7 @@ TEST(EvaluationTestSuite, WhileLoopSimpleTest) {
     }
 }
 
-TEST(EvaluationTestSuite, WhileBreakTest) {
+TEST(EvaluationLoopTestSuite, WhileBreakTest) {
     std::vector<std::pair<std::string, int64_t>> expressions = {
         {R"(
             x = 0
@@ -54,7 +54,7 @@ TEST(EvaluationTestSuite, WhileBreakTest) {
     }
 }
 
-TEST(EvaluationTestSuite, WhileContinueTest) {
+TEST(EvaluationLoopTestSuite, WhileContinueTest) {
     std::vector<std::pair<std::string, int64_t>> expressions = {
         {R"(
             x = 0

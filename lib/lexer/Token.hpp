@@ -168,6 +168,19 @@ static const std::map<std::string, TokenType> kKeywords{
     {"in", TokenType::kIn},
 };
 
+/**
+ * @brief Maps the compound assign operator token to the token of the
+ * operator that should be applied to the identifier and the value
+ */
+const std::map<TokenType, TokenType> kCompoundAssignOperators {
+    {TokenType::kPlusAssign, TokenType::kPlus},
+    {TokenType::kMinusAssign, TokenType::kMinus},
+    {TokenType::kAsteriskAssign, TokenType::kAsterisk},
+    {TokenType::kSlashAssign, TokenType::kSlash},
+    {TokenType::kPercentAssign, TokenType::kPercent},
+    {TokenType::kPowAssign, TokenType::kPow},
+};
+
 /// @brief Maps token types to their human-readable string names (mostly for debugging or error messages).
 static const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kEOF, "EOF"},

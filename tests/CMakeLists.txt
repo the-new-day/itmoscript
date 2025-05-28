@@ -27,11 +27,11 @@ add_executable(
   lexer/syntax_errors_test.cpp
 
   parser/statements_test.cpp
-  parser/basic_expressions_test.cpp
-  parser/prefix_and_infix_ops_test.cpp
+  parser/expressions_test.cpp
   parser/branch_test.cpp
   parser/functions_test.cpp
   parser/loop_test.cpp
+  parser/literals_test.cpp
 
   evaluation_units/literals_test.cpp
   evaluation_units/prefix_expressions_test.cpp
@@ -43,6 +43,7 @@ add_executable(
   evaluation_units/functions_test.cpp
   evaluation_units/loop_test.cpp
   evaluation_units/scope_test.cpp
+  evaluation_units/assignment_test.cpp
 )
 
 target_link_libraries(

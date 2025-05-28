@@ -194,6 +194,7 @@ private:
 
     std::shared_ptr<ast::Statement> ParseStatement();
     std::shared_ptr<ast::AssignStatement> ParseAssignStatement();
+    std::shared_ptr<ast::OperatorAssignStatement> ParseOperatorAssignStatement();
     std::shared_ptr<ast::ReturnStatement> ParseReturnStatement();
     std::shared_ptr<ast::ExpressionStatement> ParseExpressionStatement();
     std::shared_ptr<ast::BreakStatement> ParseBreakStatement();

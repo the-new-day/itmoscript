@@ -9,6 +9,7 @@ struct Program;
 struct ExpressionStatement;
 struct Identifier;
 struct AssignStatement;
+struct OperatorAssignStatement;
 struct ReturnStatement;
 struct PrefixExpression;
 struct InfixExpression;
@@ -38,6 +39,7 @@ public:
     virtual void Visit(Program&) = 0;
     virtual void Visit(Identifier&) = 0;
     virtual void Visit(AssignStatement&) = 0;
+    virtual void Visit(OperatorAssignStatement&) = 0;
     virtual void Visit(ReturnStatement&) = 0;
     virtual void Visit(ExpressionStatement&) = 0;
     virtual void Visit(PrefixExpression&) = 0;

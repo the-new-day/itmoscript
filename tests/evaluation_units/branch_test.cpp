@@ -1,6 +1,6 @@
 #include "evaluation_units_test.hpp"
 
-TEST(EvaluationTestSuite, IfTest) {
+TEST(EvaluationBranchTestSuite, IfTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {"if true then 10 end if", IsValue{10}},
         {"if false then 10 end if", IsValue{itmoscript::NullType{}}},
@@ -16,7 +16,7 @@ TEST(EvaluationTestSuite, IfTest) {
     }
 }
 
-TEST(EvaluationTestSuite, IfElseTest) {
+TEST(EvaluationBranchTestSuite, IfElseTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {"if false then 10 else 5 end if", IsValue{5}},
         {"if true then 10 else 5 end if", IsValue{10}},
@@ -28,7 +28,7 @@ TEST(EvaluationTestSuite, IfElseTest) {
     }
 }
 
-TEST(EvaluationTestSuite, IfElseIfElseTest) {
+TEST(EvaluationBranchTestSuite, IfElseIfElseTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {R"(
             if 1 == 2 then
@@ -78,7 +78,7 @@ TEST(EvaluationTestSuite, IfElseIfElseTest) {
     }
 }
 
-TEST(EvaluationTestSuite, IfElseIfAndNoElseTest) {
+TEST(EvaluationBranchTestSuite, IfElseIfAndNoElseTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {R"(
             if 1 == 2 then
@@ -109,7 +109,7 @@ TEST(EvaluationTestSuite, IfElseIfAndNoElseTest) {
     }
 }
 
-TEST(EvaluationTestSuite, IfTruphyAndUntruphyConditionsTest) {
+TEST(EvaluationBranchTestSuite, IfTruphyAndUntruphyConditionsTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {"if 1 then 10 end if", IsValue{10}},
         {"if 0 then 10 end if", IsValue{itmoscript::NullType{}}},

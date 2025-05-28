@@ -26,7 +26,7 @@ itmoscript::ast::CallExpression* GetCallExpr(const itmoscript::ast::Program& pro
     return call_expr;
 }
 
-TEST(ParserTestSuite, FunctionSimpleTest) {
+TEST(ParserFunctionsTestSuite, FunctionSimpleTest) {
     std::string code = R"(
         function (x, y)
             x + y
@@ -44,10 +44,10 @@ TEST(ParserTestSuite, FunctionSimpleTest) {
     ASSERT_EQ(body_statements.size(), 1);
 
     auto* body = GetExpressionStatement(body_statements[0]);
-    TestInfixExpression(body->expr, "x", "+", "y");
+    TestInfixExpression(body->expr, "x", itmoscript::TokenType::kPlus, "y");
 }
 
-TEST(ParserTestSuite, FunctionParametersTest) {
+TEST(ParserFunctionsTestSuite, FunctionParametersTest) {
     // <input, expected>
     std::vector<std::pair<std::string, std::vector<std::string>>> tests{
         {"function () end function", {}},
@@ -67,7 +67,7 @@ TEST(ParserTestSuite, FunctionParametersTest) {
     }
 }
 
-TEST(ParserTestSuite, FunctionCallTest) {
+TEST(ParserFunctionsTestSuite, FunctionCallTest) {
     std::string code = "add(1, 2 * 3, 4 + 5)";
     
     auto program = GetParsedProgram(code);
@@ -77,8 +77,8 @@ TEST(ParserTestSuite, FunctionCallTest) {
 
     ASSERT_EQ(call_expression->arguments.size(), 3);
     TestLiteralExpression(call_expression->arguments[0], 1);
-    TestInfixExpression(call_expression->arguments[1], 2, "*", 3);
-    TestInfixExpression(call_expression->arguments[2], 4, "+", 5);
+    TestInfixExpression(call_expression->arguments[1], 2, itmoscript::TokenType::kAsterisk, 3);
+    TestInfixExpression(call_expression->arguments[2], 4, itmoscript::TokenType::kPlus, 5);
 }
 
 struct FnCall {
@@ -87,7 +87,7 @@ struct FnCall {
     std::vector<std::string> expected_args;
 };
 
-TEST(ParserTestSuite, FunctionCallParametersTest) {
+TEST(ParserFunctionsTestSuite, FunctionCallParametersTest) {
     std::vector<FnCall> tests{
         {"add()", "add", {}},
         {"add(1)", "add", {"1"}},
