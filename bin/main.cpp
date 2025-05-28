@@ -25,8 +25,11 @@ int main(int argc, char** argv) {
     } catch (const std::bad_alloc& e) {
         std::cerr << "Memory error" << std::endl;
         return -1;
+    } catch (const std::exception& e) {
+        std::cerr << "Internal exception occured: " << e.what() << std::endl;
+        return -1;
     } catch (...) {
-        std::cerr << "An unknown internal error occured" << std::endl;
+        std::cerr << "Unknown internal error occured: " << std::endl;
         return -1;
     }
 

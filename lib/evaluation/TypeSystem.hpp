@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <type_traits>
 
-#include "Value.hpp"
+#include "objects/Value.hpp"
 #include "utils.hpp"
 
 namespace itmoscript {
@@ -75,12 +75,13 @@ private:
 
 template<CoreValueType T>
 ValueType TypeSystem::GetValueType() {
+    if constexpr (std::is_same_v<T, NullType>) return ValueType::kNullType;
     if constexpr (std::is_same_v<T, Int>) return ValueType::kInt;
     if constexpr (std::is_same_v<T, Float>) return ValueType::kFloat;
     if constexpr (std::is_same_v<T, String>) return ValueType::kString;
     if constexpr (std::is_same_v<T, Bool>) return ValueType::kBool;
     if constexpr (std::is_same_v<T, Function>) return ValueType::kFunction;
-    if constexpr (std::is_same_v<T, NullType>) return ValueType::kNullType;
+    if constexpr (std::is_same_v<T, List>) return ValueType::kList;
 }
     
 } // namespace itmoscript

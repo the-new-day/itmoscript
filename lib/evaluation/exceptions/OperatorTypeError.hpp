@@ -3,7 +3,7 @@
 #include <format>
 
 #include "RuntimeError.hpp"
-#include "evaluation/Value.hpp"
+#include "objects/Value.hpp"
 
 namespace itmoscript {
 
@@ -29,8 +29,8 @@ public:
             std::format(
                 "unsupported operand types for '{}': {} and {}{}",
                 oper,
-                kValueTypeNames.at(left),
-                kValueTypeNames.at(right),
+                GetTypeName(left),
+                GetTypeName(right),
                 message.empty() ? "" : ", " + message
             )
         ) {}
@@ -47,7 +47,7 @@ public:
             std::format(
                 "unsupported operand type for '{}': {}{}",
                 oper,
-                kValueTypeNames.at(right),
+                GetTypeName(right),
                 message.empty() ? "" : ", " + message
             )
         ) {}

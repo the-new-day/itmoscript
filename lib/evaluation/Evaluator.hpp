@@ -13,11 +13,13 @@
 #include "ast/AstVisitor.hpp"
 #include "ast/AST.hpp"
 
-#include "evaluation/Value.hpp"
+#include "objects/Value.hpp"
+#include "objects/Function.hpp"
+#include "objects/List.hpp"
+
 #include "evaluation/TypeSystem.hpp"
 #include "evaluation/OperatorRegistry.hpp"
 #include "evaluation/Environment.hpp"
-#include "evaluation/FunctionObject.hpp"
 #include "evaluation/CallFrame.hpp"
 
 #include "exceptions/ZeroDivisionError.hpp"
@@ -175,13 +177,13 @@ private:
     void Visit(ast::PrefixExpression&) override;
     void Visit(ast::InfixExpression&) override;
 
+    void Visit(ast::Identifier&) override;
     void Visit(ast::IntegerLiteral&) override;
     void Visit(ast::BooleanLiteral&) override;
     void Visit(ast::NullTypeLiteral&) override;
     void Visit(ast::FloatLiteral&) override;
     void Visit(ast::StringLiteral&) override;
     void Visit(ast::FunctionLiteral&) override;
-    void Visit(ast::Identifier&) override;
 
     void Visit(ast::IfExpression&) override;
     void Visit(ast::BlockStatement&) override;
@@ -195,6 +197,8 @@ private:
     void Visit(ast::ContinueStatement&) override;
 
     void Visit(ast::ForStatement&) override {}
+    void Visit(ast::ListLiteral&) override;
+    void Visit(ast::IndexOperatorExpression&) override {}
 };
 
 template<NumericValueType T>

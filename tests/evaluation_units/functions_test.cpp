@@ -15,11 +15,11 @@ TEST(EvaluationFunctionTestSuite, FunctionParametersTest) {
 
     for (const auto& [input, expected] : expressions) {
         IsValue evaluated = Eval(input);
-        const auto& params = evaluated.Get<itmoscript::Function>()->parameters;
+        const auto& params = evaluated.Get<itmoscript::Function>().parameters();
 
-        ASSERT_EQ(expected.size(), params->size());
-        for (size_t i = 0; i < params->size(); ++i) {
-            ASSERT_EQ(expected[i].name, params->at(i)->name) << i;
+        ASSERT_EQ(expected.size(), params.size());
+        for (size_t i = 0; i < params.size(); ++i) {
+            ASSERT_EQ(expected[i].name, params.at(i)->name) << i;
         }
     }
 }

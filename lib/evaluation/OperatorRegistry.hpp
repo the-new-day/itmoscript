@@ -4,7 +4,7 @@
 #include <string>
 #include <functional>
 
-#include "Value.hpp"
+#include "objects/Value.hpp"
 #include "TypeSystem.hpp"
 
 namespace itmoscript {

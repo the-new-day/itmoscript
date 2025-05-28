@@ -26,7 +26,8 @@ static itmoscript::Value Eval(const std::string& input) {
 template<typename T>
 void TestValue(const IsValue& value, T expected) {
     ASSERT_TRUE(value.IsOfType<T>()) 
-        << "real type of " << value.ToString() << " is: " << itmoscript::kValueTypeNames.at(value.type());
+        << "real type of " << value.ToString() << 
+        " is: " << itmoscript::GetTypeName(value.type());
     
     ASSERT_EQ(value.Get<T>(), expected);
 }

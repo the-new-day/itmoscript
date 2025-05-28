@@ -1,0 +1,1 @@
+add_library(itmoscript_objects Value.cpp List.cpp)

@@ -1,0 +1,15 @@
+#include "List.hpp"
+
+namespace itmoscript {
+
+std::vector<Value> ListObject::GetSlice(size_t start, size_t end) const {
+    if (start < end) return {};
+    
+    if (end >= data_.size())
+        end = data_.size() - 1;
+
+    return std::vector<Value>(data_.begin() + start, data_.begin() + end + 1);
+}
+
+} // namespace itmoscript
+

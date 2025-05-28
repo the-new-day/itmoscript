@@ -1,5 +1,6 @@
 #include "Value.hpp"
-#include "FunctionObject.hpp"
+#include "Function.hpp"
+#include "List.hpp"
 #include "utils.hpp"
 
 namespace itmoscript {
@@ -18,6 +19,8 @@ bool Value::IsTruphy() const {
             return Get<Bool>();
         case ValueType::kFunction:
             return true;
+        case ValueType::kList:
+            return Get<List>()->size() != 0;
         default:
             return false;
     }
@@ -39,22 +42,36 @@ std::string Value::ToString() const {
             return std::format(
                 "<Function object>({})",
                 utils::Join<std::shared_ptr<ast::Identifier>, std::string>(
-                    *Get<Function>()->parameters, 
+                    Get<Function>().parameters(), 
                     ", ", 
                     [](const std::shared_ptr<ast::Identifier>& ident) { return ident->name; }
                 )
             );
+        case ValueType::kList:
+            return std::format(
+                "[{}]",
+                utils::Join<Value, std::string>(
+                    Get<List>()->data(), 
+                    ", ", 
+                    [](const Value& value) { return value.ToString(); }
+                )
+            );
         default:
-            return "<UnknownType>";
+            return kUnknownTypeName;
     }
 }
 
 bool Value::operator==(const Value& other) const {
+    if (type() == ValueType::kList) {
+        return other.type() == ValueType::kList
+            && Get<List>()->data() == other.Get<List>()->data();
+    }
+    
     return type() == other.type() && data_ == other.data_;
 }
 
 const std::string& Value::GetTypeName() const {
-    return kValueTypeNames.at(type());
+    return itmoscript::GetTypeName(type());
 }
 
 std::ostream& operator<<(std::ostream& stream, const Value& value) {
@@ -72,6 +89,8 @@ ValueType Value::type() const {
         return ValueType::kBool;
     } else if (IsOfType<Function>()) {
         return ValueType::kFunction;
+    } else if (IsOfType<List>()) {
+        return ValueType::kList;
     }
 
     return ValueType::kNullType;
@@ -91,8 +110,18 @@ bool Value::IsOfType(ValueType type) const {
             return std::holds_alternative<Bool>(data_);
         case ValueType::kFunction:
             return std::holds_alternative<Function>(data_);
+        case ValueType::kList:
+            return std::holds_alternative<List>(data_);
         default:
             return false;
+    }
+}
+
+const std::string& GetTypeName(ValueType type) {
+    if (kValueTypeNames.contains(type)) {
+        return kValueTypeNames.at(type);
+    } else {
+        return kUnknownTypeName;
     }
 }
 

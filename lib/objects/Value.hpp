@@ -9,21 +9,19 @@
 #include <concepts>
 
 #include "ast/AST.hpp"
-#include "Environment.hpp"
+
+#include "Function.hpp"
 
 namespace itmoscript {
-
-struct FunctionObject;
-
-// TODO: implement
-struct List {};
 
 using NullType = std::monostate; // Represents the null value.
 using Int = int64_t;             // Integer type used in the language.
 using Float = double;            // Floating-point type used in the language.
 using String = std::string;      // String type used in the language.
 using Bool = bool;               // Bool type used in the language.
-using Function = std::shared_ptr<FunctionObject>;
+
+class ListObject;
+using List = std::shared_ptr<ListObject>; // List type used in the language.
 
 /**
  * @brief Concept to constrain core language types for Value class.
@@ -35,7 +33,8 @@ concept CoreValueType =
     std::same_as<T, Float> || std::convertible_to<T, Float> ||
     std::same_as<T, String> ||
     std::same_as<T, Bool> ||
-    std::same_as<T, Function>;
+    std::same_as<T, Function> ||
+    std::same_as<T, List>;
 
 /**
  * @brief Concept to constrain supported numeric types for Value class.
@@ -52,10 +51,12 @@ enum class ValueType {
     kInt,
     kFloat,
     kBool,
-
+    kFunction,
     kString,
-    kFunction
+    kList,
 };
+
+const std::string kUnknownTypeName = "<UnknownType>";
 
 /** @brief Hasher for std::pair<ValueType, ValueType>. Used for std::unordered_map of type converters. */
 struct ValueTypePairHash {
@@ -124,8 +125,8 @@ public:
 
     /** @tparam T Must satisfy CoreValueType. */
     template<CoreValueType T>
-    Value& operator=(const T& value) {
-        data_ = value;
+    Value& operator=(T value) {
+        data_ = std::move(value);
         return *this;
     }
 
@@ -160,20 +161,28 @@ private:
         Float,
         String,
         Bool,
-        Function
+        Function,
+        List
     >;
 
     Type data_ = NullType{};
 };
 
 /** @brief Mapping from ValueType enum to string names for debugging/logging. */
-const std::map<ValueType, std::string> kValueTypeNames{
+const std::map<ValueType, std::string> kValueTypeNames = {
     {ValueType::kNullType, "NullType"},
     {ValueType::kInt, "Int"},
     {ValueType::kFloat, "Float"},
     {ValueType::kString, "String"},
     {ValueType::kBool, "Bool"},
     {ValueType::kFunction, "Function"},
+    {ValueType::kList, "List"},
 };
+
+/** 
+ * @brief Returns string representation of the type (type name).
+ * Should always be used instead of direct usage of kValueTypeNames.
+ * */
+const std::string& GetTypeName(ValueType type);
 
 } // namespace itmoscript

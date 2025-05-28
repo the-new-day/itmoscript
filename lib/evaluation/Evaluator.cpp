@@ -10,6 +10,7 @@
 #include <format>
 #include <cmath>
 #include <set>
+#include <algorithm>
 
 namespace itmoscript {
 
@@ -163,20 +164,20 @@ void Evaluator::Visit(ast::CallExpression& expr) {
 }
 
 Value Evaluator::CallFunction(std::string name, const Function& func, std::vector<Value>& args) {
-    if (args.size() != func->parameters->size()) {
-        ThrowRuntimeError<lang_exceptions::ParametersCountError>(func->parameters->size(), args.size());
+    if (args.size() != func.parameters().size()) {
+        ThrowRuntimeError<lang_exceptions::ParametersCountError>(func.parameters().size(), args.size());
     }
 
     PushEnv();
     
     call_stack_.push_back(CallFrame{.function_name = std::move(name), .entry_token = current_token_});
 
-    for (size_t i = 0; i < func->parameters->size(); ++i) {
-        const std::string& name = func->parameters->at(i)->name;
+    for (size_t i = 0; i < func.parameters().size(); ++i) {
+        const std::string& name = func.parameters().at(i)->name;
         env().SetInLocal(name, std::move(args[i]));
     }
 
-    ExecResult res = Eval(*func->body);
+    ExecResult res = Eval(*func.body());
     PopEnv();
     call_stack_.pop_back();
 
@@ -239,6 +240,18 @@ void Evaluator::Visit(ast::ContinueStatement& stmt) {
     last_exec_result_.control = ControlFlowState::kContinue;
 }
 
+void Evaluator::Visit(ast::ListLiteral& list_literal) {
+    std::vector<Value> elements;
+    elements.reserve(list_literal.elements.size());
+    
+    for (auto& expr : list_literal.elements) {
+        elements.push_back(Eval(*expr).value);
+    }
+
+    last_exec_result_.value = std::make_shared<ListObject>(std::move(elements));
+    last_exec_result_.control = ControlFlowState::kNormal;
+}
+
 void Evaluator::Visit(ast::FunctionLiteral& func) {
     std::set<std::string> seen_params;
 
@@ -251,7 +264,7 @@ void Evaluator::Visit(ast::FunctionLiteral& func) {
     }
 
     auto parameters = std::make_shared<std::vector<std::shared_ptr<ast::Identifier>>>(func.parameters);
-    last_exec_result_.value = std::make_shared<FunctionObject>(std::move(parameters), func.body);
+    last_exec_result_.value = Function(std::move(parameters), func.body);
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 

@@ -39,3 +39,33 @@ TEST(EvaluationAssignmentTestSuite, IntOperatorAssignmentTest) {
         TestValue<itmoscript::Int>(evaluated, expected);
     }
 }
+
+TEST(EvaluationAssignmentTestSuite, StringOperatorAssignmentTest) {
+    std::vector<std::pair<std::string, std::string>> expressions{
+        {R"(
+            x = "aaa"
+            x += "bbb"
+            x    
+        )", "aaabbb"},
+        {R"(
+            x = ""
+            x += "aaa"
+            x
+        )", "aaa"},
+        {R"(
+            x = "aaabbb"
+            x -= "aaa"
+            x
+        )", "aaabbb"},
+        {R"(
+            x = "aaabbb"
+            x -= "bbb"
+            x
+        )", "aaa"},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::String>(evaluated, expected);
+    }
+}
