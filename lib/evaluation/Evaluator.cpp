@@ -119,7 +119,7 @@ void Evaluator::Visit(ast::FloatLiteral& node) {
 }
 
 void Evaluator::Visit(ast::StringLiteral& node) {
-    last_exec_result_.value = node.value;
+    last_exec_result_.value = CreateString(node.value);
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
@@ -381,7 +381,7 @@ void Evaluator::RegisterUnaryOps() {
 void Evaluator::RegisterComparisonOps() {
     operator_registry_.RegisterAllComparisonOps<Int>();
     operator_registry_.RegisterAllComparisonOps<Float>();
-    operator_registry_.RegisterAllComparisonOps<String>();
+    operator_registry_.RegisterAllComparisonOpsForHeavyType<String>();
 
     operator_registry_.RegisterCommutativeOperatorForAllTypes<Bool>(
         TokenType::kEqual, 
@@ -411,10 +411,31 @@ void Evaluator::RegisterComparisonOps() {
         }
     );
 
-    operator_registry_.RegisterBinaryOper<String, String>(
-        TokenType::kPlus, 
+    operator_registry_.RegisterBinaryOper<Function, Function>(
+        TokenType::kEqual, 
         [](const Value& left, const Value& right) {
-            return left.Get<String>() + right.Get<String>();
+            return left.Get<Function>() == right.Get<Function>();
+        }
+    );
+
+    operator_registry_.RegisterBinaryOper<Function, Function>(
+        TokenType::kNotEqual, 
+        [](const Value& left, const Value& right) {
+            return left.Get<Function>() != right.Get<Function>();
+        }
+    );
+
+    operator_registry_.RegisterBinaryOper<List, List>(
+        TokenType::kEqual, 
+        [](const Value& left, const Value& right) {
+            return *left.Get<List>() == *right.Get<List>();
+        }
+    );
+
+    operator_registry_.RegisterBinaryOper<List, List>(
+        TokenType::kNotEqual, 
+        [](const Value& left, const Value& right) {
+            return *left.Get<List>() != *right.Get<List>();
         }
     );
 }
@@ -425,14 +446,21 @@ void Evaluator::RegisterStringOps() {
 
     operator_registry_.RegisterBinaryOper<String, String>(
         TokenType::kMinus, 
-        [](const Value& left, const Value& right) -> Value {
-            String str = left.Get<String>();
-            String suffix = right.Get<String>();
+        [this](const Value& left, const Value& right) -> Value {
+            const String& str = left.Get<String>();
+            const String& suffix = right.Get<String>();
 
-            if (str.ends_with(suffix))
-                return str.substr(0, str.size() - suffix.size());
+            if (str->ends_with(*suffix))
+                return CreateString(str->substr(0, str->size() - suffix->size()));
             
-            return str;
+            return CreateString(*str);
+        }
+    );
+    
+    operator_registry_.RegisterBinaryOper<String, String>(
+        TokenType::kPlus, 
+        [this](const Value& left, const Value& right) {
+            return CreateString(*left.Get<String>() + *right.Get<String>());
         }
     );
 }

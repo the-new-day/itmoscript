@@ -63,5 +63,5 @@ private:
     std::unordered_map<std::string, Value> storage_;
     std::shared_ptr<Environment> parent_;
 };
-    
+
 } // namespace itmoscript

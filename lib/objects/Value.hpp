@@ -17,11 +17,11 @@ namespace itmoscript {
 using NullType = std::monostate; // Represents the null value.
 using Int = int64_t;             // Integer type used in the language.
 using Float = double;            // Floating-point type used in the language.
-using String = std::string;      // String type used in the language.
 using Bool = bool;               // Bool type used in the language.
 
 class ListObject;
 using List = std::shared_ptr<ListObject>; // List type used in the language.
+using String = std::shared_ptr<std::string>; // String type used in the language.
 
 /**
  * @brief Concept to constrain core language types for Value class.

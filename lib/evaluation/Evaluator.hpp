@@ -199,6 +199,19 @@ private:
     void Visit(ast::ForStatement&) override {}
     void Visit(ast::ListLiteral&) override;
     void Visit(ast::IndexOperatorExpression&) override {}
+
+    template<CoreValueType T, typename InnerType>
+    static std::shared_ptr<InnerType> CreateHeavyValue(InnerType val) {
+        return std::make_shared<InnerType>(std::move(val));
+    }
+
+    static String CreateString(std::string val) {
+        return CreateHeavyValue<String>(std::move(val));
+    }
+
+    static List CreateList(ListObject val) {
+        return CreateHeavyValue<List>(std::move(val));
+    }
 };
 
 template<NumericValueType T>
@@ -229,21 +242,21 @@ void Evaluator::RegisterStringMultiplication() {
     operator_registry_.RegisterCommutativeOperator<String, T>(
         TokenType::kAsterisk, 
         [this](const Value& left, const Value& right) -> Value {
-        String str = left.IsOfType<String>() ? left.Get<String>() : right.Get<String>();
+        const String& str = left.IsOfType<String>() ? left.Get<String>() : right.Get<String>();
         T number = left.IsOfType<String>() ? right.Get<T>() : left.Get<T>();
 
-        std::optional<std::string> result = utils::MultiplyStr(str, number);
+        std::optional<std::string> result = utils::MultiplyStr(*str, number);
         if (!result) {
             ThrowRuntimeError<lang_exceptions::SequenceMultiplicationError>(
                 std::format(
                     "cannot multiply string \"{}\" by negative value {}",
-                    str,
+                    *str,
                     number
                 )
             );
         }
 
-        return result.value();
+        return CreateString(result.value());
     });
 }
 

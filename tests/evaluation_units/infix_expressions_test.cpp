@@ -130,3 +130,18 @@ TEST(EvaluationInfixTestSuite, LogicalOperatorsTest) {
         TestValue<itmoscript::Bool>(evaluated, expected);
     }
 }
+
+TEST(EvaluationInfixTestSuite, ListComparisonTest) {
+    std::vector<std::pair<std::string, bool>> expressions{
+        {"[1, 2, 3] == [1, 2, 3]", true},
+        {"[1] == [1, 2, 3]", false},
+        {"[] == [1, 2, 3]", false},
+        {"[] == []", true},
+        {"[1, 2, 3] == [1, 2, 3, 4]", false},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Bool>(evaluated, expected);
+    }
+}

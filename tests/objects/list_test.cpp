@@ -26,7 +26,7 @@ TEST(ObjectsListTestSuite, SmallListTest) {
     std::vector<Value> values = {
         Value{1},
         Value{1.5},
-        Value{std::string{"aaa"}},
+        Value{std::make_shared<std::string>("aaa")},
         Value{true}
     };
 

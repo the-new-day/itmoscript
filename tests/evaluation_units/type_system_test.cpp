@@ -34,7 +34,8 @@ TEST(EvaluationTypesTestSuite, ExplicitConversionTest) {
     for (const auto& [value, requested_type, expected] : expressions) {
         ASSERT_EQ(type_system.TryConvert(value, requested_type), expected)
             << "value: " << value << "; requested type: " << itmoscript::GetTypeName(value.type()) 
-            << "; expected: " << (expected.has_value() ? *expected : IsValue{std::string{"nullopt"}});
+            << "; expected: " 
+            << (expected.has_value() ? *expected : IsValue{std::make_shared<std::string>("nullopt")});
     }
 }
 

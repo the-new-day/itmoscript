@@ -80,6 +80,14 @@ public:
     void RegisterAllComparisonOps();
 
     /**
+     * @brief Registers all comparison operators for specified heavy type (list, string, function).
+     *
+     * All comparison operators are: ==, != , <, <=, >, >=
+     */
+    template<CoreValueType T>
+    void RegisterAllComparisonOpsForHeavyType();
+
+    /**
      * @brief Finds exact handler for given binary operator with given left and right types.
      * @return The handler if it was found for given types and operator, std::nullopt otherwise.
      */
@@ -144,6 +152,22 @@ void OperatorRegistry::RegisterAllComparisonOps() {
     const auto cmp = [](auto op) {
         return [op](const Value& left, const Value& right) {
             return op(left.Get<T>(), right.Get<T>());
+        };
+    };
+    
+    RegisterBinaryOper<T, T>(TokenType::kEqual, cmp(std::equal_to{}));
+    RegisterBinaryOper<T, T>(TokenType::kNotEqual, cmp(std::not_equal_to{}));
+    RegisterBinaryOper<T, T>(TokenType::kLess, cmp(std::less{}));
+    RegisterBinaryOper<T, T>(TokenType::kLessOrEqual, cmp(std::less_equal{}));
+    RegisterBinaryOper<T, T>(TokenType::kGreater, cmp(std::greater{}));
+    RegisterBinaryOper<T, T>(TokenType::kGreaterOrEqual, cmp(std::greater_equal{}));
+}
+
+template<CoreValueType T>
+void OperatorRegistry::RegisterAllComparisonOpsForHeavyType() {
+    const auto cmp = [](auto op) {
+        return [op](const Value& left, const Value& right) {
+            return op(*left.Get<T>(), *right.Get<T>());
         };
     };
     

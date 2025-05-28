@@ -14,7 +14,7 @@ bool Value::IsTruphy() const {
         case ValueType::kFloat:
             return Get<Float>() != 0;
         case ValueType::kString:
-            return !Get<String>().empty();
+            return !Get<String>()->empty();
         case ValueType::kBool:
             return Get<Bool>();
         case ValueType::kFunction:
@@ -35,7 +35,7 @@ std::string Value::ToString() const {
         case ValueType::kFloat:
             return std::format("{}", Get<Float>());
         case ValueType::kString:
-            return Get<String>();
+            return '"' + *Get<String>() + '"';
         case ValueType::kBool:
             return Get<Bool>() ? "true" : "false";
         case ValueType::kFunction:
@@ -65,6 +65,12 @@ bool Value::operator==(const Value& other) const {
     if (type() == ValueType::kList) {
         return other.type() == ValueType::kList
             && Get<List>()->data() == other.Get<List>()->data();
+    } else if (type() == ValueType::kString) {
+        return other.type() == ValueType::kString
+            && *Get<String>() == *other.Get<String>();
+    } else if (type() == ValueType::kFunction) {
+        return other.type() == ValueType::kFunction
+            && Get<Function>() == other.Get<Function>();
     }
     
     return type() == other.type() && data_ == other.data_;
