@@ -123,3 +123,46 @@ TEST(ParserExpressionsTestSuite, OperatorPrecedenceParsingTest) {
         ASSERT_EQ(program.String(), expected);
     }
 }
+
+TEST(ParserExpressionsTestSuite, IndexOperatorTest) {
+    // <code, operand, is_slice, indeces (empty == no index)>
+    std::vector<std::tuple<std::string, std::string, bool, std::pair<std::string, std::string>>> tests{
+        {"x[1]", "x", false, {"1", ""}},
+        {"x[1:2]", "x", true, {"1", "2"}},
+        {"x[:2]", "x", true, {"", "2"}},
+        {"x[:]", "x", true, {"", ""}},
+    };
+
+    for (const auto& [input, operand, is_slice, indeces] : tests) {
+        auto program = GetParsedProgram(input);
+        const auto& statements = program.GetStatements();
+
+        ASSERT_EQ(program.GetStatements().size(), 1) << input;
+
+        auto* expr_stmt = dynamic_cast<itmoscript::ast::ExpressionStatement*>(statements[0].get());
+        ASSERT_NE(expr_stmt, nullptr);
+        ASSERT_NE(expr_stmt->expr, nullptr);
+
+        auto* expr = dynamic_cast<itmoscript::ast::IndexOperatorExpression*>(expr_stmt->expr.get());
+        ASSERT_NE(expr, nullptr);
+        ASSERT_NE(expr->operand, nullptr);
+
+        ASSERT_EQ(expr->operand->String(), operand);
+        
+        if (is_slice) {
+            if (indeces.first.empty()) {
+                ASSERT_EQ(expr->index, nullptr);
+            } else {
+                ASSERT_NE(expr->index, nullptr);
+                ASSERT_EQ(expr->index->String(), indeces.first);
+            }
+            
+            if (indeces.second.empty()) {
+                ASSERT_EQ(expr->second_index, nullptr);
+            } else {
+                ASSERT_NE(expr->second_index, nullptr);
+                ASSERT_EQ(expr->second_index->String(), indeces.second);
+            }
+        }
+    }
+}

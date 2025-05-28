@@ -79,6 +79,23 @@ static void TestBooleanLiteral(std::shared_ptr<itmoscript::ast::Expression>& int
     ASSERT_EQ(bool_literal->token.literal, expected_value ? "true" : "false");
 }
 
+static void TestListLiteral(
+    std::shared_ptr<itmoscript::ast::Expression>& list_literal_expr,
+    const std::vector<std::string>& expected_value_strs
+) {
+    auto* literal = dynamic_cast<itmoscript::ast::ListLiteral*>(list_literal_expr.get());
+    ASSERT_NE(literal, nullptr);
+
+    const auto& elements = literal->elements;
+    ASSERT_EQ(elements.size(), expected_value_strs.size());
+    
+    for (size_t i = 0; i < elements.size(); ++i) {
+        ASSERT_EQ(elements[i]->String(), expected_value_strs[i])
+            << "expected: " << expected_value_strs[i]
+            << "; got: " << elements[i]->String();
+    }
+}
+
 template<typename T>
 void TestLiteralExpression(std::shared_ptr<itmoscript::ast::Expression>& expr, T expected) {
     if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, const char*>) {

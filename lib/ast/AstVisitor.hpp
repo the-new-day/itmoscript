@@ -26,6 +26,8 @@ struct WhileStatement;
 struct ForStatement;
 struct BreakStatement;
 struct ContinueStatement;
+struct IndexOperatorExpression;
+struct ListLiteral;
 
 /**
  * @class AstVisitor
@@ -37,22 +39,29 @@ public:
     virtual ~AstVisitor() = default;
     
     virtual void Visit(Program&) = 0;
-    virtual void Visit(Identifier&) = 0;
+
     virtual void Visit(AssignStatement&) = 0;
     virtual void Visit(OperatorAssignStatement&) = 0;
-    virtual void Visit(ReturnStatement&) = 0;
     virtual void Visit(ExpressionStatement&) = 0;
+    
+    virtual void Visit(Identifier&) = 0;
     virtual void Visit(PrefixExpression&) = 0;
     virtual void Visit(InfixExpression&) = 0;
+    virtual void Visit(IndexOperatorExpression&) = 0;
+
     virtual void Visit(IntegerLiteral&) = 0;
     virtual void Visit(FloatLiteral&) = 0;
     virtual void Visit(StringLiteral&) = 0;
     virtual void Visit(BooleanLiteral&) = 0;
     virtual void Visit(NullTypeLiteral&) = 0;
+    virtual void Visit(FunctionLiteral&) = 0;
+    virtual void Visit(ListLiteral&) = 0;
+    
+    virtual void Visit(CallExpression&) = 0;
+    virtual void Visit(ReturnStatement&) = 0;
+
     virtual void Visit(BlockStatement&) = 0;
     virtual void Visit(IfExpression&) = 0;
-    virtual void Visit(FunctionLiteral&) = 0;
-    virtual void Visit(CallExpression&) = 0;
     virtual void Visit(WhileStatement&) = 0;
     virtual void Visit(ForStatement&) = 0;
     virtual void Visit(BreakStatement&) = 0;

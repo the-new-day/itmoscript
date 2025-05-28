@@ -48,7 +48,6 @@ TEST(ParserFunctionsTestSuite, FunctionSimpleTest) {
 }
 
 TEST(ParserFunctionsTestSuite, FunctionParametersTest) {
-    // <input, expected>
     std::vector<std::pair<std::string, std::vector<std::string>>> tests{
         {"function () end function", {}},
         {"function (x) end function", {"x"}},

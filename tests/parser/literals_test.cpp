@@ -1,6 +1,6 @@
 #include "parser_test.hpp"
 
-TEST(ParserLiteralsTestSuite, IntLiteralExpressionTest) {
+TEST(ParserLiteralsTestSuite, IntLiteralTest) {
     std::string code = R"(
         100500
     )";
@@ -13,7 +13,7 @@ TEST(ParserLiteralsTestSuite, IntLiteralExpressionTest) {
     TestIntegerLiteral(expr_stmt->expr, 100500);
 }
 
-TEST(ParserLiteralsTestSuite, FloatLiteralExpressionTest) {
+TEST(ParserLiteralsTestSuite, FloatLiteralTest) {
     std::string code = R"(
         3.14
     )";
@@ -26,7 +26,7 @@ TEST(ParserLiteralsTestSuite, FloatLiteralExpressionTest) {
     TestFloatLiteral(expr_stmt->expr, 3.14);
 }
 
-TEST(ParserLiteralsTestSuite, StringLiteralExpressionTest) {
+TEST(ParserLiteralsTestSuite, StringLiteralTest) {
     std::string code = R"(
         "Hello World"
     )";
@@ -50,7 +50,7 @@ TEST(ParserLiteralsTestSuite, StringLiteralEscapeSeqTest) {
     TestStringLiteral(expr_stmt->expr, "\n\t\'\"\?\a\b\f\r\v\\");
 }
 
-TEST(ParserLiteralsTestSuite, NullTypeLiteralExpressionTest) {
+TEST(ParserLiteralsTestSuite, NullTypeLiteralTest) {
     std::string code = R"(
         nil
     )";
@@ -63,7 +63,7 @@ TEST(ParserLiteralsTestSuite, NullTypeLiteralExpressionTest) {
     TestNullTypeLiteral(expr_stmt->expr);
 }
 
-TEST(ParserLiteralsTestSuite, BooleanLiteralExpressionTest) {
+TEST(ParserLiteralsTestSuite, BooleanLiteralTest) {
     std::string code = R"(
         true
         false
@@ -73,14 +73,32 @@ TEST(ParserLiteralsTestSuite, BooleanLiteralExpressionTest) {
     const auto& statements = program.GetStatements();
     ASSERT_EQ(statements.size(), 2);
 
-    auto* expr_stmt1 = dynamic_cast<itmoscript::ast::ExpressionStatement*>(statements[0].get());
-    ASSERT_NE(expr_stmt1, nullptr);
-    ASSERT_NE(expr_stmt1->expr, nullptr);
-
-    auto* expr_stmt2 = dynamic_cast<itmoscript::ast::ExpressionStatement*>(statements[1].get());
-    ASSERT_NE(expr_stmt2, nullptr);
-    ASSERT_NE(expr_stmt2->expr, nullptr);
+    auto* expr_stmt1 = GetExpressionStatement(statements[0]);
+    auto* expr_stmt2 = GetExpressionStatement(statements[1]);
 
     TestBooleanLiteral(expr_stmt1->expr, true);
     TestBooleanLiteral(expr_stmt2->expr, false);
+}
+
+TEST(ParserLiteralsTestSuite, ListLiteralTest) {
+    std::string code = R"(
+        [1, 2, 3]
+        []
+        [1]
+        [1, "hello"]
+    )";
+
+    auto program = GetParsedProgram(code);
+    const auto& statements = program.GetStatements();
+    ASSERT_EQ(statements.size(), 4);
+
+    auto* expr_stmt1 = GetExpressionStatement(statements[0]);
+    auto* expr_stmt2 = GetExpressionStatement(statements[1]);
+    auto* expr_stmt3 = GetExpressionStatement(statements[2]);
+    auto* expr_stmt4 = GetExpressionStatement(statements[3]);
+
+    TestListLiteral(expr_stmt1->expr, {"1", "2", "3"});
+    TestListLiteral(expr_stmt2->expr, {});
+    TestListLiteral(expr_stmt3->expr, {"1"});
+    TestListLiteral(expr_stmt4->expr, {"1", "\"hello\""});
 }

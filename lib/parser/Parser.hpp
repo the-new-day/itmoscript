@@ -44,6 +44,7 @@ const std::map<TokenType, Precedence> kPrecedences{
     {TokenType::kAsterisk, Precedence::kProduct},
     {TokenType::kSlash, Precedence::kProduct},
     {TokenType::kPow, Precedence::kPrefix},
+    {TokenType::kLBracket, Precedence::kPrefix},
     {TokenType::kLParen, Precedence::kCall},
 };
 
@@ -189,8 +190,8 @@ private:
     std::shared_ptr<ast::Expression> ParseGroupedExpression();
     std::shared_ptr<ast::IfExpression> ParseIfExpression();
     std::shared_ptr<ast::BlockStatement> ParseBlockStatement();
+    std::shared_ptr<ast::ListLiteral> ParseListLiteral();
     std::shared_ptr<ast::FunctionLiteral> ParseFunctionLiteral();
-    std::shared_ptr<ast::CallExpression> ParseCallExpression(std::shared_ptr<ast::Expression> function);
 
     std::shared_ptr<ast::Statement> ParseStatement();
     std::shared_ptr<ast::AssignStatement> ParseAssignStatement();
@@ -202,6 +203,10 @@ private:
     std::shared_ptr<ast::WhileStatement> ParseWhileStatement();
     std::shared_ptr<ast::ForStatement> ParseForStatement();
 
+    std::shared_ptr<ast::IndexOperatorExpression>
+    ParseIndexOperatorExpression(std::shared_ptr<ast::Expression> operand);
+
+    std::shared_ptr<ast::CallExpression> ParseCallExpression(std::shared_ptr<ast::Expression> function);
     std::vector<std::shared_ptr<ast::Identifier>> ParseFunctionParameters();
     std::vector<std::shared_ptr<ast::Expression>> ParseCallArguments();
 

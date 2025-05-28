@@ -14,23 +14,24 @@ Parser::Parser(Lexer& lexer)
     AdvanceToken();
     AdvanceToken();
 
-    prefix_parse_funcs_[TokenType::kIdentifier] = [this]() { return this->ParseIdentifier(); };
-    prefix_parse_funcs_[TokenType::kInt] = [this]() { return this->ParseIntegerLiteral(); };
-    prefix_parse_funcs_[TokenType::kFloat] = [this]() { return this->ParseFloatLiteral(); };
-    prefix_parse_funcs_[TokenType::kStringLiteral] = [this]() { return this->ParseStringLiteral(); };
-    prefix_parse_funcs_[TokenType::kNil] = [this]() { return this->ParseNullTypeLiteral(); };
-    prefix_parse_funcs_[TokenType::kBang] = [this]() { return this->ParsePrefixExpression(); };
-    prefix_parse_funcs_[TokenType::kMinus] = [this]() { return this->ParsePrefixExpression(); };
-    prefix_parse_funcs_[TokenType::kPlus] = [this]() { return this->ParsePrefixExpression(); };
-    prefix_parse_funcs_[TokenType::kNot] = [this]() { return this->ParsePrefixExpression(); };
-    prefix_parse_funcs_[TokenType::kTrue] = [this]() { return this->ParseBooleanLiteral(); };
-    prefix_parse_funcs_[TokenType::kFalse] = [this]() { return this->ParseBooleanLiteral(); };
-    prefix_parse_funcs_[TokenType::kLParen] = [this]() { return this->ParseGroupedExpression(); };
-    prefix_parse_funcs_[TokenType::kIf] = [this]() { return this->ParseIfExpression(); };
-    prefix_parse_funcs_[TokenType::kFunction] = [this]() { return this->ParseFunctionLiteral(); };
+    prefix_parse_funcs_[TokenType::kIdentifier] = [this]() { return ParseIdentifier(); };
+    prefix_parse_funcs_[TokenType::kInt] = [this]() { return ParseIntegerLiteral(); };
+    prefix_parse_funcs_[TokenType::kFloat] = [this]() { return ParseFloatLiteral(); };
+    prefix_parse_funcs_[TokenType::kStringLiteral] = [this]() { return ParseStringLiteral(); };
+    prefix_parse_funcs_[TokenType::kNil] = [this]() { return ParseNullTypeLiteral(); };
+    prefix_parse_funcs_[TokenType::kBang] = [this]() { return ParsePrefixExpression(); };
+    prefix_parse_funcs_[TokenType::kMinus] = [this]() { return ParsePrefixExpression(); };
+    prefix_parse_funcs_[TokenType::kPlus] = [this]() { return ParsePrefixExpression(); };
+    prefix_parse_funcs_[TokenType::kNot] = [this]() { return ParsePrefixExpression(); };
+    prefix_parse_funcs_[TokenType::kTrue] = [this]() { return ParseBooleanLiteral(); };
+    prefix_parse_funcs_[TokenType::kFalse] = [this]() { return ParseBooleanLiteral(); };
+    prefix_parse_funcs_[TokenType::kLParen] = [this]() { return ParseGroupedExpression(); };
+    prefix_parse_funcs_[TokenType::kIf] = [this]() { return ParseIfExpression(); };
+    prefix_parse_funcs_[TokenType::kFunction] = [this]() { return ParseFunctionLiteral(); };
+    prefix_parse_funcs_[TokenType::kLBracket] = [this]() { return ParseListLiteral(); };
 
-    auto infix_parser = [this](std::shared_ptr<ast::Expression> expr) {
-        return this->ParseInfixExpression(std::move(expr));
+    auto infix_parser = [this](std::shared_ptr<ast::Expression> left) {
+        return ParseInfixExpression(std::move(left));
     };
 
     infix_parse_funcs_[TokenType::kPlus] = infix_parser;
@@ -49,7 +50,7 @@ Parser::Parser(Lexer& lexer)
     infix_parse_funcs_[TokenType::kOr] = infix_parser;
     infix_parse_funcs_[TokenType::kLParen] = [this](std::shared_ptr<ast::Expression> function) {
         Token token = function->token;
-        auto expr = this->ParseCallExpression(std::move(function));
+        auto expr = ParseCallExpression(std::move(function));
 
         if (auto ident = dynamic_cast<ast::Identifier*>(expr->function.get())) {
             expr->function_name = ident->name;
@@ -60,6 +61,10 @@ Parser::Parser(Lexer& lexer)
         }
 
         return expr;
+    };
+
+    infix_parse_funcs_[TokenType::kLBracket] = [this](std::shared_ptr<ast::Expression> operand) {
+        return ParseIndexOperatorExpression(operand);
     };
 }
 
@@ -172,6 +177,27 @@ std::shared_ptr<ast::Expression> Parser::ParseExpression(Precedence precedence) 
     }
 
     return left;
+}
+
+std::shared_ptr<ast::ListLiteral> Parser::ParseListLiteral() {
+    auto expr = MakeNode<ast::ListLiteral>();
+    AdvanceToken();
+    
+    if (IsCurrentToken(TokenType::kRBracket)) {
+        return expr;
+    }
+
+    expr->elements.push_back(ParseExpression());
+
+    while (IsPeekToken(TokenType::kComma)) {
+        AdvanceToken();
+        AdvanceToken();
+        
+        expr->elements.push_back(ParseExpression());
+    }
+
+    Consume(TokenType::kRBracket);
+    return expr;
 }
 
 bool Parser::IsCurrentToken(TokenType type) const {
@@ -445,6 +471,38 @@ std::shared_ptr<ast::ForStatement> Parser::ParseForStatement() {
 
     Consume(TokenType::kFor);
     return stmt;
+}
+
+std::shared_ptr<ast::IndexOperatorExpression>
+Parser::ParseIndexOperatorExpression(std::shared_ptr<ast::Expression> operand) { 
+    auto expr = MakeNode<ast::IndexOperatorExpression>();
+    expr->operand = std::move(operand);
+
+    AdvanceToken();
+
+    if (IsCurrentToken(TokenType::kColon)) { // a[:n] or a[:]
+        expr->is_slice = true;
+
+        if (!IsPeekToken(TokenType::kRBracket)) {
+            AdvanceToken();
+            expr->second_index = ParseExpression();
+        }
+    } else { // a[n] or a[n:] or a[m:n]
+        expr->index = ParseExpression();
+
+        if (IsPeekToken(TokenType::kColon)) {
+            AdvanceToken();
+            expr->is_slice = true;
+
+            if (!IsPeekToken(TokenType::kRBracket)) {
+                AdvanceToken();
+                expr->second_index = ParseExpression();
+            }
+        }
+    }
+
+    Consume(TokenType::kRBracket);
+    return expr;
 }
 
 std::shared_ptr<ast::BreakStatement> Parser::ParseBreakStatement() {

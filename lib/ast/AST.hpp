@@ -140,6 +140,34 @@ struct NullTypeLiteral : public Expression {
     void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 };
 
+struct FunctionLiteral : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
+
+    std::vector<std::shared_ptr<Identifier>> parameters;
+    std::shared_ptr<BlockStatement> body;
+};
+
+struct IndexOperatorExpression : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
+
+    std::shared_ptr<Expression> operand;
+    std::shared_ptr<Expression> index;
+    std::shared_ptr<Expression> second_index;
+    bool is_slice = false;
+};
+
+struct ListLiteral : public Expression {
+    using Expression::Expression;
+    std::string String() const override;
+    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
+
+    std::vector<std::shared_ptr<Expression>> elements;
+};
+
 class BlockStatement : public Statement {
 public:
     using Statement::Statement;
@@ -169,15 +197,6 @@ struct IfExpression : public Expression {
     void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
 
     std::vector<IfBranch> alternatives;
-};
-
-struct FunctionLiteral : public Expression {
-    using Expression::Expression;
-    std::string String() const override;
-    void Accept(AstVisitor& visitor) override { visitor.Visit(*this); }
-
-    std::vector<std::shared_ptr<Identifier>> parameters;
-    std::shared_ptr<BlockStatement> body;
 };
 
 struct CallExpression : public Expression {

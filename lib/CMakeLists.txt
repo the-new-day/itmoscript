@@ -3,6 +3,7 @@ add_subdirectory(repl)
 add_subdirectory(ast)
 add_subdirectory(parser)
 add_subdirectory(evaluation)
+add_subdirectory(objects)
 
 add_library(itmoscript interpreter.cpp)
 
@@ -11,4 +12,5 @@ target_link_libraries(itmoscript
     itmoscript_repl 
     itmoscript_parser
     itmoscript_ast
-    itmoscript_evaluation)
+    itmoscript_evaluation
+    itmoscript_objects)

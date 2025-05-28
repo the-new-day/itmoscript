@@ -1,4 +1,5 @@
 #include "AST.hpp"
+#include "utils.hpp"
 
 #include <format>
 
@@ -36,6 +37,8 @@ void BlockStatement::AddStatement(std::shared_ptr<Statement> statement) {
 
 std::string BlockStatement::String() const {
     std::string result;
+
+    // TODO: use utils::Join here and everywhere below
 
     for (size_t i = 0; i < statements_.size(); ++i) {
         result += statements_[i]->String();
@@ -123,6 +126,34 @@ std::string FunctionLiteral::String() const {
     result += ") ";
     result += body->String();
     result += " end function";
+    return result;
+}
+
+std::string ListLiteral::String() const {
+    std::string result;
+    result += '[';
+
+    for (size_t i = 0; i < elements.size(); ++i) {
+        result += elements[i]->String();
+        if (i != elements.size() - 1) result += ", ";
+    }
+
+    result += ']';
+    return result;
+}
+
+std::string IndexOperatorExpression::String() const {
+    std::string result;
+    result += operand->String();
+    result += '[';
+    result += index ? index->String() : "";
+
+    if (is_slice) {
+        result += ':';
+        result += second_index ? second_index->String() : "";
+    }
+
+    result += ']';
     return result;
 }
 
