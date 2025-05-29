@@ -63,3 +63,63 @@ TEST(EvaluationListsTestSuite, ListSlicingTest) {
         TestHeavyValue<itmoscript::List>(evaluated, CreateList(expected));
     }
 }
+
+TEST(EvaluationListsTestSuite, StringIndexingTest) {
+    std::vector<std::pair<std::string, std::string>> expressions{
+        {R"(
+            x = "01234"
+            x[1]
+        )", "1"},
+        {R"(
+            x = "01234"
+            x[0]
+        )", "0"},
+        {R"(
+            x = "01234"
+            x[-1]
+        )", "4"},
+        {R"(
+            x = "01234"
+            x[-2]
+        )", "3"},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestHeavyValue<itmoscript::String>(evaluated, CreateString(expected));
+    }
+}
+
+TEST(EvaluationListsTestSuite, StringSlicingTest) {
+    std::vector<std::pair<std::string, std::string>> expressions{
+        {R"(
+            x = "012345"
+            x[:]
+        )", "012345"},
+        {R"(
+            x = "012345"
+            x[1:3]
+        )", "123"},
+        {R"(
+            x = "012345"
+            x[0:4]
+        )", "01234"},
+        {R"(
+            x = "012345"
+            x[5:4]
+        )", ""},
+        {R"(
+            x = "012345"
+            x[:4]
+        )", "01234"},
+        {R"(
+            x = "012345"
+            x[2:]
+        )", "2345"},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestHeavyValue<itmoscript::String>(evaluated, CreateString(expected));
+    }
+}

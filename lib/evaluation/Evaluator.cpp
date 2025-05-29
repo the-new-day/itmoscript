@@ -429,17 +429,17 @@ void Evaluator::EvalSliceIndexExpression(ast::IndexOperatorExpression& expr) {
     } else if (op_type == ValueType::kString) {
         const String& str = operand.value.Get<String>();
 
-        if (start > end || str->empty()) {
+        if (start > end || start >= str->size()) {
             last_exec_result_.value = CreateString(std::string{});
             return;
         }
 
-        start = std::min(start, str->size() - 1);
-        end = std::min(end, str->size() - 1);
+        if (end >= str->size())
+            end = str->size() - 1;
 
         last_exec_result_.value = CreateString(std::string(
             str->begin() + start,
-            str->end() + end + 1
+            str->begin() + end + 1
         ));
     }
 }
