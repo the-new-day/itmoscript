@@ -3,8 +3,6 @@
 #include "objects/Value.hpp"
 #include "exceptions/ArgumentTypeError.hpp"
 
-#include <expected>
-
 namespace itmoscript {
 
 namespace stdlib {

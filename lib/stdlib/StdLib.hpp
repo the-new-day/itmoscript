@@ -9,20 +9,45 @@
 #include <string>
 #include <unordered_map>
 #include <concepts>
-#include <expected>
+#include <iostream>
 
 namespace itmoscript {
 
 namespace stdlib {
 
-using BuiltInFunction = std::function<Value(std::vector<Value>&, Token, const CallStack&)>;
+using ValueHandlingFunction = std::function<Value(std::vector<Value>&, Token, const CallStack&)>;
+using OutStreamHandlingFunction = std::function<Value(std::ostream&, std::vector<Value>&, Token, const CallStack&)>;
+using InStreamHandlingFunction = std::function<Value(std::istream&, std::vector<Value>&, Token, const CallStack&)>;
 
 class StdLib {
 public:
+    void Register(const std::string& name, ValueHandlingFunction func);
+    void RegisterOutStreamHandlingFunc(const std::string& name, OutStreamHandlingFunction func);
+    void RegisterInStreamHandlingFunc(const std::string& name, InStreamHandlingFunction func);
+    
+    bool HasValueHandlingFunc(const std::string& name) const;
+    bool HasOutStreamHandlingFunc(const std::string& name) const;
+    bool HasInStreamHandlingFunc(const std::string& name) const;
+
     bool Has(const std::string& name) const;
-    void Register(const std::string& name, BuiltInFunction func);
     
     Value Call( 
+        const std::string& name, 
+        std::vector<Value>& args,
+        Token from, 
+        const CallStack& call_stack
+    );
+
+    Value CallOutStreamHandlingFunc( 
+        std::ostream& stream,
+        const std::string& name, 
+        std::vector<Value>& args,
+        Token from, 
+        const CallStack& call_stack
+    );
+
+    Value CallInStreamHandlingFunc( 
+        std::istream& stream,
         const std::string& name, 
         std::vector<Value>& args,
         Token from, 
@@ -32,7 +57,9 @@ public:
     void LoadDefault();
 
 private:
-    std::unordered_map<std::string, BuiltInFunction> functions_;
+    std::unordered_map<std::string, ValueHandlingFunction> functions_;
+    std::unordered_map<std::string, OutStreamHandlingFunction> out_stream_functions_;
+    std::unordered_map<std::string, InStreamHandlingFunction> in_stream_functions_;
 };
 
 /**
@@ -57,6 +84,34 @@ auto MakeBuiltin(F fn, size_t arg_num) {
         }
 
         return std::invoke(fn, args, from, stack);
+    };
+}
+
+template<typename F> requires std::invocable<F, std::ostream&, std::vector<Value>&, Token, const CallStack&>
+auto MakeBuiltin(F fn, size_t arg_num) {
+    return [fn, arg_num](std::ostream& stream,
+                         std::vector<Value>& args,
+                         Token from,
+                         const CallStack& stack) -> Value {
+        if (args.size() != arg_num) {
+            throw lang_exceptions::ParametersCountError{from, stack, arg_num, args.size()};
+        }
+
+        return std::invoke(fn, stream, args, from, stack);
+    };
+}
+
+template<typename F> requires std::invocable<F, std::istream&, std::vector<Value>&, Token, const CallStack&>
+auto MakeBuiltin(F fn, size_t arg_num) {
+    return [fn, arg_num](std::istream& stream,
+                         std::vector<Value>& args,
+                         Token from,
+                         const CallStack& stack) -> Value {
+        if (args.size() != arg_num) {
+            throw lang_exceptions::ParametersCountError{from, stack, arg_num, args.size()};
+        }
+
+        return std::invoke(fn, stream, args, from, stack);
     };
 }
 

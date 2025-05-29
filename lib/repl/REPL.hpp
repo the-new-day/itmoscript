@@ -33,7 +33,7 @@ private:
 
     void EvalLexer(std::ostream& output);
     void EvalParser(std::ostream& output);
-    void Eval(std::ostream& output);
+    void Eval(std::istream& input, std::ostream& output);
 
     void PrintToken(std::ostream& output, const Token& token);
 

@@ -23,7 +23,7 @@ void REPL::Start(std::istream& input, std::ostream& output) {
             } else if (mode_ == ReplMode::kParser) {
                 EvalParser(output);
             } else if (mode_ == ReplMode::kEval) {
-                Eval(output);
+                Eval(input, output);
             }
         } catch (const lang_exceptions::RuntimeError& e) {
             PrintException(output, e, "Runtime error");
@@ -55,14 +55,21 @@ void REPL::EvalParser(std::ostream& output) {
     output << '\n';
 }
 
-void REPL::Eval(std::ostream& output) {
+void REPL::Eval(std::istream& input, std::ostream& output) {
     Lexer lexer{current_line_};
     Parser parser{lexer};
     ast::Program program = parser.ParseProgram();
 
-    evaluator_.Interpret(program);
+    std::ostringstream out;
+    evaluator_.Interpret(program, input, out);
+    
+    std::string printed = out.str();
+    if (printed.empty()) {
+        output << evaluator_.GetLastEvaluatedValue();
+    } else {
+        output << printed;
+    }
 
-    output << evaluator_.GetLastEvaluatedValue();
     output << '\n';
 }
 

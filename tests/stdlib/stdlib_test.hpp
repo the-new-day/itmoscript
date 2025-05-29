@@ -17,6 +17,7 @@ static itmoscript::Value Eval(const std::string& input) {
     itmoscript::ast::Program program = GetParsedProgram(input);
     evaluator.EnableStandardOperators();
     evaluator.EnableStd();
-    evaluator.Interpret(program);
+    std::stringstream dummy;
+    evaluator.Interpret(program, dummy, dummy);
     return evaluator.GetLastEvaluatedValue();
 }

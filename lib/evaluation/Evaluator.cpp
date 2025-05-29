@@ -27,7 +27,9 @@ Evaluator::Evaluator() {
     env_stack_.emplace(std::make_shared<Environment>(nullptr));
 }
 
-void Evaluator::Interpret(ast::Program& root) {
+void Evaluator::Interpret(ast::Program& root, std::istream& input, std::ostream& output) {
+    input_ = &input;
+    output_ = &output;
     call_stack_.clear();
     last_exec_result_ = Eval(root);
 }
@@ -185,9 +187,17 @@ void Evaluator::Visit(ast::CallExpression& expr) {
         args.push_back(Eval(*arg).value);
     }
 
-    if (expr.function_name && !env().Has(*expr.function_name) && std_lib_.Has(*expr.function_name)) {
-        CallLibraryFunction(*expr.function_name, args);
-        return;
+    if (expr.function_name && !env().Has(*expr.function_name)) {
+        if (std_lib_.HasOutStreamHandlingFunc(*expr.function_name)) {
+            CallOutStreamLibraryFunction(*expr.function_name, args);
+            return;
+        } else if (std_lib_.HasInStreamHandlingFunc(*expr.function_name)) {
+            CallInStreamLibraryFunction(*expr.function_name, args);
+            return;
+        } else if (std_lib_.HasValueHandlingFunc(*expr.function_name)) {
+            CallLibraryFunction(*expr.function_name, args);
+            return;
+        }
     }
 
     ExecResult func_result = Eval(*expr.function);
@@ -203,6 +213,26 @@ void Evaluator::Visit(ast::CallExpression& expr) {
 
 void Evaluator::CallLibraryFunction(const std::string& name, std::vector<Value>& args) {
     last_exec_result_.value = std_lib_.Call(name, args, current_token_, call_stack_);
+    last_exec_result_.control = ControlFlowState::kNormal;
+}
+
+void Evaluator::CallOutStreamLibraryFunction(const std::string& name, std::vector<Value>& args) {
+    last_exec_result_.value = std_lib_.CallOutStreamHandlingFunc(
+        *output_, 
+        name, args, 
+        current_token_, 
+        call_stack_
+    );
+    last_exec_result_.control = ControlFlowState::kNormal;
+}
+
+void Evaluator::CallInStreamLibraryFunction(const std::string& name, std::vector<Value>& args) {
+    last_exec_result_.value = std_lib_.CallInStreamHandlingFunc(
+        *input_, 
+        name, args, 
+        current_token_, 
+        call_stack_
+    );
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 

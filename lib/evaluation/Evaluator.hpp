@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <stack>
+#include <iostream>
 
 #include "utils.hpp"
 
@@ -50,8 +51,12 @@ public:
      * Clears the call stack before execution.
      * 
      * All AST nodes, which control flow reaches, are evaluated.
+     * 
+     * If any io-stream functions are called, they use streams passed to this function.
+     * Evaluator doesn't take the ownership of the streams, so the caller must ensure
+     * it remains valid.
      */
-    void Interpret(ast::Program& root);
+    void Interpret(ast::Program& root, std::istream& input, std::ostream& output);
 
     /** @brief Registers all standart operators, making them able to use. */
     void EnableStandardOperators();
@@ -86,6 +91,9 @@ private:
 
     ExecResult last_exec_result_;
     stdlib::StdLib std_lib_;
+
+    std::ostream* output_;
+    std::istream* input_;
 
     Environment& env();
 
@@ -171,6 +179,8 @@ private:
     void RegisterListOps();
 
     void CallLibraryFunction(const std::string& name, std::vector<Value>& args);
+    void CallOutStreamLibraryFunction(const std::string& name, std::vector<Value>& args);
+    void CallInStreamLibraryFunction(const std::string& name, std::vector<Value>& args);
 
     /**
      * @brief Throws RuntimeError's inheritant exception with given type and arguments.
