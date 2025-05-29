@@ -1,0 +1,40 @@
+#include "StdLib.hpp"
+
+#include "exceptions/DuplicateNameError.hpp"
+#include "evaluation/exceptions/UndefinedNameError.hpp"
+
+namespace itmoscript {
+
+namespace stdlib {
+
+bool StdLib::Has(const std::string& name) const {
+    return functions_.contains(name);
+}
+
+void StdLib::Register(const std::string& name, BuiltInFunction func) {
+    functions_[name] = std::move(func);
+}
+
+Value StdLib::Call(
+    const std::string& name, 
+    const std::vector<Value>& args,
+    Token from, 
+    const CallStack& call_stack
+) {
+    if (!functions_.contains(name)) {
+        throw lang_exceptions::UndefinedNameError{from, call_stack};
+    }
+    return std::invoke(functions_[name], from, call_stack, args);
+}
+
+void StdLib::LoadDefault() {
+    Register("abs",
+        MakeBuiltin<Int>([](Int x) {
+            return Value{ std::abs(x) };
+        })
+    );
+}
+
+} // namespace stdlib
+
+} // namespace itmoscript

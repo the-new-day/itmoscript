@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 #include <ostream>
-#include <typeindex>
+#include <type_traits>
 #include <concepts>
 
 #include "ast/AST.hpp"
@@ -184,5 +184,16 @@ const std::map<ValueType, std::string> kValueTypeNames = {
  * Should always be used instead of direct usage of kValueTypeNames.
  * */
 const std::string& GetTypeName(ValueType type);
+
+template<CoreValueType T>
+ValueType GetType() {
+    if constexpr (std::is_same_v<T, Int>) return ValueType::kInt;
+    if constexpr (std::is_same_v<T, Float>) return ValueType::kFloat;
+    if constexpr (std::is_same_v<T, Bool>) return ValueType::kBool;
+    if constexpr (std::is_same_v<T, Function>) return ValueType::kFunction;
+    if constexpr (std::is_same_v<T, List>) return ValueType::kList;
+    if constexpr (std::is_same_v<T, String>) return ValueType::kString;
+    if constexpr (std::is_same_v<T, NullType>) return ValueType::kNullType;
+}
 
 } // namespace itmoscript

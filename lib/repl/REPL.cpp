@@ -6,6 +6,11 @@
 namespace itmoscript {
 
 void REPL::Start(std::istream& input, std::ostream& output) {
+    if (mode_ == ReplMode::kEval) {
+        evaluator_.EnableStandardOperators();
+        evaluator_.EnableStd();
+    }
+
     while (true) { 
         output << kReplPrompt;
 

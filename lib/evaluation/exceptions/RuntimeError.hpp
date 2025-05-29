@@ -14,7 +14,7 @@ namespace lang_exceptions {
 class RuntimeError : public Exception {
 public:
     RuntimeError(Token token, const CallStack& call_stack, const std::string& message)
-        : lang_exceptions::Exception(std::move(token), message) 
+        : Exception(std::move(token), message) 
     {
         call_stack_ = call_stack;
     }

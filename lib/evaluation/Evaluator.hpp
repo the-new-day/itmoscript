@@ -25,6 +25,8 @@
 #include "exceptions/ZeroDivisionError.hpp"
 #include "exceptions/SequenceMultiplicationError.hpp"
 
+#include "stdlib/StdLib.hpp"
+
 namespace itmoscript {
 
 /**
@@ -50,6 +52,12 @@ public:
      * All AST nodes, which control flow reaches, are evaluated.
      */
     void Interpret(ast::Program& root);
+
+    /** @brief Registers all standart operators, making them able to use. */
+    void EnableStandardOperators();
+
+    /** @brief Registers all the functions in the standard library, making them able to use. */
+    void EnableStd();
 
     const Value& GetLastEvaluatedValue() const;
 
@@ -77,6 +85,7 @@ private:
     std::stack<std::shared_ptr<Environment>> env_stack_;
 
     ExecResult last_exec_result_;
+    stdlib::StdLib std_lib_;
 
     Environment& env();
 
@@ -160,6 +169,8 @@ private:
     void RegisterStringOps();
     void RegisterLogicalOps();
     void RegisterListOps();
+
+    void CallLibraryFunction(const std::string& name, const std::vector<Value>& args);
 
     /**
      * @brief Throws RuntimeError's inheritant exception with given type and arguments.

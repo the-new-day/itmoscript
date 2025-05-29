@@ -11,6 +11,9 @@
 #include "exceptions/NegativeIndexError.hpp"
 #include "exceptions/ControlFlowError.hpp"
 #include "exceptions/UnsupportedTypeError.hpp"
+#include "exceptions/StandardFunctionNoCallError.hpp"
+#include "exceptions/UncallableObjectCallError.hpp"
+#include "exceptions/StandardOverrideError.hpp"
 
 #include <format>
 #include <cmath>
@@ -21,6 +24,15 @@
 namespace itmoscript {
 
 Evaluator::Evaluator() {
+    env_stack_.emplace(std::make_shared<Environment>(nullptr));
+}
+
+void Evaluator::Interpret(ast::Program& root) {
+    call_stack_.clear();
+    last_exec_result_ = Eval(root);
+}
+
+void Evaluator::EnableStandardOperators() {
     RegisterTypeConversions();
     RegisterAriphmeticOps();
     RegisterUnaryOps();
@@ -28,13 +40,6 @@ Evaluator::Evaluator() {
     RegisterStringOps();
     RegisterLogicalOps();
     RegisterListOps();
-
-    env_stack_.emplace(std::make_shared<Environment>(nullptr));
-}
-
-void Evaluator::Interpret(ast::Program& root) {
-    call_stack_.clear();
-    last_exec_result_ = Eval(root);
 }
 
 std::optional<Value> Evaluator::HandleUnaryOper(TokenType oper, const Value& right) {
@@ -82,13 +87,21 @@ const Evaluator::ExecResult& Evaluator::Eval(ast::Node& node) {
     return last_exec_result_;
 }
 
+void Evaluator::EnableStd() {
+    std_lib_.LoadDefault();
+}
+
 const Value& Evaluator::GetLastEvaluatedValue() const {
     return last_exec_result_.value;
 }
 
 const Value& Evaluator::ResolveIdentifier(const ast::Identifier& ident) {
     if (!env().Has(ident.name)) {
-        ThrowRuntimeError<lang_exceptions::UndefinedNameError>(ident.token);
+        if (std_lib_.Has(ident.name)) {
+            ThrowRuntimeError<lang_exceptions::StandardFunctionNoCallError>(ident.token);
+        } else {
+            ThrowRuntimeError<lang_exceptions::UndefinedNameError>(ident.token);
+        }
     }
 
     return env().Get(ident.name);
@@ -136,11 +149,19 @@ void Evaluator::Visit(ast::Identifier& node) {
 }
 
 void Evaluator::Visit(ast::AssignStatement& stmt) {
+    if (std_lib_.Has(stmt.ident->name)) {
+        ThrowRuntimeError<lang_exceptions::StandardOverrideError>(stmt.ident->name);
+    }
+
     Eval(*stmt.expr);
     AssignIdentifier(*stmt.ident, last_exec_result_.value);
 }
 
 void Evaluator::Visit(ast::OperatorAssignStatement& stmt) {
+    if (std_lib_.Has(stmt.ident->name)) {
+        ThrowRuntimeError<lang_exceptions::StandardOverrideError>(stmt.ident->name);
+    }
+
     ExecResult right_res = Eval(*stmt.expr);
     Value ident_value = ResolveIdentifier(*stmt.ident);
 
@@ -164,9 +185,24 @@ void Evaluator::Visit(ast::CallExpression& expr) {
         args.push_back(Eval(*arg).value);
     }
 
-    Function func = Eval(*expr.function).value.Get<Function>();
+    if (expr.function_name && !env().Has(*expr.function_name) && std_lib_.Has(*expr.function_name)) {
+        CallLibraryFunction(*expr.function_name, args);
+        return;
+    }
+
+    ExecResult func_result = Eval(*expr.function);
+    if (func_result.value.type() != ValueType::kFunction) {
+        ThrowRuntimeError<lang_exceptions::UncallableObjectCallError>(expr.function->String());
+    }
+
+    Function func = func_result.value.Get<Function>();
 
     last_exec_result_.value = CallFunction(GetFunctionName(expr.function_name), func, args);
+    last_exec_result_.control = ControlFlowState::kNormal;
+}
+
+void Evaluator::CallLibraryFunction(const std::string& name, const std::vector<Value>& args) {
+    last_exec_result_.value = std_lib_.Call(name, args, current_token_, call_stack_);
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 

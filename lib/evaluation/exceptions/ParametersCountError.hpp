@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Exception.hpp"
+#include "RuntimeError.hpp"
 
 #include <format>
 #include <cstddef>
