@@ -11,5 +11,9 @@ std::vector<Value> ListObject::GetSlice(size_t start, size_t end) const {
     return std::vector<Value>(data_.begin() + start, data_.begin() + end + 1);
 }
 
+List CreateList(ListObject val) {
+    return CreateHeavyValue(val);
+}
+
 } // namespace itmoscript
 

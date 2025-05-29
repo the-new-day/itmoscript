@@ -86,7 +86,7 @@ TEST(EvaluationListsTestSuite, StringIndexingTest) {
 
     for (const auto& [input, expected] : expressions) {
         IsValue evaluated = Eval(input);
-        TestHeavyValue<itmoscript::String>(evaluated, CreateString(expected));
+        TestHeavyValue<itmoscript::String>(evaluated, itmoscript::CreateString(expected));
     }
 }
 
@@ -120,6 +120,6 @@ TEST(EvaluationListsTestSuite, StringSlicingTest) {
 
     for (const auto& [input, expected] : expressions) {
         IsValue evaluated = Eval(input);
-        TestHeavyValue<itmoscript::String>(evaluated, CreateString(expected));
+        TestHeavyValue<itmoscript::String>(evaluated, itmoscript::CreateString(expected));
     }
 }

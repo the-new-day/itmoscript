@@ -8,27 +8,25 @@ namespace itmoscript {
 
 namespace lang_exceptions {
 
-class ArgumentTypeError : public StdUsageError {
+class InvalidArgumentError : public StdUsageError {
 public:
-    ArgumentTypeError(
+    InvalidArgumentError(
         Token token, 
         const CallStack& call_stack,
         size_t idx,
-        ValueType given,
-        const std::string& expected) 
+        const std::string& message) 
         : StdUsageError(
             token, 
             call_stack, 
             std::format(
-                "invalid argument type on index {}: expected {}, got {}",
+                "invalid argument on index {}: {}",
                 idx,
-                expected,
-                GetTypeName(given)
+                message
             )
         ) {}
 
     std::string error_type() const noexcept override {
-        return "ArgumentTypeError";
+        return "InvalidArgumentError";
     }
 };
 

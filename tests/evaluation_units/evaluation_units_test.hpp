@@ -42,16 +42,3 @@ void TestHeavyValue(const IsValue& value, const std::shared_ptr<Inner>& expected
     
     ASSERT_EQ(*value.Get<T>(), *expected);
 }
-
-template<typename T, typename InnerType>
-std::shared_ptr<InnerType> CreateHeavyValue(InnerType val) {
-    return std::make_shared<InnerType>(std::move(val));
-}
-
-static std::shared_ptr<std::string> CreateString(std::string val) {
-    return CreateHeavyValue<itmoscript::String>(std::move(val));
-}
-
-static std::shared_ptr<itmoscript::ListObject> CreateList(itmoscript::ListObject val) {
-    return CreateHeavyValue<itmoscript::List>(std::move(val));
-}

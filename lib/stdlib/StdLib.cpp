@@ -3,6 +3,8 @@
 #include "exceptions/DuplicateNameError.hpp"
 #include "evaluation/exceptions/UndefinedNameError.hpp"
 
+#include "numbers.hpp"
+
 namespace itmoscript {
 
 namespace stdlib {
@@ -24,15 +26,11 @@ Value StdLib::Call(
     if (!functions_.contains(name)) {
         throw lang_exceptions::UndefinedNameError{from, call_stack};
     }
-    return std::invoke(functions_[name], from, call_stack, args);
+    return std::invoke(functions_[name], args, from, call_stack);
 }
 
 void StdLib::LoadDefault() {
-    Register("abs",
-        MakeBuiltin<Int>([](Int x) {
-            return Value{ std::abs(x) };
-        })
-    );
+    numbers::RegisterAll(*this);
 }
 
 } // namespace stdlib

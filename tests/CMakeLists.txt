@@ -47,6 +47,8 @@ add_executable(
   evaluation_units/sequences_test.cpp
 
   objects/list_test.cpp
+  
+  stdlib/numbers_test.cpp
 )
 
 target_link_libraries(

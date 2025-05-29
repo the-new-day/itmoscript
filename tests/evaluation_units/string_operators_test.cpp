@@ -3,7 +3,7 @@
 void TestStringExpressions(const std::vector<std::pair<std::string, std::string>>& expressions) {
     for (const auto& [input, expected] : expressions) {
         IsValue evaluated = Eval(input);
-        TestHeavyValue<itmoscript::String>(evaluated, CreateString(expected));
+        TestHeavyValue<itmoscript::String>(evaluated, itmoscript::CreateString(expected));
     }
 }
 

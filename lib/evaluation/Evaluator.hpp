@@ -214,19 +214,6 @@ private:
     void Visit(ast::ForStatement&) override;
     void Visit(ast::BreakStatement&) override;
     void Visit(ast::ContinueStatement&) override;
-
-    template<typename InnerType>
-    static std::shared_ptr<InnerType> CreateHeavyValue(InnerType& val) {
-        return std::make_shared<InnerType>(std::move(val));
-    }
-
-    static String CreateString(std::string val) {
-        return CreateHeavyValue(val);
-    }
-
-    static List CreateList(ListObject val) {
-        return CreateHeavyValue(val);
-    }
 };
 
 template<NumericValueType T>

@@ -196,4 +196,18 @@ ValueType GetType() {
     if constexpr (std::is_same_v<T, NullType>) return ValueType::kNullType;
 }
 
+template<CoreValueType T>
+const std::string& GetTypeName() {
+    return GetTypeName(GetType<T>());
+}
+
+template<typename InnerType>
+std::shared_ptr<InnerType> CreateHeavyValue(InnerType& val) {
+    return std::make_shared<InnerType>(std::move(val));
+}
+
+static String CreateString(std::string val) {
+    return CreateHeavyValue(val);
+}
+
 } // namespace itmoscript

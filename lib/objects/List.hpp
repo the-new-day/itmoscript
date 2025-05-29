@@ -33,5 +33,7 @@ public:
 private:
     std::vector<Value> data_;
 };
+
+List CreateList(ListObject val);
     
 } // namespace itmoscript

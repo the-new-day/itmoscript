@@ -9,12 +9,13 @@
 #include <string>
 #include <unordered_map>
 #include <concepts>
+#include <expected>
 
 namespace itmoscript {
 
 namespace stdlib {
 
-using BuiltInFunction = std::function<Value(Token, const CallStack&, const std::vector<Value>&)>;
+using BuiltInFunction = std::function<Value(const std::vector<Value>&, Token, const CallStack&)>;
 
 class StdLib {
 public:
@@ -34,38 +35,27 @@ private:
 };
 
 /**
- * @brief Gets function that handles a specified parameters
+ * @brief Gets function that handles specified Values
  * and returns a wrapper over it which gets Token, CallStack and std::vector<Value>.
  * 
- * The wrapper is also validating the number of arguments passed and their types
- * and throws an exception.
+ * The wrapper is also validating the number of arguments passed and throws an exception.
+ * Value types are not validated.
+ * 
+ * @param fn Function to handle the value
+ * @param arg_num Amount of arguments to expect.
+ * If the amount of arguments passed to the returned lambda is not equal to arg_num,
+ * ParametersCountError will be thrown by the wrapper.
  */
-template<CoreValueType... Ts, typename F> requires std::invocable<F, Ts...>
-auto MakeBuiltin(F fn) {
-    return [fn](Token from,
-                const CallStack& stack,
-                const std::vector<Value>& args) -> Value {
-        if (args.size() != sizeof...(Ts)) {
-            throw lang_exceptions::ParametersCountError{from, stack, sizeof...(Ts), args.size()};
+template<typename F> requires std::invocable<F, const std::vector<Value>&, Token, const CallStack&>
+auto MakeBuiltin(F fn, size_t arg_num) {
+    return [fn, arg_num](const std::vector<Value>& args,
+                         Token from,
+                         const CallStack& stack) -> Value {
+        if (args.size() != arg_num) {
+            throw lang_exceptions::ParametersCountError{from, stack, arg_num, args.size()};
         }
-        
-        size_t idx = 0;
-        Value out;
-        
-        auto tup = std::make_tuple(
-            ([&]() {
-                using T = Ts;
-                const Value& v = args[idx];
-                if (!v.IsOfType<T>()) {
-                    throw lang_exceptions::ArgumentTypeError{
-                        from, stack, idx, v.type(), GetType<T>()
-                    };
-                }
-                ++idx;
-                return v.Get<T>();
-            }())...
-        );
-        return std::apply(fn, tup);
+
+        return std::invoke(fn, args, from, stack);
     };
 }
     

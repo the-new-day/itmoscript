@@ -66,6 +66,6 @@ TEST(EvaluationAssignmentTestSuite, StringOperatorAssignmentTest) {
 
     for (const auto& [input, expected] : expressions) {
         IsValue evaluated = Eval(input);
-        TestHeavyValue<itmoscript::String>(evaluated, CreateString(expected));
+        TestHeavyValue<itmoscript::String>(evaluated, itmoscript::CreateString(expected));
     }
 }
