@@ -149,6 +149,9 @@ private:
 
     template<NumericValueType T>
     void RegisterStringMultiplication();
+
+    template<NumericValueType T>
+    void RegisterListMultiplication();
     
     void RegisterTypeConversions();
     void RegisterAriphmeticOps();
@@ -156,7 +159,7 @@ private:
     void RegisterComparisonOps();
     void RegisterStringOps();
     void RegisterLogicalOps();
-    void RegisterAssignmentOps();
+    void RegisterListOps();
 
     /**
      * @brief Throws RuntimeError's inheritant exception with given type and arguments.
@@ -257,7 +260,30 @@ void Evaluator::RegisterStringMultiplication() {
             );
         }
 
-        return CreateString(result.value());
+        return CreateString(std::move(*result));
+    });
+}
+
+template<NumericValueType T>
+void Evaluator::RegisterListMultiplication() {
+    operator_registry_.RegisterCommutativeOperator<List, T>(
+        TokenType::kAsterisk, 
+        [this](const Value& left, const Value& right) -> Value {
+        const List& list = left.IsOfType<List>() ? left.Get<List>() : right.Get<List>();
+        T number = left.IsOfType<List>() ? right.Get<T>() : left.Get<T>();
+
+        std::optional<std::vector<Value>> result = utils::MultiplyVec<Value>(list->data(), number);
+
+        if (!result) {
+            ThrowRuntimeError<lang_exceptions::SequenceMultiplicationError>(
+                std::format(
+                    "cannot multiply list by negative value {}",
+                    number
+                )
+            );
+        }
+
+        return CreateList(std::move(*result));
     });
 }
 

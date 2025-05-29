@@ -92,6 +92,28 @@ static std::optional<std::string> MultiplyStr(const std::string& str, double tim
     return result;
 }
 
+template<typename T>
+std::optional<std::vector<T>> MultiplyVec(const std::vector<T>& vec, double times) {
+    if (times < 0) return std::nullopt;
+
+    size_t whole_part = static_cast<size_t>(times);
+    size_t additional_chars = static_cast<double>(vec.size()) * (times - static_cast<double>(whole_part));
+
+    std::vector<T> result;
+    result.reserve(vec.size() * whole_part + additional_chars);
+
+    for (size_t i = 0; i < whole_part; ++i) {
+        for (size_t j = 0; j < vec.size(); ++j) {
+            result.push_back(vec[j]);
+        }
+    }
+
+    for (size_t i = 0; i < additional_chars; ++i)
+        result.push_back(vec[i]);
+
+    return result;
+}
+
 template<typename T, typename Out = T>
 std::string Join(const std::vector<T>& objects, const std::string& glue, const std::function<Out(const T&)>& getter) {
     std::ostringstream result;

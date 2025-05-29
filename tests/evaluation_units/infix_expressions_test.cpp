@@ -145,3 +145,18 @@ TEST(EvaluationInfixTestSuite, ListComparisonTest) {
         TestValue<itmoscript::Bool>(evaluated, expected);
     }
 }
+
+TEST(EvaluationInfixTestSuite, ListAdditionTest) {
+    std::vector<std::pair<std::string, std::vector<itmoscript::Value>>> expressions{
+        {"[1, 2, 3] + [4, 5, 6]", {1, 2, 3, 4, 5, 6}},
+        {"[1] + [4, 5, 6]", {1, 4, 5, 6}},
+        {"[] + [4, 5, 6]", {4, 5, 6}},
+        {"[1, 2, 3] + []", {1, 2, 3}},
+        {"[] + []", {}},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestHeavyValue<itmoscript::List>(evaluated, CreateList(expected));
+    }
+}

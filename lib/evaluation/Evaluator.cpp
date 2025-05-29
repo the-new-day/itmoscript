@@ -27,6 +27,7 @@ Evaluator::Evaluator() {
     RegisterComparisonOps();
     RegisterStringOps();
     RegisterLogicalOps();
+    RegisterListOps();
 
     env_stack_.emplace(std::make_shared<Environment>(nullptr));
 }
@@ -599,6 +600,22 @@ void Evaluator::RegisterStringOps() {
         TokenType::kPlus, 
         [this](const Value& left, const Value& right) {
             return CreateString(*left.Get<String>() + *right.Get<String>());
+        }
+    );
+}
+
+void Evaluator::RegisterListOps() {
+    RegisterListMultiplication<Int>();
+    RegisterListMultiplication<Float>();
+    
+    operator_registry_.RegisterBinaryOper<List, List>(
+        TokenType::kPlus, 
+        [this](const Value& left, const Value& right) {
+            std::vector<Value> result = left.Get<List>()->data();
+            const std::vector<Value>& right_vals = right.Get<List>()->data();
+            result.insert(result.end(), right_vals.begin(), right_vals.end());
+
+            return CreateList(result);
         }
     );
 }
