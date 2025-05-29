@@ -49,6 +49,7 @@ add_executable(
   objects/list_test.cpp
   
   stdlib/numbers_test.cpp
+  stdlib/strings_test.cpp
 )
 
 target_link_libraries(

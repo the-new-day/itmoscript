@@ -13,8 +13,6 @@
 
 namespace itmoscript {
 
-// TODO: make utils.cpp and link it, don't use static functions here
-
 namespace utils {
 
 template<std::integral T>
@@ -122,6 +120,28 @@ std::string Join(const std::vector<T>& objects, const std::string& glue, const s
         if (i != objects.size() - 1) result << glue;
     }
     return result.str();
+}
+
+static std::string ReplaceAll(const std::string& str, const std::string& from, const std::string& to) {
+    if (from.empty()) {
+        return str;
+    }
+
+    std::string new_str;
+    new_str.reserve(str.size() + (to.size() > from.size() ? (to.size() - from.size()) * 10 : 0));
+
+    size_t start_pos = 0;
+    size_t find_pos = 0;
+
+    while ((find_pos = str.find(from, find_pos)) != std::string::npos) {
+        new_str.append(str, start_pos, find_pos - start_pos);
+        new_str += to;
+        find_pos += from.length();
+        start_pos = find_pos;
+    }
+
+    new_str.append(str, start_pos);
+    return new_str;
 }
 
 } // namespace utils

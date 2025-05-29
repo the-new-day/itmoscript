@@ -35,7 +35,7 @@ std::string Value::ToString() const {
         case ValueType::kFloat:
             return std::format("{}", Get<Float>());
         case ValueType::kString:
-            return '"' + *Get<String>() + '"';
+            return *Get<String>();
         case ValueType::kBool:
             return Get<Bool>() ? "true" : "false";
         case ValueType::kFunction:

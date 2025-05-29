@@ -4,6 +4,7 @@
 #include "evaluation/exceptions/UndefinedNameError.hpp"
 
 #include "numbers.hpp"
+#include "strings.hpp"
 
 namespace itmoscript {
 
@@ -31,6 +32,17 @@ Value StdLib::Call(
 
 void StdLib::LoadDefault() {
     numbers::RegisterAll(*this);
+    strings::RegisterAll(*this);
+}
+
+void ThrowArgumentTypeError(
+    Token from, 
+    const CallStack &call_stack, 
+    size_t idx, 
+    ValueType given_type, 
+    const std::string &expected
+) {
+    ThrowError<lang_exceptions::ArgumentTypeError>(std::move(from), call_stack, idx, given_type, expected);
 }
 
 } // namespace stdlib

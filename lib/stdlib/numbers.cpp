@@ -26,36 +26,9 @@ void RegisterAll(StdLib& lib) {
     lib.Register("to_string", MakeBuiltin(ToString, 1));
 }
 
-template<typename ErrorType, typename... Args>
-void ThrowError(Token from, const CallStack& call_stack, Args&&... args) {
-    throw ErrorType{std::move(from), call_stack, std::forward<Args>(args)...};
-}
-
-void ThrowArgumentTypeError(
-    Token from, 
-    const CallStack& call_stack, 
-    size_t idx, 
-    ValueType given_type, 
-    const std::string& expected
-) {
-    ThrowError<lang_exceptions::ArgumentTypeError>(std::move(from), call_stack, idx, given_type, expected);
-}
-
 void AssertIntOrFloat(const Value& val, size_t idx, Token from, const CallStack& call_stack) {
     if (!val.IsOfType<Int>() && !val.IsOfType<Float>()) {
         ThrowArgumentTypeError(std::move(from), call_stack, idx, val.type(), "Int or Float");
-    }
-}
-
-template<typename T>
-void AssertType(
-    const Value& val,
-    size_t idx, 
-    Token from, 
-    const CallStack& call_stack
-) {
-    if (!val.IsOfType<T>()) {
-        ThrowArgumentTypeError(std::move(from), call_stack, idx, val.type(), GetTypeName<T>());
     }
 }
 
@@ -119,7 +92,7 @@ Value Rnd(const std::vector<Value>& args, Token from, const CallStack& call_stac
 
     if (n <= 0) {
         ThrowError<lang_exceptions::InvalidArgumentError>(
-            from, call_stack, 0,
+            from, call_stack, 0uz,
             std::format("negative values and zero are not supported, got {}", n)
         );
     }
