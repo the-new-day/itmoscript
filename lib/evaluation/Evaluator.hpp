@@ -176,6 +176,7 @@ private:
     void Visit(ast::ExpressionStatement&) override;
     void Visit(ast::PrefixExpression&) override;
     void Visit(ast::InfixExpression&) override;
+    void Visit(ast::IndexOperatorExpression&) override;
 
     void Visit(ast::Identifier&) override;
     void Visit(ast::IntegerLiteral&) override;
@@ -184,6 +185,7 @@ private:
     void Visit(ast::FloatLiteral&) override;
     void Visit(ast::StringLiteral&) override;
     void Visit(ast::FunctionLiteral&) override;
+    void Visit(ast::ListLiteral&) override;
 
     void Visit(ast::IfExpression&) override;
     void Visit(ast::BlockStatement&) override;
@@ -197,8 +199,6 @@ private:
     void Visit(ast::ContinueStatement&) override;
 
     void Visit(ast::ForStatement&) override {}
-    void Visit(ast::ListLiteral&) override;
-    void Visit(ast::IndexOperatorExpression&) override {}
 
     template<CoreValueType T, typename InnerType>
     static std::shared_ptr<InnerType> CreateHeavyValue(InnerType val) {

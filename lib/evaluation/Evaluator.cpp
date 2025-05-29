@@ -6,11 +6,16 @@
 #include "exceptions/ParametersCountError.hpp"
 #include "exceptions/DuplicateParameterError.hpp"
 #include "exceptions/UnexpectedReturnError.hpp"
+#include "exceptions/IndexOperandTypeError.hpp"
+#include "exceptions/IndexTypeError.hpp"
+#include "exceptions/IndexOutOfRangeError.hpp"
+#include "exceptions/NegativeIndexError.hpp"
 
 #include <format>
 #include <cmath>
 #include <set>
 #include <algorithm>
+#include <limits>
 
 namespace itmoscript {
 
@@ -334,6 +339,78 @@ void Evaluator::Visit(ast::InfixExpression& node) {
             left_res.value.type(), 
             right_res.value.type()
         );
+    }
+}
+
+void Evaluator::Visit(ast::IndexOperatorExpression& expr) {
+    ExecResult operand = Eval(*expr.operand);
+    ValueType op_type = operand.value.type();
+        
+    last_exec_result_.control = ControlFlowState::kNormal;
+
+    if (op_type != ValueType::kString && op_type != ValueType::kList) {
+        ThrowRuntimeError<lang_exceptions::IndexOperandTypeError>(op_type);
+    }
+
+    ExecResult index = Eval(*expr.index);
+
+    if (index.value.type() != ValueType::kInt) {
+        ThrowRuntimeError<lang_exceptions::IndexTypeError>(index.value.type());
+    } else if (index.value.Get<Int>() < 0) {
+        ThrowRuntimeError<lang_exceptions::NegativeIndexError>(index.value.Get<Int>());
+    }
+
+    size_t pos = index.value.Get<Int>();
+
+    if (!expr.is_slice) {
+        if (op_type == ValueType::kString) {
+            const String& str = operand.value.Get<String>();
+            if (pos >= str->size()) {
+                ThrowRuntimeError<lang_exceptions::IndexOutOfRangeError>(pos, str->size());
+            }
+            last_exec_result_.value = CreateString(std::string{str->at(pos)});
+        } else if (op_type == ValueType::kList) {
+            const List& list = operand.value.Get<List>();
+            if (pos >= list->size()) {
+                ThrowRuntimeError<lang_exceptions::IndexOutOfRangeError>(pos, list->size());
+            }
+            last_exec_result_.value = list->data().at(pos);
+        }
+    }
+
+    if (expr.is_slice) {
+        ExecResult second_index = {.value = std::numeric_limits<int64_t>::max()};
+        if (expr.second_index != nullptr) {
+            second_index = Eval(*expr.index);
+        }
+
+        if (second_index.value.type() != ValueType::kInt) {
+            ThrowRuntimeError<lang_exceptions::IndexTypeError>(second_index.value.type());
+        } else if (index.value.Get<Int>() < 0) {
+            ThrowRuntimeError<lang_exceptions::NegativeIndexError>(second_index.value.Get<Int>());
+        }
+
+        size_t end = second_index.value.Get<Int>();
+
+        if (op_type == ValueType::kString) {
+            const String& str = operand.value.Get<String>();
+            if (str->empty() || pos < end) {
+                last_exec_result_.value = CreateString(std::string{});
+                return;
+            }
+
+            pos = std::min(pos, str->size() - 1);
+            end = std::min(end, str->size() - 1);
+            
+            last_exec_result_.value = CreateString(std::string(
+                str->begin() + pos,
+                str->begin() + end
+            ));
+            return;
+        } else if (op_type == ValueType::kList) {
+            const List& list = operand.value.Get<List>();
+            last_exec_result_.value = CreateList(list->GetSlice(pos, end));
+        }
     }
 }
 
