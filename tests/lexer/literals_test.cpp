@@ -32,3 +32,20 @@ TEST(LexerTestSuite, ReadStringLiteral) {
     expected.push_back({.type = TT::kEOF});
     CompareTokens(lexer, expected);
 }
+
+TEST(LexerTestSuite, ReadScientificNotationFloat) {
+    std::string code = "1e3 1.5e2 -2.1E-1 5e+0";
+
+    itmoscript::Lexer lexer{code};
+
+    std::vector<itmoscript::Token> expected = {
+        {TT::kFloat, "1e3"},
+        {TT::kFloat, "1.5e2"},
+        {TT::kMinus, "-"},
+        {TT::kFloat, "2.1E-1"},
+        {TT::kFloat, "5e+0"}
+    };
+
+    expected.push_back({.type = TT::kEOF});
+    CompareTokens(lexer, expected);
+}

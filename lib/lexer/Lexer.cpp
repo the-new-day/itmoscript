@@ -129,7 +129,23 @@ Token Lexer::ReadNumber() {
         token.type = TokenType::kFloat;
     }
 
-    // TODO: add notation (1.23e-1)
+    if (PeekChar() == 'e' || PeekChar() == 'E') {
+        word += ReadChar();
+
+        if (PeekChar() == '+' || PeekChar() == '-') {
+            word += ReadChar();
+        }
+
+        if (!std::isdigit(PeekChar())) {
+            throw lang_exceptions::SyntaxError{current_line_, current_col_ + word.size()};
+        }
+
+        while (std::isdigit(PeekChar())) {
+            word += ReadChar();
+        }
+
+        token.type = TokenType::kFloat;
+    }
 
     if (IsIdentifierChar(PeekChar())) {
         throw lang_exceptions::SyntaxError{current_line_, current_col_ + word.size()};

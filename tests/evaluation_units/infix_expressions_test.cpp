@@ -160,3 +160,17 @@ TEST(EvaluationInfixTestSuite, ListAdditionTest) {
         TestHeavyValue<itmoscript::List>(evaluated, CreateList(expected));
     }
 }
+
+TEST(EvaluationInfixTestSuite, ListMultiplicationTest) {
+    std::vector<std::pair<std::string, std::vector<itmoscript::Value>>> expressions{
+        {"[1, 2, 3] * 2", {1, 2, 3, 1, 2, 3}},
+        {"[1, 2, 3, 4] * 0.5", {1, 2}},
+        {"[1, 2, 3] * 0", {}},
+        {"[] * 0", {}},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestHeavyValue<itmoscript::List>(evaluated, CreateList(expected));
+    }
+}
