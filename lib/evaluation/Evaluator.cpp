@@ -5,11 +5,12 @@
 #include "exceptions/UndefinedNameError.hpp"
 #include "exceptions/ParametersCountError.hpp"
 #include "exceptions/DuplicateParameterError.hpp"
-#include "exceptions/UnexpectedReturnError.hpp"
 #include "exceptions/IndexOperandTypeError.hpp"
 #include "exceptions/IndexTypeError.hpp"
 #include "exceptions/IndexOutOfRangeError.hpp"
 #include "exceptions/NegativeIndexError.hpp"
+#include "exceptions/ControlFlowError.hpp"
+#include "exceptions/UnsupportedTypeError.hpp"
 
 #include <format>
 #include <cmath>
@@ -195,7 +196,7 @@ Value Evaluator::CallFunction(std::string name, const Function& func, std::vecto
 
 void Evaluator::Visit(ast::ReturnStatement& stmt) {
     if (call_stack_.empty()) {
-        ThrowRuntimeError<lang_exceptions::UnexpectedReturnError>();
+        ThrowRuntimeError<lang_exceptions::ControlFlowError>("unexpected 'return' outside of a function");
     }
 
     if (stmt.expr != nullptr) {
@@ -217,10 +218,7 @@ void Evaluator::Visit(ast::WhileStatement& stmt) {
     while (Eval(*stmt.condition).value.IsTruphy()) {
         Eval(*stmt.body);
         
-        if (last_exec_result_.control == ControlFlowState::kContinue) {
-            last_exec_result_.control = ControlFlowState::kNormal;
-            continue;
-        } else if (last_exec_result_.control == ControlFlowState::kBreak) {
+        if (last_exec_result_.control == ControlFlowState::kBreak) {
             last_exec_result_.control = ControlFlowState::kNormal;
             break;
         } else if (last_exec_result_.control == ControlFlowState::kReturn) {
@@ -231,16 +229,49 @@ void Evaluator::Visit(ast::WhileStatement& stmt) {
     inside_loop_ = prev_loop;
 }
 
+void Evaluator::Visit(ast::ForStatement& stmt) {
+    bool prev_loop = inside_loop_;
+    inside_loop_ = true;
+
+    last_exec_result_.value = NullType{};
+    last_exec_result_.control = ControlFlowState::kNormal;
+
+    ExecResult range_res = Eval(*stmt.range);
+
+    if (range_res.value.type() != ValueType::kList) {
+        ThrowRuntimeError<lang_exceptions::UnsupportedTypeError>(
+            "range in the for loop is not of type List"
+        );
+    }
+
+    const List& range = range_res.value.Get<List>();
+
+    for (const Value& value : range->data()) {
+        PushEnv();
+        env().SetInLocal(stmt.iter->name, value);
+        Eval(*stmt.body);
+
+        PopEnv();
+
+        if (last_exec_result_.control == ControlFlowState::kBreak) {
+            last_exec_result_.control = ControlFlowState::kNormal;
+            break;
+        } else if (last_exec_result_.control == ControlFlowState::kReturn) {
+            break;
+        }
+    }
+}
+
 void Evaluator::Visit(ast::BreakStatement& stmt) {
     if (!inside_loop_) {
-        // TODO: error
+        ThrowRuntimeError<lang_exceptions::ControlFlowError>("unexpected 'break' outside of a loop");
     }
     last_exec_result_.control = ControlFlowState::kBreak;
 }
 
 void Evaluator::Visit(ast::ContinueStatement& stmt) {
     if (!inside_loop_) {
-        // TODO: error
+        ThrowRuntimeError<lang_exceptions::ControlFlowError>("unexpected 'continue' outside of a loop");
     }
     last_exec_result_.control = ControlFlowState::kContinue;
 }

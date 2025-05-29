@@ -75,3 +75,111 @@ TEST(EvaluationLoopTestSuite, WhileContinueTest) {
         TestValue<itmoscript::Int>(evaluated, expected);
     }
 }
+
+TEST(EvaluationLoopTestSuite, ForLoopSimpleTest) {
+    std::vector<std::pair<std::string, int64_t>> expressions = {
+        {R"(
+            arr = [1, 2, 3]
+            sum = 0
+            for i in arr
+                sum += i 
+            end for
+            sum
+        )", 6},
+        {R"(
+            arr = []
+            sum = 0
+            for i in arr
+                sum += i 
+            end for
+            sum  
+        )", 0},
+        {R"(
+            arr = [4]
+            sum = 0
+            for i in arr
+                sum += i 
+            end for
+            sum  
+        )", 4},
+        {R"(
+            sum = 0
+            for i in [1, 2, 3]
+                sum += i 
+            end for
+            sum  
+        )", 6},
+        {R"(
+            sum = 0
+            for i in []
+                sum += i 
+            end for
+            sum  
+        )", 0},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Int>(evaluated, expected);
+    }
+}
+
+TEST(EvaluationLoopTestSuite, ForLoopContinueTest) {
+    std::vector<std::pair<std::string, int64_t>> expressions = {
+        {R"(
+            arr = [1, 2, 3, 4, 5, 6]
+            sum = 0
+            for i in arr
+                continue
+                sum += i 
+            end for
+            sum
+        )", 0},
+        {R"(
+            arr = [1, 2, 3, 4, 5, 6]
+            sum = 0
+            for i in arr
+                if i % 2 == 0 then
+                    continue
+                end if
+                sum += i 
+            end for
+            sum 
+        )", 1 + 3 + 5},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Int>(evaluated, expected);
+    }
+}
+
+TEST(EvaluationLoopTestSuite, ForLoopBreakTest) {
+    std::vector<std::pair<std::string, int64_t>> expressions = {
+        {R"(
+            arr = [1, 2, 3, 4, 5, 6]
+            sum = 0
+            for i in arr
+                sum += i 
+                break
+            end for
+            sum
+        )", 1},
+        {R"(
+            arr = [1, 2, 3, 4, 5, 6]
+            sum = 0
+            for i in arr
+                if i == 4 then
+                    break
+                end if
+                sum += i 
+            end for
+            sum 
+        )", 1 + 2 + 3},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        TestValue<itmoscript::Int>(evaluated, expected);
+    }
+}

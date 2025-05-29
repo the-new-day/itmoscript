@@ -197,10 +197,9 @@ private:
     void Visit(ast::ReturnStatement&) override;
 
     void Visit(ast::WhileStatement&) override;
+    void Visit(ast::ForStatement&) override;
     void Visit(ast::BreakStatement&) override;
     void Visit(ast::ContinueStatement&) override;
-
-    void Visit(ast::ForStatement&) override {}
 
     template<typename InnerType>
     static std::shared_ptr<InnerType> CreateHeavyValue(InnerType& val) {
