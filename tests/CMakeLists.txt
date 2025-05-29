@@ -44,6 +44,7 @@ add_executable(
   evaluation_units/loop_test.cpp
   evaluation_units/scope_test.cpp
   evaluation_units/assignment_test.cpp
+  evaluation_units/sequences_test.cpp
 
   objects/list_test.cpp
 )

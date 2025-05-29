@@ -142,6 +142,8 @@ private:
      */
     std::string GetFunctionName(const std::optional<std::string>& name);
 
+    void EvalSliceIndexExpression(ast::IndexOperatorExpression& expr);
+
     template<NumericValueType T>
     void RegisterCommonAriphmeticOps();
 
@@ -200,17 +202,17 @@ private:
 
     void Visit(ast::ForStatement&) override {}
 
-    template<CoreValueType T, typename InnerType>
-    static std::shared_ptr<InnerType> CreateHeavyValue(InnerType val) {
+    template<typename InnerType>
+    static std::shared_ptr<InnerType> CreateHeavyValue(InnerType& val) {
         return std::make_shared<InnerType>(std::move(val));
     }
 
     static String CreateString(std::string val) {
-        return CreateHeavyValue<String>(std::move(val));
+        return CreateHeavyValue(val);
     }
 
     static List CreateList(ListObject val) {
-        return CreateHeavyValue<List>(std::move(val));
+        return CreateHeavyValue(val);
     }
 };
 

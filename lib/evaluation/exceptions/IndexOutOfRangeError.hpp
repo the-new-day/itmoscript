@@ -11,7 +11,7 @@ namespace lang_exceptions {
 
 class IndexOutOfRangeError : public RuntimeError {
 public:
-    IndexOutOfRangeError(Token token, const CallStack& call_stack, size_t index, size_t size) 
+    IndexOutOfRangeError(Token token, const CallStack& call_stack, Int index, size_t size) 
         : RuntimeError(
             token, 
             call_stack, 

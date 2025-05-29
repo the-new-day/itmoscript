@@ -11,11 +11,14 @@ namespace itmoscript {
 
 class ListObject {
 public:
+    ListObject() = default;
+
     ListObject(std::vector<Value> values)
         : data_(std::move(values)) {}
 
     size_t size() const { return data_.size(); }
     const std::vector<Value>& data() const { return data_; }
+    bool empty() const { return size() == 0; }
 
     std::vector<Value> GetSlice(size_t start, size_t end) const;
     

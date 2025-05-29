@@ -343,6 +343,11 @@ void Evaluator::Visit(ast::InfixExpression& node) {
 }
 
 void Evaluator::Visit(ast::IndexOperatorExpression& expr) {
+    if (expr.is_slice) {
+        EvalSliceIndexExpression(expr);
+        return;
+    }
+
     ExecResult operand = Eval(*expr.operand);
     ValueType op_type = operand.value.type();
         
@@ -356,61 +361,86 @@ void Evaluator::Visit(ast::IndexOperatorExpression& expr) {
 
     if (index.value.type() != ValueType::kInt) {
         ThrowRuntimeError<lang_exceptions::IndexTypeError>(index.value.type());
-    } else if (index.value.Get<Int>() < 0) {
-        ThrowRuntimeError<lang_exceptions::NegativeIndexError>(index.value.Get<Int>());
     }
 
-    size_t pos = index.value.Get<Int>();
+    Int given_pos = index.value.Get<Int>();
 
-    if (!expr.is_slice) {
-        if (op_type == ValueType::kString) {
-            const String& str = operand.value.Get<String>();
-            if (pos >= str->size()) {
-                ThrowRuntimeError<lang_exceptions::IndexOutOfRangeError>(pos, str->size());
-            }
-            last_exec_result_.value = CreateString(std::string{str->at(pos)});
-        } else if (op_type == ValueType::kList) {
-            const List& list = operand.value.Get<List>();
-            if (pos >= list->size()) {
-                ThrowRuntimeError<lang_exceptions::IndexOutOfRangeError>(pos, list->size());
-            }
-            last_exec_result_.value = list->data().at(pos);
+    if (op_type == ValueType::kString) {
+        const String& str = operand.value.Get<String>();
+        size_t pos = given_pos >= 0 ? given_pos : str->size() + given_pos;
+
+        if (pos >= str->size()) {
+            ThrowRuntimeError<lang_exceptions::IndexOutOfRangeError>(given_pos, str->size());
         }
+
+        last_exec_result_.value = CreateString(std::string{str->at(pos)});
+    } else if (op_type == ValueType::kList) {
+        const List& list = operand.value.Get<List>();
+        size_t pos = given_pos >= 0 ? given_pos : list->size() + given_pos;
+        
+        if (pos >= list->size()) {
+            ThrowRuntimeError<lang_exceptions::IndexOutOfRangeError>(given_pos, list->size());
+        }
+
+        last_exec_result_.value = list->data().at(pos);
+    }
+}
+
+void Evaluator::EvalSliceIndexExpression(ast::IndexOperatorExpression& expr) {
+    ExecResult operand = Eval(*expr.operand);
+    ValueType op_type = operand.value.type();
+
+    if (op_type != ValueType::kString && op_type != ValueType::kList) {
+        ThrowRuntimeError<lang_exceptions::IndexOperandTypeError>(op_type);
     }
 
-    if (expr.is_slice) {
-        ExecResult second_index = {.value = std::numeric_limits<int64_t>::max()};
-        if (expr.second_index != nullptr) {
-            second_index = Eval(*expr.index);
+    size_t start = 0;
+    size_t end = std::numeric_limits<size_t>::max();
+
+    if (expr.index != nullptr) {
+        ExecResult index_res = Eval(*expr.index);
+        
+        if (index_res.value.type() != ValueType::kInt) {
+            ThrowRuntimeError<lang_exceptions::IndexTypeError>(index_res.value.type());
+        } else if (index_res.value.Get<Int>() < 0) {
+            ThrowRuntimeError<lang_exceptions::NegativeIndexError>(index_res.value.Get<Int>());
         }
 
-        if (second_index.value.type() != ValueType::kInt) {
-            ThrowRuntimeError<lang_exceptions::IndexTypeError>(second_index.value.type());
-        } else if (index.value.Get<Int>() < 0) {
-            ThrowRuntimeError<lang_exceptions::NegativeIndexError>(second_index.value.Get<Int>());
+        start = index_res.value.Get<Int>();
+    }
+
+    if (expr.second_index != nullptr) {
+        ExecResult index_res = Eval(*expr.second_index);
+        
+        if (index_res.value.type() != ValueType::kInt) {
+            ThrowRuntimeError<lang_exceptions::IndexTypeError>(index_res.value.type());
+        } else if (index_res.value.Get<Int>() < 0) {
+            ThrowRuntimeError<lang_exceptions::NegativeIndexError>(index_res.value.Get<Int>());
         }
 
-        size_t end = second_index.value.Get<Int>();
+        end = index_res.value.Get<Int>();
+    }
 
-        if (op_type == ValueType::kString) {
-            const String& str = operand.value.Get<String>();
-            if (str->empty() || pos < end) {
-                last_exec_result_.value = CreateString(std::string{});
-                return;
-            }
+    last_exec_result_.control = ControlFlowState::kNormal;
 
-            pos = std::min(pos, str->size() - 1);
-            end = std::min(end, str->size() - 1);
-            
-            last_exec_result_.value = CreateString(std::string(
-                str->begin() + pos,
-                str->begin() + end
-            ));
+    if (op_type == ValueType::kList) {
+        const List& list = operand.value.Get<List>();
+        last_exec_result_.value = CreateList(list->GetSlice(start, end));
+    } else if (op_type == ValueType::kString) {
+        const String& str = operand.value.Get<String>();
+
+        if (start > end || str->empty()) {
+            last_exec_result_.value = CreateString(std::string{});
             return;
-        } else if (op_type == ValueType::kList) {
-            const List& list = operand.value.Get<List>();
-            last_exec_result_.value = CreateList(list->GetSlice(pos, end));
         }
+
+        start = std::min(start, str->size() - 1);
+        end = std::min(end, str->size() - 1);
+
+        last_exec_result_.value = CreateString(std::string(
+            str->begin() + start,
+            str->end() + end + 1
+        ));
     }
 }
 
