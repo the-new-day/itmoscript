@@ -15,7 +15,7 @@ Value Lower(const std::vector<Value>& args, Token from, const CallStack& call_st
 Value Upper(const std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value Split(const std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value Join(const std::vector<Value>& args, Token from, const CallStack& call_stack);
-Value Replace(const std::vector<Value>& args, Token from, const CallStack& call_stack);
+Value Replace(std::vector<Value>& args, Token from, const CallStack& call_stack);
 
 } // namespace lists
     

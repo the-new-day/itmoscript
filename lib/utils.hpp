@@ -122,9 +122,9 @@ std::string Join(const std::vector<T>& objects, const std::string& glue, const s
     return result.str();
 }
 
-static std::string ReplaceAll(const std::string& str, const std::string& from, const std::string& to) {
+static void ReplaceAll(std::string& str, const std::string& from, const std::string& to) {
     if (from.empty()) {
-        return str;
+        return;
     }
 
     std::string new_str;
@@ -141,7 +141,7 @@ static std::string ReplaceAll(const std::string& str, const std::string& from, c
     }
 
     new_str.append(str, start_pos);
-    return new_str;
+    new_str.swap(str);
 }
 
 } // namespace utils

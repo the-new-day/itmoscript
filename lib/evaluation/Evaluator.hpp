@@ -170,7 +170,7 @@ private:
     void RegisterLogicalOps();
     void RegisterListOps();
 
-    void CallLibraryFunction(const std::string& name, const std::vector<Value>& args);
+    void CallLibraryFunction(const std::string& name, std::vector<Value>& args);
 
     /**
      * @brief Throws RuntimeError's inheritant exception with given type and arguments.

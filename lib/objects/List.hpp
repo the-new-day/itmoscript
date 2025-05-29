@@ -4,6 +4,7 @@
 #include <utility>
 #include <cstddef>
 #include <memory>
+#include <algorithm>
 
 #include "Value.hpp"
 
@@ -19,6 +20,18 @@ public:
     size_t size() const { return data_.size(); }
     const std::vector<Value>& data() const { return data_; }
     bool empty() const { return size() == 0; }
+
+    void Push(const Value& value) { data_.push_back(value); }
+    void Append(Value&& value) { data_.push_back(std::move(value)); }
+
+    void Pop() { data_.pop_back(); }
+
+    void Insert(size_t pos, const Value& value) { data_.insert(data_.begin() + pos, value); }
+    void Insert(size_t pos, Value&& value) { data_.insert(data_.begin() + pos, std::move(value)); }
+
+    void Remove(size_t pos) { data_.erase(data_.begin() + pos); }
+
+    void Sort() { std::sort(data_.begin(), data_.end()); }
 
     std::vector<Value> GetSlice(size_t start, size_t end) const;
     

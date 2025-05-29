@@ -80,6 +80,37 @@ const std::string& Value::GetTypeName() const {
     return itmoscript::GetTypeName(type());
 }
 
+bool Value::operator<(const Value& other) const {
+    if (type() == ValueType::kInt && other.type() == ValueType::kFloat) {
+        return Get<Int>() < other.Get<Float>();
+    } else if (type() == ValueType::kFloat && other.type() == ValueType::kInt) {
+        return Get<Float>() < other.Get<Int>();
+    }
+    
+    if (type() != other.type()) {
+        return type() < other.type();
+    }
+
+    switch (type()) {
+        case ValueType::kNullType:
+            return false;
+        case ValueType::kInt:
+            return Get<Int>() < other.Get<Int>();
+        case ValueType::kFloat:
+            return Get<Float>() < other.Get<Float>();
+        case ValueType::kString:
+            return *Get<String>() < *other.Get<String>();
+        case ValueType::kBool:
+            return Get<Bool>() < other.Get<Bool>();
+        case ValueType::kFunction:
+            return false;
+        case ValueType::kList:
+            return Get<List>()->data() < other.Get<List>()->data();
+        default:
+            return false;
+    }
+}
+
 std::ostream& operator<<(std::ostream& stream, const Value& value) {
     return stream << value.ToString();
 }

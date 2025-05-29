@@ -15,15 +15,16 @@ namespace itmoscript {
 
 namespace stdlib {
 
-using BuiltInFunction = std::function<Value(const std::vector<Value>&, Token, const CallStack&)>;
+using BuiltInFunction = std::function<Value(std::vector<Value>&, Token, const CallStack&)>;
 
 class StdLib {
 public:
     bool Has(const std::string& name) const;
     void Register(const std::string& name, BuiltInFunction func);
+    
     Value Call( 
         const std::string& name, 
-        const std::vector<Value>& args,
+        std::vector<Value>& args,
         Token from, 
         const CallStack& call_stack
     );
@@ -46,9 +47,9 @@ private:
  * If the amount of arguments passed to the returned lambda is not equal to arg_num,
  * ParametersCountError will be thrown by the wrapper.
  */
-template<typename F> requires std::invocable<F, const std::vector<Value>&, Token, const CallStack&>
+template<typename F> requires std::invocable<F, std::vector<Value>&, Token, const CallStack&>
 auto MakeBuiltin(F fn, size_t arg_num) {
-    return [fn, arg_num](const std::vector<Value>& args,
+    return [fn, arg_num](std::vector<Value>& args,
                          Token from,
                          const CallStack& stack) -> Value {
         if (args.size() != arg_num) {

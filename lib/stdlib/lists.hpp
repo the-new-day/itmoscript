@@ -11,13 +11,14 @@ namespace lists {
 
 void RegisterAll(StdLib& lib);
 
-Value Range(const std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value Len(const std::vector<Value>& args, Token from, const CallStack& call_stack);
-Value Push(const std::vector<Value>& args, Token from, const CallStack& call_stack);
-Value Pop(const std::vector<Value>& args, Token from, const CallStack& call_stack);
-Value Insert(const std::vector<Value>& args, Token from, const CallStack& call_stack);
-Value Remove(const std::vector<Value>& args, Token from, const CallStack& call_stack);
-Value Sort(const std::vector<Value>& args, Token from, const CallStack& call_stack);
+
+Value Range(const std::vector<Value>& args, Token from, const CallStack& call_stack);
+Value Push(std::vector<Value>& args, Token from, const CallStack& call_stack);
+Value Pop(std::vector<Value>& args, Token from, const CallStack& call_stack);
+Value Insert(std::vector<Value>& args, Token from, const CallStack& call_stack);
+Value Remove(std::vector<Value>& args, Token from, const CallStack& call_stack);
+Value Sort(std::vector<Value>& args, Token from, const CallStack& call_stack);
 
 } // namespace lists
     

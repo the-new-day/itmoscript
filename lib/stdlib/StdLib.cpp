@@ -5,6 +5,7 @@
 
 #include "numbers.hpp"
 #include "strings.hpp"
+#include "lists.hpp"
 
 namespace itmoscript {
 
@@ -20,7 +21,7 @@ void StdLib::Register(const std::string& name, BuiltInFunction func) {
 
 Value StdLib::Call(
     const std::string& name, 
-    const std::vector<Value>& args,
+    std::vector<Value>& args,
     Token from, 
     const CallStack& call_stack
 ) {
@@ -33,6 +34,7 @@ Value StdLib::Call(
 void StdLib::LoadDefault() {
     numbers::RegisterAll(*this);
     strings::RegisterAll(*this);
+    lists::RegisterAll(*this);
 }
 
 void ThrowArgumentTypeError(

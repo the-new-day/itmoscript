@@ -50,6 +50,7 @@ add_executable(
   
   stdlib/numbers_test.cpp
   stdlib/strings_test.cpp
+  stdlib/lists_test.cpp
 )
 
 target_link_libraries(

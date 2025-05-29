@@ -201,7 +201,7 @@ void Evaluator::Visit(ast::CallExpression& expr) {
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
-void Evaluator::CallLibraryFunction(const std::string& name, const std::vector<Value>& args) {
+void Evaluator::CallLibraryFunction(const std::string& name, std::vector<Value>& args) {
     last_exec_result_.value = std_lib_.Call(name, args, current_token_, call_stack_);
     last_exec_result_.control = ControlFlowState::kNormal;
 }

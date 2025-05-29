@@ -2,6 +2,20 @@
 
 using IsValue = itmoscript::Value;
 
+TEST(StdStringTestSuite, LenTest) {
+    std::vector<std::pair<std::string, IsValue>> expressions = {
+        {R"(len("123"))", IsValue{3}},
+        {R"(len(""))", IsValue{0}},
+        {R"(len("1"))", IsValue{1}},
+        {R"(len("1 2 3 4"))", IsValue{7}},
+    };
+
+    for (const auto& [input, expected] : expressions) {
+        IsValue evaluated = Eval(input);
+        ASSERT_EQ(evaluated, expected);
+    }
+}
+
 TEST(StdStringTestSuite, LowerTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
         {R"(lower("HELLO"))", IsValue{itmoscript::CreateString("hello")}},

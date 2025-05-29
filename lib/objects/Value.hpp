@@ -45,15 +45,19 @@ concept NumericValueType =
     std::same_as<T, Int> || std::convertible_to<T, Int> ||
     std::same_as<T, Float> || std::convertible_to<T, Float>;
 
-/** @brief Enum representing all possible types stored in a Value. */
+/** 
+ * @brief Enum representing all possible types stored in a Value. 
+ * Integer value assigned to the enum constants are the type priority used
+ * in comparison of 2 Values of different types (Ints and Floats are compared separately).
+ * */
 enum class ValueType {
-    kNullType,
-    kInt,
-    kFloat,
-    kBool,
-    kFunction,
-    kString,
-    kList,
+    kInt = 1,
+    kFloat = 2,
+    kBool = 3,
+    kFunction = 4,
+    kString = 5,
+    kList = 6,
+    kNullType = 7,
 };
 
 const std::string kUnknownTypeName = "<UnknownType>";
@@ -123,6 +127,11 @@ public:
         return std::get<T>(data_);
     }
 
+    template<CoreValueType T>
+    T& Get() {
+        return std::get<T>(data_);
+    }
+
     /** @tparam T Must satisfy CoreValueType. */
     template<CoreValueType T>
     Value& operator=(T value) {
@@ -153,6 +162,25 @@ public:
      * Can be used for debugging or dynamic type check in the language.
      */
     const std::string& GetTypeName() const;
+
+    /**
+     * @brief Checks if the value is less than the other value.
+     * 
+     * Specifically, if both operands are numeric (Int or Float),
+     * the comparison is just a number comparison.
+     * 
+     * In the other cases when two values have different types, the priority of the type
+     * goes as a key of comparison (see ValueType for more info).
+     * 
+     * @details The rules of comparison when types are the sames are:
+     * 1. Any two NullTypes are equal
+     * 2. Int and Float - just a number comparison
+     * 3. String - compared lexicographically (using std::string::operator<)
+     * 4. Bool - false < true
+     * 5. Functions are incomparable, so the operator simply returns false. Don't sort functions.
+     * 6. Lists are compared using std::vector::operator<
+     */
+    bool operator<(const Value& other) const;
 
 private:
     using Type = std::variant<
