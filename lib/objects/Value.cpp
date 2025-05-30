@@ -53,7 +53,12 @@ std::string Value::ToString() const {
                 utils::Join<Value, std::string>(
                     Get<List>()->data(), 
                     ", ", 
-                    [](const Value& value) { return value.ToString(); }
+                    [this](const Value& value) -> std::string {
+                        if (value.IsOfType<List>() && value.Get<List>().get() == Get<List>().get()) {
+                            return "[...]";
+                        }
+                        return value.ToString();
+                    }
                 )
             );
         default:
