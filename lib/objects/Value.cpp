@@ -35,7 +35,7 @@ std::string Value::ToString() const {
         case ValueType::kFloat:
             return std::format("{}", Get<Float>());
         case ValueType::kString:
-            return *Get<String>();
+            return '"' + *Get<String>() + '"';
         case ValueType::kBool:
             return Get<Bool>() ? "true" : "false";
         case ValueType::kFunction:
@@ -54,9 +54,6 @@ std::string Value::ToString() const {
                     Get<List>()->data(), 
                     ", ", 
                     [this](const Value& value) -> std::string {
-                        if (value.IsOfType<List>() && value.Get<List>().get() == Get<List>().get()) {
-                            return "[...]";
-                        }
                         return value.ToString();
                     }
                 )
@@ -114,6 +111,23 @@ bool Value::operator<(const Value& other) const {
         default:
             return false;
     }
+}
+
+bool Value::IsReferenceType() const {
+    return kReferenceTypes.contains(type());
+}
+
+Value Value::GetCopy() const {
+    if (IsReferenceType()) {
+        switch (type()) {
+            case ValueType::kList:
+                return CreateList(Get<List>()->data());
+            case ValueType::kString:
+                return CreateString(*Get<String>());
+        }
+    }
+
+    return *this;
 }
 
 std::ostream& operator<<(std::ostream& stream, const Value& value) {

@@ -6,4 +6,4 @@
 #include "evaluation/Evaluator.hpp"
 #include "Exception.hpp"
 
-bool interpret(std::istream& input, std::ostream& output);
+bool Interpret(std::istream& input, std::ostream& output);

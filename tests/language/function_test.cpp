@@ -16,7 +16,7 @@ TEST(FunctionTestSuite, SimpleFunctionTest) {
     std::istringstream input(code);
     std::ostringstream output;
 
-    ASSERT_TRUE(interpret(input, output));
+    ASSERT_TRUE(Interpret(input, output));
     ASSERT_EQ(output.str(), expected);
 }
 
@@ -40,7 +40,7 @@ TEST(FunctionTestSuite, FunctionAsArgTest) {
     std::istringstream input(code);
     std::ostringstream output;
 
-    ASSERT_TRUE(interpret(input, output));
+    ASSERT_TRUE(Interpret(input, output));
     ASSERT_EQ(output.str(), expected);
 }
 
@@ -66,7 +66,7 @@ TEST(FunctionTestSuite, NestedFunctionTest) {
     std::istringstream input(code);
     std::ostringstream output;
 
-    ASSERT_TRUE(interpret(input, output));
+    ASSERT_TRUE(Interpret(input, output));
     ASSERT_EQ(output.str(), expected);
 }
 
@@ -89,6 +89,6 @@ TEST(FunctionTestSuite, FunnySyntaxTest) {
     std::istringstream input(code);
     std::ostringstream output;
 
-    ASSERT_TRUE(interpret(input, output));
+    ASSERT_TRUE(Interpret(input, output));
     ASSERT_EQ(output.str(), expected);
 }

@@ -29,7 +29,7 @@ enum class Precedence {
  * @brief Mapping of token types to their corresponding precedence levels.
  * Used to resolve ambiguity in expression parsing (e.g., + vs * vs ^).
  */
-const std::map<TokenType, Precedence> kPrecedences{
+inline const std::map<TokenType, Precedence> kPrecedences{
     {TokenType::kEqual, Precedence::kEquals},
     {TokenType::kNotEqual, Precedence::kEquals},
     {TokenType::kLess, Precedence::kLessGreater},
@@ -51,7 +51,7 @@ const std::map<TokenType, Precedence> kPrecedences{
 /**
  * @brief Set of tokens that indicate the beginning of a block.
  */
-const std::set<TokenType> kBlockTypes {
+inline const std::set<TokenType> kBlockTypes {
     TokenType::kIf,
     TokenType::kFor,
     TokenType::kWhile,

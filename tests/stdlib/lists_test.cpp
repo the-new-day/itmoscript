@@ -26,10 +26,10 @@ TEST(StdListTestSuite, RangeTest) {
 
 TEST(StdListTestSuite, LenTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {R"(len([1, 2, 3]))", IsValue{3}},
-        {R"(len([]))", IsValue{0}},
-        {R"(len("hello"))", IsValue{5}},
-        {R"(len(""))", IsValue{0}}
+        {R"(len([1, 2, 3]))", 3},
+        {R"(len([]))", 0},
+        {R"(len("hello"))", 5},
+        {R"(len(""))", 0}
     };
 
     for (const auto& [input, expected] : expressions) {
@@ -40,9 +40,9 @@ TEST(StdListTestSuite, LenTest) {
 
 TEST(StdListTestSuite, PushTest) {
     std::vector<std::pair<std::string, std::vector<IsValue>>> test_cases = {
-        {R"(push([1, 2], 3))", {IsValue{1}, IsValue{2}, IsValue{3}}},
+        {R"(push([1, 2], 3))", {1, 2, 3}},
         {R"(push([], "a"))", {itmoscript::CreateString("a")}},
-        {R"(push(["x"], 42))", {itmoscript::CreateString("x"), IsValue{42}}}
+        {R"(push(["x"], 42))", {itmoscript::CreateString("x"), 42}}
     };
 
     for (const auto& [input, expected_values] : test_cases) {
@@ -53,7 +53,7 @@ TEST(StdListTestSuite, PushTest) {
 
 TEST(StdListTestSuite, PopTest) {
     std::vector<std::pair<std::string, std::vector<IsValue>>> test_cases = {
-        {R"(pop([1, 2, 3]))", {IsValue{1}, IsValue{2}}},
+        {R"(pop([1, 2, 3]))", {1, 2}},
         {R"(pop(["single"]))", {}},
     };
 
@@ -65,10 +65,10 @@ TEST(StdListTestSuite, PopTest) {
 
 TEST(StdListTestSuite, InsertTest) {
     std::vector<std::pair<std::string, std::vector<IsValue>>> test_cases = {
-        {R"(insert([1, 3], 1, 2))", {IsValue{1}, IsValue{2}, IsValue{3}}},
-        {R"(insert([1, 3], 0, 2))", {IsValue{2}, IsValue{1}, IsValue{3}}},
-        {R"(insert([], 0, 4))", {IsValue{4}}},
-        {R"(insert([1, 2], 2, 3))", {IsValue{1}, IsValue{2}, IsValue{3}}}
+        {R"(insert([1, 3], 1, 2))", {1, 2, 3}},
+        {R"(insert([1, 3], 0, 2))", {2, 1, 3}},
+        {R"(insert([], 0, 4))", {4}},
+        {R"(insert([1, 2], 2, 3))", {1, 2, 3}}
     };
 
     for (const auto& [input, expected_values] : test_cases) {
@@ -79,8 +79,8 @@ TEST(StdListTestSuite, InsertTest) {
 
 TEST(StdListTestSuite, RemoveTest) {
     std::vector<std::pair<std::string, std::vector<IsValue>>> test_cases = {
-        {R"(remove([1, 2, 3], 1))", {IsValue{1}, IsValue{3}}},
-        {R"(remove([1, 2, 3], 0))", {IsValue{2}, IsValue{3}}},
+        {R"(remove([1, 2, 3], 1))", {1, 3}},
+        {R"(remove([1, 2, 3], 0))", {2, 3}},
         {R"(remove([true, false], 1))", {IsValue{true}}},
     };
 
@@ -93,7 +93,7 @@ TEST(StdListTestSuite, RemoveTest) {
 TEST(StdListTestSuite, SortTest) {
     std::vector<std::pair<std::string, std::vector<IsValue>>> test_cases = {
         {R"(lst = [3, 1, 2] sort(lst) lst)", 
-         {IsValue{1}, IsValue{2}, IsValue{3}}},
+         {1, 2, 3}},
         
         {R"(lst = ["b", "a", "c"] sort(lst) lst)",
          {itmoscript::CreateString("a"), itmoscript::CreateString("b"), itmoscript::CreateString("c")}},
@@ -102,9 +102,22 @@ TEST(StdListTestSuite, SortTest) {
          {IsValue{false}, IsValue{true}, IsValue{true}}},
          
         {R"(lst = [1, "a", 2] sort(lst) lst)", 
-         {IsValue{1}, IsValue{2}, itmoscript::CreateString("a")}},
+         {1, 2, itmoscript::CreateString("a")}},
          
         {R"(lst = [] sort(lst) lst)", {}}
+    };
+
+    for (const auto& [input, expected_values] : test_cases) {
+        IsValue evaluated = Eval(input);
+        ASSERT_EQ(evaluated, itmoscript::CreateList(expected_values));
+    }
+}
+
+TEST(StdListTestSuite, SetTest) {
+    std::vector<std::pair<std::string, std::vector<IsValue>>> test_cases = {
+        {R"(set([1, 2, 3], 1, 4))", {1, 4, 3}},
+        {R"(set([1], 0, 2))", {2}},
+        {R"(set([1, 1], 1, "hello"))", {1, itmoscript::CreateString("hello")}},
     };
 
     for (const auto& [input, expected_values] : test_cases) {

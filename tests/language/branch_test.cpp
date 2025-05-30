@@ -14,7 +14,7 @@ TEST(BranchTestSuite, SimpleIfTest) {
     std::istringstream input(code);
     std::ostringstream output;
 
-    ASSERT_TRUE(interpret(input, output));
+    ASSERT_TRUE(Interpret(input, output));
     ASSERT_EQ(output.str(), expected);
 }
 
@@ -33,7 +33,7 @@ TEST(BranchTestSuite, SimpleElseIfTest) {
     std::istringstream input(code);
     std::ostringstream output;
 
-    ASSERT_TRUE(interpret(input, output));
+    ASSERT_TRUE(Interpret(input, output));
     ASSERT_EQ(output.str(), expected);
 }
 
@@ -56,7 +56,7 @@ TEST(BranchTestSuite, ComplexIfTest) {
     std::istringstream input(code);
     std::ostringstream output;
 
-    ASSERT_TRUE(interpret(input, output));
+    ASSERT_TRUE(Interpret(input, output));
     ASSERT_EQ(output.str(), expected);
 }
 
@@ -67,6 +67,6 @@ TEST(BranchTestSuite, OneLineIfTest) {
     std::istringstream input(code);
     std::ostringstream output;
 
-    ASSERT_TRUE(interpret(input, output));
+    ASSERT_TRUE(Interpret(input, output));
     ASSERT_EQ(output.str(), expected);
 }

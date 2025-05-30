@@ -5,7 +5,7 @@
 #include <functional>
 
 #include "objects/Value.hpp"
-#include "TypeSystem.hpp"
+#include "TypeConversionSystem.hpp"
 
 namespace itmoscript {
 
@@ -120,18 +120,18 @@ private:
 
 template<CoreValueType Right>
 void OperatorRegistry::RegisterUnaryOper(TokenType oper, UnaryHandler handler) {
-    unary_ops_[oper][TypeSystem::GetValueType<Right>()] = handler;
+    unary_ops_[oper][GetType<Right>()] = handler;
 }
 
 template<CoreValueType Left, CoreValueType Right>
 void OperatorRegistry::RegisterBinaryOper(TokenType oper, BinaryHandler handler) {
-    binary_ops_[oper][{TypeSystem::GetValueType<Left>(), TypeSystem::GetValueType<Right>()}] = handler;
+    binary_ops_[oper][{GetType<Left>(), GetType<Right>()}] = handler;
 }
 
 template<CoreValueType T, CoreValueType U>
 void OperatorRegistry::RegisterCommutativeOperator(TokenType oper, BinaryHandler handler) {
-    binary_ops_[oper][{TypeSystem::GetValueType<T>(), TypeSystem::GetValueType<U>()}] = handler;
-    binary_ops_[oper][{TypeSystem::GetValueType<U>(), TypeSystem::GetValueType<T>()}] = handler;
+    binary_ops_[oper][{GetType<T>(), GetType<U>()}] = handler;
+    binary_ops_[oper][{GetType<U>(), GetType<T>()}] = handler;
 }
 
 template<CoreValueType T>

@@ -4,10 +4,10 @@ using IsValue = itmoscript::Value;
 
 TEST(StdStringTestSuite, LenTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {R"(len("123"))", IsValue{3}},
-        {R"(len(""))", IsValue{0}},
-        {R"(len("1"))", IsValue{1}},
-        {R"(len("1 2 3 4"))", IsValue{7}},
+        {R"(len("123"))", 3},
+        {R"(len(""))", 0},
+        {R"(len("1"))", 1},
+        {R"(len("1 2 3 4"))", 7},
     };
 
     for (const auto& [input, expected] : expressions) {
@@ -65,16 +65,19 @@ TEST(StdStringTestSuite, SplitTest) {
 }
 
 TEST(StdStringTestSuite, JoinTest) {
-    std::vector<std::pair<std::string, IsValue>> expressions = {
-        {R"(join(["a", "b", "c"], ","))", IsValue{itmoscript::CreateString("a,b,c")}},
-        {R"(join(["one", "", "three"], " "))", IsValue{itmoscript::CreateString("one  three")}},
-        {R"(join([], "-"))", IsValue{itmoscript::CreateString("")}},
-        {R"(join(["single"], ""))", IsValue{itmoscript::CreateString("single")}}
+    std::vector<std::pair<std::string, std::string>> expressions = {
+        {R"(join(["a", "b", "c"], ","))", "a,b,c"},
+        {R"(join(["one", "", "three"], " "))", "one  three"},
+        {R"(join([], "-"))", ""},
+        {R"(join(["single"], ""))", "single"}
     };
 
     for (const auto& [input, expected] : expressions) {
         IsValue evaluated = Eval(input);
-        ASSERT_EQ(evaluated, expected);
+        ASSERT_TRUE(evaluated.type() == itmoscript::ValueType::kString);
+        const std::string& got = *evaluated.Get<itmoscript::String>();
+
+        ASSERT_EQ(expected, got);
     }
 }
 

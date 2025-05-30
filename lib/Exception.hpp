@@ -18,7 +18,7 @@ namespace lang_exceptions {
  * 
  * (' ' * kErrorDetailsIndent)<message>
  */
-const size_t kErrorDetailsIndent = 4;
+inline const size_t kErrorDetailsIndent = 4;
 
 /**
  * @brief Generic exception type for all kinds of errors.

@@ -7,25 +7,10 @@
 
 using Value = itmoscript::Value;
 
-std::vector<Value> GetSlice(std::vector<Value> data, size_t start, size_t end) {
-    if (start < end) return {};
-    
-    if (end >= data.size())
-        end = data.size() - 1;
-
-    std::vector<Value> slice;
-
-    for (size_t i = start; i <= end; ++i) {
-        slice.push_back(data[i]);
-    }
-
-    return slice;
-}
-
 TEST(ObjectsListTestSuite, SmallListTest) {
     std::vector<Value> values = {
-        Value{1},
-        Value{1.5},
+        1,
+        1.5,
         Value{std::make_shared<std::string>("aaa")},
         Value{true}
     };
@@ -45,30 +30,27 @@ TEST(ObjectsListTestSuite, EmptyListTest) {
 
 TEST(ObjectsListTestSuite, ListSliceTest) {
     std::vector<Value> values = {
-        Value{1},
-        Value{2},
-        Value{3},
-        Value{4},
-        Value{5},
-        Value{6},
+        1, 2, 3, 4, 5, 6,
     };
 
     itmoscript::List list = std::make_shared<itmoscript::ListObject>(values);
     ASSERT_EQ(list->size(), values.size());
     ASSERT_EQ(list->data(), values);
 
-    // <start, end>
-    std::vector<std::pair<size_t, size_t>> slices = {
-        {0, 5},
-        {0, 1},
-        {0, 0},
-        {1, 3},
-        {4, 5},
-        {4, 100},
+    // <start, end, expected>
+    std::vector<std::tuple<size_t, size_t, std::vector<Value>>> slices = {
+        {0, 6, {1, 2, 3, 4, 5, 6}},
+        {0, 5, {1, 2, 3, 4, 5}},
+        {0, 1, {1}},
+        {0, 0, {}},
+        {1, 3, {2, 3}},
+        {4, 5, {5}},
+        {4, 100, {5, 6}},
     };
 
-    for (const auto& [start, end] : slices) {
+    for (const auto& [start, end, expected] : slices) {
         std::vector<Value> slice = list->GetSlice(start, end);
-        ASSERT_EQ(slice, GetSlice(values, start, end)) << "start: " << start << "; end: " << end;
+        ASSERT_EQ(slice, expected) 
+            << "start: " << start << "; end: " << end;
     }
 }

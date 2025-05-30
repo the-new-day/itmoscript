@@ -44,6 +44,10 @@ void Evaluator::EnableStandardOperators() {
     RegisterListOps();
 }
 
+void Evaluator::EnableStd() {
+    std_lib_.LoadDefault();
+}
+
 std::optional<Value> Evaluator::HandleUnaryOper(TokenType oper, const Value& right) {
     if (auto handler = operator_registry_.FindExactHandler(oper, right.type())) {
         return std::invoke(*handler, right);
@@ -57,9 +61,9 @@ std::optional<Value> Evaluator::HandleBinaryOper(TokenType oper, const Value& le
         return std::invoke(*handler, left, right);
     }
 
-    if (auto common = type_system_.FindCommonType(left.type(), right.type())) {
-        auto lhs = type_system_.TryConvert(left, *common);
-        auto rhs = type_system_.TryConvert(right, *common);
+    if (auto common = type_convertion_system_.FindCommonType(left.type(), right.type())) {
+        auto lhs = type_convertion_system_.TryConvert(left, *common);
+        auto rhs = type_convertion_system_.TryConvert(right, *common);
 
         if (lhs && rhs) {
             if (auto handler = operator_registry_.FindExactHandler(oper, *common, *common)) {
@@ -87,10 +91,6 @@ const Evaluator::ExecResult& Evaluator::Eval(ast::Node& node) {
     current_token_ = node.token;
     node.Accept(*this);
     return last_exec_result_;
-}
-
-void Evaluator::EnableStd() {
-    std_lib_.LoadDefault();
 }
 
 const Value& Evaluator::GetLastEvaluatedValue() const {
@@ -374,14 +374,14 @@ void Evaluator::Visit(ast::FunctionLiteral& func) {
 void Evaluator::Visit(ast::IfExpression& expr) {
     for (const auto& alternative : expr.alternatives) {
         if (alternative.condition == nullptr) { // else-branch, guaranteed to be last
-            Eval(*alternative.consequence);
+            last_exec_result_ = Eval(*alternative.consequence);
             return;
         }
 
         Eval(*alternative.condition);
 
         if (last_exec_result_.value.IsTruphy()) {
-            Eval(*alternative.consequence);
+            last_exec_result_ = Eval(*alternative.consequence);
             return;
         }
 
@@ -395,6 +395,11 @@ void Evaluator::Visit(ast::IfExpression& expr) {
 }
 
 void Evaluator::Visit(ast::BlockStatement& block) {
+    if (block.GetStatements().empty()) {
+        last_exec_result_.value = NullType{};
+        return;
+    }
+
     PushEnv();
 
     for (const auto& stmt : block.GetStatements()) {
@@ -480,7 +485,7 @@ void Evaluator::Visit(ast::IndexOperatorExpression& expr) {
             ThrowRuntimeError<lang_exceptions::IndexOutOfRangeError>(given_pos, list->size());
         }
 
-        last_exec_result_.value = list->data().at(pos);
+        last_exec_result_.value = list->At(pos);
     }
 }
 
@@ -533,11 +538,11 @@ void Evaluator::EvalSliceIndexExpression(ast::IndexOperatorExpression& expr) {
         }
 
         if (end >= str->size())
-            end = str->size() - 1;
+            end = str->size();
 
         last_exec_result_.value = CreateString(std::string(
             str->begin() + start,
-            str->begin() + end + 1
+            str->begin() + end
         ));
     }
 }
@@ -547,8 +552,16 @@ std::string Evaluator::GetFunctionName(const std::optional<std::string>& name) {
 }
 
 void Evaluator::RegisterTypeConversions() {
-    type_system_.RegisterConversion<Int, Float>([](Int value) { return static_cast<Float>(value); });
-    type_system_.RegisterConversion<Float, Int>([](Float value) { return static_cast<Int>(value); });
+    type_convertion_system_.RegisterConversion<Int, Float>(
+        [](Int value) { 
+            return static_cast<Float>(value); 
+        }
+    );
+    type_convertion_system_.RegisterConversion<Float, Int>(
+        [](Float value) { 
+            return static_cast<Int>(value); 
+        }
+    );
 }
 
 void Evaluator::RegisterAriphmeticOps() {

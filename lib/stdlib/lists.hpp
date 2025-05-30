@@ -19,6 +19,7 @@ Value Pop(std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value Insert(std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value Remove(std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value Sort(std::vector<Value>& args, Token from, const CallStack& call_stack);
+Value Set(std::vector<Value>& args, Token from, const CallStack& call_stack);
 
 } // namespace lists
     

@@ -37,8 +37,20 @@ concept CoreValueType =
     std::same_as<T, List>;
 
 /**
+ * @brief Concept to contrain types that are not copied but rather passed by reference.
+ * Current reference value types are: List, String, Function.
+ * 
+ * If a ReferenceValueType is inserted into an array, it's getting copied.
+ */
+template<typename T>
+concept ReferenceValueType =
+    std::same_as<T, List> ||
+    std::same_as<T, String> ||
+    std::same_as<T, Function>;
+
+/**
  * @brief Concept to constrain supported numeric types for Value class.
- * @details Current supported numeric types are: Int, Float.
+ * Current supported numeric types are: Int, Float.
  */
 template<typename T>
 concept NumericValueType = 
@@ -60,7 +72,7 @@ enum class ValueType {
     kNullType = 7,
 };
 
-const std::string kUnknownTypeName = "<UnknownType>";
+inline const std::string kUnknownTypeName = "<UnknownType>";
 
 /** @brief Hasher for std::pair<ValueType, ValueType>. Used for std::unordered_map of type converters. */
 struct ValueTypePairHash {
@@ -166,13 +178,10 @@ public:
     /**
      * @brief Checks if the value is less than the other value.
      * 
-     * Specifically, if both operands are numeric (Int or Float),
-     * the comparison is just a number comparison.
-     * 
-     * In the other cases when two values have different types, the priority of the type
+     * @details Specifically, if operands have different types, the priority of the type
      * goes as a key of comparison (see ValueType for more info).
      * 
-     * @details The rules of comparison when types are the sames are:
+     * The rules of comparison when types are the same are:
      * 1. Any two NullTypes are equal
      * 2. Int and Float - just a number comparison
      * 3. String - compared lexicographically (using std::string::operator<)
@@ -181,6 +190,19 @@ public:
      * 6. Lists are compared using std::vector::operator<
      */
     bool operator<(const Value& other) const;
+
+    /**
+     * @brief Checks if the current type is a reference type.
+     * See ReferenceValueType for more info.
+     */
+    bool IsReferenceType() const;
+
+    /**
+     * @brief Returns copy of the value.
+     * If current type is ReferenceValueType, returns copy of the current data,
+     * not the reference.
+     */
+    Value GetCopy() const;
 
 private:
     using Type = std::variant<
@@ -197,7 +219,7 @@ private:
 };
 
 /** @brief Mapping from ValueType enum to string names for debugging/logging. */
-const std::map<ValueType, std::string> kValueTypeNames = {
+inline const std::map<ValueType, std::string> kValueTypeNames = {
     {ValueType::kNullType, "NullType"},
     {ValueType::kInt, "Int"},
     {ValueType::kFloat, "Float"},
@@ -205,6 +227,13 @@ const std::map<ValueType, std::string> kValueTypeNames = {
     {ValueType::kBool, "Bool"},
     {ValueType::kFunction, "Function"},
     {ValueType::kList, "List"},
+};
+
+/** @brief Set containing all reference types. ReferenceValueType for more info. */
+inline const std::set<ValueType> kReferenceTypes = {
+    ValueType::kString,
+    ValueType::kFunction,
+    ValueType::kList,
 };
 
 /** 
@@ -229,13 +258,17 @@ const std::string& GetTypeName() {
     return GetTypeName(GetType<T>());
 }
 
+/**
+ * @brief Creates a shared_ptr to the given InnerType.
+ * The given value gets moved to the constructor of the given type.
+ */
 template<typename InnerType>
-std::shared_ptr<InnerType> CreateHeavyValue(InnerType& val) {
+std::shared_ptr<InnerType> CreateRefValue(InnerType& val) {
     return std::make_shared<InnerType>(std::move(val));
 }
 
 static String CreateString(std::string val) {
-    return CreateHeavyValue(val);
+    return CreateRefValue(val);
 }
 
 } // namespace itmoscript

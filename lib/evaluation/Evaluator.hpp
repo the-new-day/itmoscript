@@ -18,7 +18,7 @@
 #include "objects/Function.hpp"
 #include "objects/List.hpp"
 
-#include "evaluation/TypeSystem.hpp"
+#include "evaluation/TypeConversionSystem.hpp"
 #include "evaluation/OperatorRegistry.hpp"
 #include "evaluation/Environment.hpp"
 #include "evaluation/CallFrame.hpp"
@@ -69,7 +69,7 @@ public:
 private:
     Token current_token_;
 
-    TypeSystem type_system_;
+    TypeConversionSystem type_convertion_system_;
     OperatorRegistry operator_registry_;
 
     bool inside_loop_ = false;

@@ -1,13 +1,13 @@
-#include "TypeSystem.hpp"
+#include "TypeConversionSystem.hpp"
 
 namespace itmoscript {
 
-bool TypeSystem::CanConvert(ValueType from, ValueType to) const {
+bool TypeConversionSystem::CanConvert(ValueType from, ValueType to) const {
     auto key = std::make_pair(from, to);
     return from == to || converters_.contains(key);
 }
 
-std::optional<Value> TypeSystem::TryConvert(const Value& v, ValueType target) const {
+std::optional<Value> TypeConversionSystem::TryConvert(const Value& v, ValueType target) const {
     if (target == v.type()) return v;
 
     auto key = std::make_pair(v.type(), target);
@@ -18,7 +18,7 @@ std::optional<Value> TypeSystem::TryConvert(const Value& v, ValueType target) co
     return std::nullopt;
 }
 
-std::optional<ValueType> TypeSystem::FindCommonType(ValueType a, ValueType b) const {
+std::optional<ValueType> TypeConversionSystem::FindCommonType(ValueType a, ValueType b) const {
     if (a == b) return a;
 
     static const std::vector<ValueType> type_priority = {

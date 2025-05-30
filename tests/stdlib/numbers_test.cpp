@@ -4,10 +4,10 @@ using IsValue = itmoscript::Value;
 
 TEST(StdNumbersTestSuite, AbsTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {"abs(3)", IsValue{3}},
-        {"abs(-1)", IsValue{1}},
-        {"abs(0)", IsValue{0}},
-        {"abs(-21423423)", IsValue{21423423}},
+        {"abs(3)", 3},
+        {"abs(-1)", 1},
+        {"abs(0)", 0},
+        {"abs(-21423423)", 21423423},
     };
 
     for (const auto& [input, expected] : expressions) {
@@ -22,10 +22,10 @@ using IsValue = itmoscript::Value;
 
 TEST(StdNumbersTestSuite, CeilTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {"ceil(3.2)", IsValue{4.0}},
-        {"ceil(-1.7)", IsValue{-1.0}},
-        {"ceil(0.0)", IsValue{0.0}},
-        {"ceil(5.999)", IsValue{6.0}},
+        {"ceil(3.2)", 4.0},
+        {"ceil(-1.7)", -1.0},
+        {"ceil(0.0)", 0.0},
+        {"ceil(5.999)", 6.0},
     };
 
     for (const auto& [input, expected] : expressions) {
@@ -36,10 +36,10 @@ TEST(StdNumbersTestSuite, CeilTest) {
 
 TEST(StdNumbersTestSuite, FloorTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {"floor(3.7)", IsValue{3.0}},
-        {"floor(-1.2)", IsValue{-2.0}},
-        {"floor(0.0)", IsValue{0.0}},
-        {"floor(5.999)", IsValue{5.0}},
+        {"floor(3.7)", 3.0},
+        {"floor(-1.2)", -2.0},
+        {"floor(0.0)", 0.0},
+        {"floor(5.999)", 5.0},
     };
 
     for (const auto& [input, expected] : expressions) {
@@ -50,10 +50,10 @@ TEST(StdNumbersTestSuite, FloorTest) {
 
 TEST(StdNumbersTestSuite, RoundTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {"round(3.2)", IsValue{3.0}},
-        {"round(3.5)", IsValue{4.0}},
-        {"round(-1.4)", IsValue{-1.0}},
-        {"round(-1.6)", IsValue{-2.0}},
+        {"round(3.2)", 3.0},
+        {"round(3.5)", 4.0},
+        {"round(-1.4)", -1.0},
+        {"round(-1.6)", -2.0},
     };
 
     for (const auto& [input, expected] : expressions) {
@@ -64,10 +64,10 @@ TEST(StdNumbersTestSuite, RoundTest) {
 
 TEST(StdNumbersTestSuite, SqrtTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {"sqrt(4)", IsValue{2.0}},
-        {"sqrt(9)", IsValue{3.0}},
-        {"sqrt(0)", IsValue{0.0}},
-        {"sqrt(2.25)", IsValue{1.5}},
+        {"sqrt(4)", 2.0},
+        {"sqrt(9)", 3.0},
+        {"sqrt(0)", 0.0},
+        {"sqrt(2.25)", 1.5},
     };
 
     for (const auto& [input, expected] : expressions) {
@@ -95,9 +95,9 @@ TEST(StdNumbersTestSuite, RndTest) {
 
 TEST(StdNumbersTestSuite, ParseNumTest) {
     std::vector<std::pair<std::string, IsValue>> expressions = {
-        {"parse_num(\"123\")", IsValue{123}},
-        {"parse_num(\"-45.67\")", IsValue{-45.67}},
-        {"parse_num(\"0\")", IsValue{0}},
+        {"parse_num(\"123\")", 123},
+        {"parse_num(\"-45.67\")", -45.67},
+        {"parse_num(\"0\")", 0},
         {"parse_num(\"not_a_number\")", IsValue{itmoscript::NullType{}}},
     };
 

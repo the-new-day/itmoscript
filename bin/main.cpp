@@ -15,6 +15,13 @@ int main(int argc, char** argv) {
             repl_mode = itmoscript::ReplMode::kLexer;
         } else if (arg1 == "--parser") {
             repl_mode = itmoscript::ReplMode::kParser;
+        } else if (argc == 2) {
+            std::cerr << "Unknown argument: " << arg1 << std::endl;
+            return 0;
+        } else {
+            std::cerr << "Wooh, that's too much arguments for me. "
+                << "Only two available are --parser and --lexer. Thank you" << std::endl;
+            return 0;
         }
     }
 

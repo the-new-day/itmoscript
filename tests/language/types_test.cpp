@@ -15,6 +15,6 @@ TEST(TypesTestSuite, IntTest) {
     std::istringstream input(code);
     std::ostringstream output;
 
-    ASSERT_TRUE(interpret(input, output));
+    ASSERT_TRUE(Interpret(input, output));
     ASSERT_EQ(output.str(), expected);
 }

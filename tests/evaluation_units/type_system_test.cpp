@@ -1,8 +1,8 @@
 #include "evaluation_units_test.hpp"
 
-using TS = itmoscript::TypeSystem;
+using TS = itmoscript::TypeConversionSystem;
 
-void RegisterConversions(itmoscript::TypeSystem& type_system) {
+void RegisterConversions(itmoscript::TypeConversionSystem& type_system) {
     type_system.RegisterConversion<itmoscript::Int, itmoscript::Float>([](const itmoscript::Int& value) { 
         return static_cast<itmoscript::Float>(value);
     });
@@ -13,13 +13,13 @@ void RegisterConversions(itmoscript::TypeSystem& type_system) {
 }
 
 TEST(EvaluationTypesTestSuite, ExplicitConversionTest) {
-    itmoscript::TypeSystem type_system;
+    itmoscript::TypeConversionSystem type_system;
     RegisterConversions(type_system);
 
-    auto float_type = TS::GetValueType<itmoscript::Float>();
-    auto int_type = TS::GetValueType<itmoscript::Int>();
-    auto bool_type = TS::GetValueType<itmoscript::Bool>();
-    auto string_type = TS::GetValueType<itmoscript::String>();
+    auto float_type = itmoscript::GetType<itmoscript::Float>();
+    auto int_type = itmoscript::GetType<itmoscript::Int>();
+    auto bool_type = itmoscript::GetType<itmoscript::Bool>();
+    auto string_type = itmoscript::GetType<itmoscript::String>();
 
     // <value, requested type, expected>
     std::vector<std::tuple<IsValue, IsValueType, std::optional<IsValue>>> expressions = {
@@ -40,15 +40,15 @@ TEST(EvaluationTypesTestSuite, ExplicitConversionTest) {
 }
 
 TEST(EvaluationTypesTestSuite, CommonTypeTest) {
-    itmoscript::TypeSystem type_system;
+    itmoscript::TypeConversionSystem type_system;
     RegisterConversions(type_system);
 
-    auto float_type = TS::GetValueType<itmoscript::Float>();
-    auto int_type = TS::GetValueType<itmoscript::Int>();
-    auto bool_type = TS::GetValueType<itmoscript::Bool>();
-    auto string_type = TS::GetValueType<itmoscript::String>();
-    auto function_type = TS::GetValueType<itmoscript::Function>();
-    auto list_type = TS::GetValueType<itmoscript::List>();
+    auto float_type = itmoscript::GetType<itmoscript::Float>();
+    auto int_type = itmoscript::GetType<itmoscript::Int>();
+    auto bool_type = itmoscript::GetType<itmoscript::Bool>();
+    auto string_type = itmoscript::GetType<itmoscript::String>();
+    auto function_type = itmoscript::GetType<itmoscript::Function>();
+    auto list_type = itmoscript::GetType<itmoscript::List>();
 
     // <a, b, expected common type>
     std::vector<std::tuple<IsValueType, IsValueType, std::optional<IsValueType>>> expressions = {

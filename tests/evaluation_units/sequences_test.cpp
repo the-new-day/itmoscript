@@ -35,7 +35,7 @@ TEST(EvaluationListsTestSuite, ListSlicingTest) {
         {R"(
             x = [1, 2, 3, 4]
             x[1:2]
-        )", {2, 3}},
+        )", {2}},
         {R"(
             x = [1, 2, 3, 4]
             x[4:2]
@@ -43,7 +43,7 @@ TEST(EvaluationListsTestSuite, ListSlicingTest) {
         {R"(
             x = [1, 2, 3, 4]
             x[:2]
-        )", {1, 2, 3}},
+        )", {1, 2}},
         {R"(
             x = [1, 2, 3, 4]
             x[1:]
@@ -99,11 +99,11 @@ TEST(EvaluationListsTestSuite, StringSlicingTest) {
         {R"(
             x = "012345"
             x[1:3]
-        )", "123"},
+        )", "12"},
         {R"(
             x = "012345"
             x[0:4]
-        )", "01234"},
+        )", "0123"},
         {R"(
             x = "012345"
             x[5:4]
@@ -111,7 +111,7 @@ TEST(EvaluationListsTestSuite, StringSlicingTest) {
         {R"(
             x = "012345"
             x[:4]
-        )", "01234"},
+        )", "0123"},
         {R"(
             x = "012345"
             x[2:]

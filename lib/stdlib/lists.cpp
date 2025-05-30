@@ -22,6 +22,7 @@ void RegisterAll(StdLib& lib) {
     lib.Register("remove", MakeBuiltin(Remove, 2));
     lib.Register("range", MakeBuiltin(Range, 3));
     lib.Register("sort", MakeBuiltin(Sort, 1));
+    lib.Register("set", MakeBuiltin(Set, 3));
 }
 
 Value Len(const std::vector<Value>& args, Token from, const CallStack& call_stack) {
@@ -73,9 +74,8 @@ Value Range(const std::vector<Value>& args, Token from, const CallStack& call_st
 }
 
 Value Push(std::vector<Value>& args, Token from, const CallStack& call_stack) {
-    AssertType<List>(args[0], 0, from, call_stack);
     List& list = args[0].Get<List>();
-    list->Push(args[1]);
+    list->Insert(list->size(), std::move(args[1]));
     return list;
 }
 
@@ -87,7 +87,7 @@ Value Pop(std::vector<Value>& args, Token from, const CallStack& call_stack) {
         ThrowError<lang_exceptions::EmptyListPopError>(std::move(from), call_stack);
     }
 
-    list->Pop();
+    list->Remove(list->size() - 1);
     return list;
 }
 
@@ -104,7 +104,7 @@ Value Insert(std::vector<Value>& args, Token from, const CallStack& call_stack) 
         );
     }
 
-    list->Insert(index, args[2]);
+    list->Insert(index, std::move(args[2]));
     return list;
 }
 
@@ -129,6 +129,23 @@ Value Sort(std::vector<Value>& args, Token from, const CallStack& call_stack) {
     AssertType<List>(args[0], 0, from, call_stack);
     List& list = args[0].Get<List>();
     list->Sort();
+    return list;
+}
+
+Value Set(std::vector<Value>& args, Token from, const CallStack& call_stack) {
+    AssertType<List>(args[0], 0, from, call_stack);
+    AssertType<Int>(args[1], 1, from, call_stack);
+
+    List& list = args[0].Get<List>();
+    Int index = args[1].Get<Int>();
+
+    if (index < 0 || index >= list->size()) {
+        ThrowError<lang_exceptions::IndexOutOfRangeError>(
+            std::move(from), call_stack, index, list->size()
+        );
+    }
+
+    list->At(index) = args[2].GetCopy();
     return list;
 }
 

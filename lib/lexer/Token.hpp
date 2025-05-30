@@ -106,7 +106,7 @@ struct Token {
 };
 
 /// @brief Maps single-character symbols to their corresponding token types.
-static const std::map<char, TokenType> kOneCharTokens{
+inline const std::map<char, TokenType> kOneCharTokens{
     {'=', TokenType::kAssign},
     {'+', TokenType::kPlus},
     {'-', TokenType::kMinus},
@@ -128,12 +128,12 @@ static const std::map<char, TokenType> kOneCharTokens{
 };
 
 /// @brief Set of characters that may begin a compound operator (e.g., '=', '!', etc.).
-static const std::set<char> kCompoundOpStarters = {
+inline const std::set<char> kCompoundOpStarters = {
     '=', '+', '-', '*', '/', '%', '^', '<', '>', '!',
 };
 
 /// @brief Maps compound operator strings (like "==", "+=") to their token types.
-static const std::map<std::string, TokenType> kCompoundOperators{
+inline const std::map<std::string, TokenType> kCompoundOperators{
     {"==", TokenType::kEqual},
     {"+=", TokenType::kPlusAssign},
     {"-=", TokenType::kMinusAssign},
@@ -147,7 +147,7 @@ static const std::map<std::string, TokenType> kCompoundOperators{
 };
 
 /// @brief Maps keyword strings to their token types.
-static const std::map<std::string, TokenType> kKeywords{
+inline const std::map<std::string, TokenType> kKeywords{
     {"function", TokenType::kFunction},
     {"end", TokenType::kEnd},
     {"nil", TokenType::kNil},
@@ -172,7 +172,7 @@ static const std::map<std::string, TokenType> kKeywords{
  * @brief Maps the compound assign operator token to the token of the
  * operator that should be applied to the identifier and the value
  */
-const std::map<TokenType, TokenType> kCompoundAssignOperators {
+inline const std::map<TokenType, TokenType> kCompoundAssignOperators {
     {TokenType::kPlusAssign, TokenType::kPlus},
     {TokenType::kMinusAssign, TokenType::kMinus},
     {TokenType::kAsteriskAssign, TokenType::kAsterisk},
@@ -182,7 +182,7 @@ const std::map<TokenType, TokenType> kCompoundAssignOperators {
 };
 
 /// @brief Maps token types to their human-readable string names (mostly for debugging or error messages).
-static const std::map<TokenType, std::string> kTokenTypeNames = {
+inline const std::map<TokenType, std::string> kTokenTypeNames = {
     {TokenType::kEOF, "EOF"},
 
     {TokenType::kIdentifier, "IDENTIFIER"},

@@ -1,6 +1,6 @@
 add_library(itmoscript_evaluation
     Evaluator.cpp 
-    TypeSystem.cpp
+    TypeConversionSystem.cpp
     OperatorRegistry.cpp
     Environment.cpp)
 

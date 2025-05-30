@@ -84,7 +84,7 @@ Value Join(const std::vector<Value>& args, Token from, const CallStack& call_sta
         args[0].Get<List>()->data(),
         *args[1].Get<String>(),
         [](const Value& val) {
-            return val.ToString();
+            return val.IsOfType<String>() ? *val.Get<String>() : val.ToString();
         }
     );
 
