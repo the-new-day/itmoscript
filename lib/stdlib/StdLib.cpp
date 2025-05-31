@@ -7,10 +7,19 @@
 #include "strings.hpp"
 #include "lists.hpp"
 #include "sys.cpp"
+#include "files.hpp"
 
 namespace itmoscript {
 
 namespace stdlib {
+
+void StdLib::LoadDefault() {
+    numbers::RegisterAll(*this);
+    strings::RegisterAll(*this);
+    lists::RegisterAll(*this);
+    sys::RegisterAll(*this);
+    files::RegisterAll(*this);
+}
 
 bool StdLib::Has(const std::string& name) const {
     return HasValueHandlingFunc(name)
@@ -78,13 +87,6 @@ Value StdLib::CallInStreamHandlingFunc(
         throw lang_exceptions::UndefinedNameError{from, call_stack};
     }
     return std::invoke(in_stream_functions_[name], stream, args, from, call_stack);
-}
-
-void StdLib::LoadDefault() {
-    numbers::RegisterAll(*this);
-    strings::RegisterAll(*this);
-    lists::RegisterAll(*this);
-    sys::RegisterAll(*this);
 }
 
 void ThrowArgumentTypeError(

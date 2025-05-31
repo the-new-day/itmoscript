@@ -3,4 +3,5 @@ add_library(itmoscript_stdlib
     numbers.cpp
     lists.cpp
     strings.cpp
-    sys.cpp)
+    sys.cpp
+    files.cpp)
