@@ -12,7 +12,7 @@ namespace itmoscript {
 
 /**
  * @class ListObject
- * @brief Implementation of the List undelying List type.
+ * @brief Implementation of the List undelying type.
  * The actual List type is a ReferenceValueType, which means it is
  * a reference to the actual object, which is ListObject.
  */

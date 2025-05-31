@@ -14,6 +14,7 @@
 #include "exceptions/StandardFunctionNoCallError.hpp"
 #include "exceptions/UncallableObjectCallError.hpp"
 #include "exceptions/StandardOverrideError.hpp"
+#include "exceptions/ImmutableAssignmentError.hpp"
 
 #include <format>
 #include <cmath>
@@ -24,6 +25,7 @@
 namespace itmoscript {
 
 Evaluator::Evaluator() {
+    RegisterTypeConversions();
     env_stack_.emplace(std::make_shared<Environment>(nullptr));
 }
 
@@ -35,7 +37,6 @@ void Evaluator::Evaluate(ast::Program& root, std::istream& input, std::ostream& 
 }
 
 void Evaluator::EnableStandardOperators() {
-    RegisterTypeConversions();
     RegisterAriphmeticOps();
     RegisterUnaryOps();
     RegisterComparisonOps();
@@ -110,6 +111,12 @@ const Value& Evaluator::ResolveIdentifier(const ast::Identifier& ident) {
 }
 
 void Evaluator::AssignIdentifier(const ast::Identifier& ident, Value value) {
+    if (env().Has(ident.name) && env().Get(ident.name).IsOfType<Function>()) {
+        ThrowRuntimeError<lang_exceptions::ImmutableAssignmentError>(
+            ident.name, ValueType::kFunction
+        );
+    }
+
     env().Set(ident.name, std::move(value));
 }
 
@@ -610,7 +617,7 @@ void Evaluator::RegisterUnaryOps() {
 void Evaluator::RegisterComparisonOps() {
     operator_registry_.RegisterAllComparisonOps<Int>();
     operator_registry_.RegisterAllComparisonOps<Float>();
-    operator_registry_.RegisterAllComparisonOpsForHeavyType<String>();
+    operator_registry_.RegisterAllComparisonOpsForRefType<String>();
 
     operator_registry_.RegisterCommutativeOperatorForAllTypes<Bool>(
         TokenType::kEqual, 

@@ -80,12 +80,13 @@ public:
     void RegisterAllComparisonOps();
 
     /**
-     * @brief Registers all comparison operators for specified heavy type (list, string, function).
+     * @brief Registers all comparison operators for specified 
+     * reference type (e.g. list, string, function).
      *
      * All comparison operators are: ==, != , <, <=, >, >=
      */
     template<CoreValueType T>
-    void RegisterAllComparisonOpsForHeavyType();
+    void RegisterAllComparisonOpsForRefType();
 
     /**
      * @brief Finds exact handler for given binary operator with given left and right types.
@@ -164,7 +165,7 @@ void OperatorRegistry::RegisterAllComparisonOps() {
 }
 
 template<CoreValueType T>
-void OperatorRegistry::RegisterAllComparisonOpsForHeavyType() {
+void OperatorRegistry::RegisterAllComparisonOpsForRefType() {
     const auto cmp = [](auto op) {
         return [op](const Value& left, const Value& right) {
             return op(*left.Get<T>(), *right.Get<T>());

@@ -10,7 +10,7 @@ namespace itmoscript {
 /**
  * @struct CallFrame
  * @brief Represents the current call frame, used for stacktrace printing
- * and deguggin. Contains the function name and the entry token (position of the call).
+ * and debugging. Contains the function name and the entry token (position of the call).
  */
 struct CallFrame {
     std::string function_name;
