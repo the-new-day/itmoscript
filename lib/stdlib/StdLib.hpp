@@ -75,12 +75,12 @@ private:
  * ParametersCountError will be thrown by the wrapper.
  */
 template<typename F> requires std::invocable<F, std::vector<Value>&, Token, const CallStack&>
-auto MakeBuiltin(F fn, size_t arg_num) {
-    return [fn, arg_num](std::vector<Value>& args,
+auto MakeBuiltin(const std::string& name, F fn, size_t arg_num) {
+    return [name, fn, arg_num](std::vector<Value>& args,
                          Token from,
                          const CallStack& stack) -> Value {
         if (args.size() != arg_num) {
-            throw lang_exceptions::ParametersCountError{from, stack, arg_num, args.size()};
+            throw lang_exceptions::ParametersCountError{from, stack, name, arg_num, args.size()};
         }
 
         return std::invoke(fn, args, from, stack);
@@ -88,13 +88,13 @@ auto MakeBuiltin(F fn, size_t arg_num) {
 }
 
 template<typename F> requires std::invocable<F, std::ostream&, std::vector<Value>&, Token, const CallStack&>
-auto MakeBuiltin(F fn, size_t arg_num) {
-    return [fn, arg_num](std::ostream& stream,
+auto MakeBuiltin(const std::string& name, F fn, size_t arg_num) {
+    return [name, fn, arg_num](std::ostream& stream,
                          std::vector<Value>& args,
                          Token from,
                          const CallStack& stack) -> Value {
         if (args.size() != arg_num) {
-            throw lang_exceptions::ParametersCountError{from, stack, arg_num, args.size()};
+            throw lang_exceptions::ParametersCountError{from, stack, name, arg_num, args.size()};
         }
 
         return std::invoke(fn, stream, args, from, stack);
@@ -102,13 +102,13 @@ auto MakeBuiltin(F fn, size_t arg_num) {
 }
 
 template<typename F> requires std::invocable<F, std::istream&, std::vector<Value>&, Token, const CallStack&>
-auto MakeBuiltin(F fn, size_t arg_num) {
-    return [fn, arg_num](std::istream& stream,
+auto MakeBuiltin(const std::string& name, F fn, size_t arg_num) {
+    return [name, fn, arg_num](std::istream& stream,
                          std::vector<Value>& args,
                          Token from,
                          const CallStack& stack) -> Value {
         if (args.size() != arg_num) {
-            throw lang_exceptions::ParametersCountError{from, stack, arg_num, args.size()};
+            throw lang_exceptions::ParametersCountError{from, stack, name, arg_num, args.size()};
         }
 
         return std::invoke(fn, stream, args, from, stack);

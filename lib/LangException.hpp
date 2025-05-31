@@ -21,16 +21,16 @@ namespace lang_exceptions {
 inline const size_t kErrorDetailsIndent = 4;
 
 /**
- * @brief Generic exception type for all kinds of errors.
+ * @brief Generic exception type for all kinds of language errors.
  * All specific exception types should be inherited from it.
  */
-class Exception : public std::exception {
+class LangException : public std::exception {
 public:
     /**
      * @brief Constructs an expression with the token details.
      * Token is used to generate a message including error position details.
      */
-    Exception(Token token, std::string message)
+    LangException(Token token, std::string message)
         : message_(std::move(message))
         , token_(std::move(token)) {}
 
@@ -53,7 +53,7 @@ public:
         return token_.column;
     }
 
-    virtual ~Exception() = default;
+    virtual ~LangException() = default;
 
 protected:
     Token token_;

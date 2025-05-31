@@ -16,14 +16,14 @@ namespace stdlib {
 namespace numbers {
 
 void RegisterAll(StdLib& lib) {
-    lib.Register("abs", MakeBuiltin(Abs, 1));
-    lib.Register("ceil", MakeBuiltin(Ceil, 1));
-    lib.Register("floor", MakeBuiltin(Floor, 1));
-    lib.Register("round", MakeBuiltin(Round, 1));
-    lib.Register("sqrt", MakeBuiltin(Sqrt, 1));
-    lib.Register("rnd", MakeBuiltin(Rnd, 1));
-    lib.Register("parse_num", MakeBuiltin(ParseNum, 1));
-    lib.Register("to_string", MakeBuiltin(ToString, 1));
+    lib.Register("abs", MakeBuiltin("abs", Abs, 1));
+    lib.Register("ceil", MakeBuiltin("ceil", Ceil, 1));
+    lib.Register("floor", MakeBuiltin("floor", Floor, 1));
+    lib.Register("round", MakeBuiltin("round", Round, 1));
+    lib.Register("sqrt", MakeBuiltin("sqrt", Sqrt, 1));
+    lib.Register("rnd", MakeBuiltin("rnd", Rnd, 1));
+    lib.Register("parse_num", MakeBuiltin("parse_num", ParseNum, 1));
+    lib.Register("to_string", MakeBuiltin("to_string", ToString, 1));
 }
 
 void AssertIntOrFloat(const Value& val, size_t idx, Token from, const CallStack& call_stack) {

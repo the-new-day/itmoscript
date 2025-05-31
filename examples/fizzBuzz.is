@@ -1,12 +1,13 @@
 fizzBuzz = function(n)
-    for i in range(1, n)
+    for i in range(1, n + 1, 1)
         s = "Fizz" * (i % 3 == 0) + "Buzz" * (i % 5 == 0)
         if s == "" then
-            print(i)
+            println(i)
         else
-            print(s)
+            println(s)
         end if
     end for
 end function
 
-fizzBuzz(100)
+n = parse_num(read())
+fizzBuzz(n)

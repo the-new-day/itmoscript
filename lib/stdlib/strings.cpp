@@ -12,11 +12,11 @@ namespace stdlib {
 namespace strings {
 
 void RegisterAll(StdLib& lib) {
-    lib.Register("lower", MakeBuiltin(Lower, 1));
-    lib.Register("upper", MakeBuiltin(Upper, 1));
-    lib.Register("split", MakeBuiltin(Split, 2));
-    lib.Register("join", MakeBuiltin(Join, 2));
-    lib.Register("replace", MakeBuiltin(Replace, 3));
+    lib.Register("lower", MakeBuiltin("lower", Lower, 1));
+    lib.Register("upper", MakeBuiltin("upper", Upper, 1));
+    lib.Register("split", MakeBuiltin("split", Split, 2));
+    lib.Register("join", MakeBuiltin("join", Join, 2));
+    lib.Register("replace", MakeBuiltin("replace", Replace, 3));
 }
 
 Value Lower(const std::vector<Value>& args, Token from, const CallStack& call_stack) {

@@ -46,17 +46,41 @@ public:
      */
     Evaluator();
 
+    Evaluator(const Evaluator&) = delete;
+    Evaluator(Evaluator&&) = delete;
+    Evaluator& operator=(const Evaluator&) = delete;
+    Evaluator& operator=(Evaluator&&) = delete;
+    ~Evaluator() = default;
+
     /**
-     * @brief Walks through the AST from given root.
-     * Clears the call stack before execution.
+     * @brief Evaluates the AST starting from the given root node.
      * 
-     * All AST nodes, which control flow reaches, are evaluated.
+     * Performs the following steps:
+     * 1. Clears the call stack and prepares a fresh execution context
+     * 2. Traverses and evaluates all AST nodes reachable through normal control flow
+     * 3. Handles variable scopes, function calls, and built-in operations
      * 
-     * If any io-stream functions are called, they use streams passed to this function.
-     * Evaluator doesn't take the ownership of the streams, so the caller must ensure
-     * it remains valid.
+     * @note The evaluator:
+     * - Does NOT take ownership of the streams (caller must manage their lifetime)
+     * - Preserves the global environment between evaluations
+     * - May throw exceptions for runtime errors (type mismatches, undefined vars, etc.)
+     * 
+     * @param root Reference to the root AST node (ast::Program)
+     * @param input Input stream for read() operations (e.g. std::cin or file stream)
+     * @param output Output stream for print()/println() (e.g. std::cout or file stream)
+     * 
+     * @throws RuntimeError if evaluation fails (e.g., division by zero, undefined var)
+     * 
+     * @example
+     * ```
+     * Lexer lexer{"print(3 + 3)"};
+     * Parser parser{lexer};
+     * ast::Program program = parser.ParseProgram();
+     * Evaluator evaluator;
+     * evaluator.Evaluate(program, std::cin, std::cout); // outputs 3
+     * ```
      */
-    void Interpret(ast::Program& root, std::istream& input, std::ostream& output);
+    void Evaluate(ast::Program& root, std::istream& input, std::ostream& output);
 
     /** @brief Registers all standart operators, making them able to use. */
     void EnableStandardOperators();

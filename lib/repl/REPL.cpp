@@ -26,9 +26,9 @@ void REPL::Start(std::istream& input, std::ostream& output) {
                 Eval(input, output);
             }
         } catch (const lang_exceptions::RuntimeError& e) {
-            PrintException(output, e, "Runtime error");
-        } catch (const lang_exceptions::Exception& e) {
-            PrintException(output, e, "Unhandled error");
+            utils::PrintException(output, e, "Runtime error", lang_exceptions::kErrorDetailsIndent);
+        } catch (const lang_exceptions::LangException& e) {
+            utils::PrintException(output, e, "Unhandled error", lang_exceptions::kErrorDetailsIndent);
             output << current_line_ << std::endl;
             output << *utils::MultiplyStr(" ", e.column()) << '^' << std::endl;
         }
@@ -61,7 +61,7 @@ void REPL::Eval(std::istream& input, std::ostream& output) {
     ast::Program program = parser.ParseProgram();
 
     std::ostringstream out;
-    evaluator_.Interpret(program, input, out);
+    evaluator_.Evaluate(program, input, out);
     
     std::string printed = out.str();
     if (printed.empty()) {

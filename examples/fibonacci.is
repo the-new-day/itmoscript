@@ -6,7 +6,7 @@ fib = function(n)
     a = 0
     b = 1
 
-    for i in range(n - 1)
+    for i in range(0, n - 1, 1)
         c = a + b
         a = b
         b = c
@@ -15,5 +15,5 @@ fib = function(n)
     return b
 end function
 
-
-print(fib(10))
+x = parse_num(read())
+print(fib(x))

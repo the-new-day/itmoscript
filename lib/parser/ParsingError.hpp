@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Exception.hpp"
+#include "LangException.hpp"
 
 namespace itmoscript {
 
 namespace lang_exceptions {
 
-class ParsingError : public Exception {
+class ParsingError : public LangException {
 public:
     ParsingError(size_t line, size_t col, const std::string& message = "invalid syntax") 
-        : Exception(Token{.line = line, .column = col}, message) {}
+        : LangException(Token{.line = line, .column = col}, message) {}
 
     std::string error_type() const noexcept override {
         return "ParsingError";

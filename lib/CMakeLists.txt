@@ -6,7 +6,7 @@ add_subdirectory(evaluation)
 add_subdirectory(objects)
 add_subdirectory(stdlib)
 
-add_library(itmoscript interpreter.cpp)
+add_library(itmoscript interpreter.cpp cli.cpp utils.cpp)
 
 target_link_libraries(itmoscript 
     itmoscript_lexer 

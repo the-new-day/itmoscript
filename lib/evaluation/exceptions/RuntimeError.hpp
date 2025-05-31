@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Exception.hpp"
+#include "LangException.hpp"
 #include "evaluation/CallFrame.hpp"
 #include "utils.hpp"
 
@@ -11,10 +11,10 @@ namespace itmoscript {
 
 namespace lang_exceptions {
 
-class RuntimeError : public Exception {
+class RuntimeError : public LangException {
 public:
     RuntimeError(Token token, const CallStack& call_stack, const std::string& message)
-        : Exception(std::move(token), message) 
+        : LangException(std::move(token), message) 
     {
         call_stack_ = call_stack;
     }

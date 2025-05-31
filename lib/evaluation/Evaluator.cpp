@@ -27,7 +27,7 @@ Evaluator::Evaluator() {
     env_stack_.emplace(std::make_shared<Environment>(nullptr));
 }
 
-void Evaluator::Interpret(ast::Program& root, std::istream& input, std::ostream& output) {
+void Evaluator::Evaluate(ast::Program& root, std::istream& input, std::ostream& output) {
     input_ = &input;
     output_ = &output;
     call_stack_.clear();
@@ -219,7 +219,8 @@ void Evaluator::CallLibraryFunction(const std::string& name, std::vector<Value>&
 void Evaluator::CallOutStreamLibraryFunction(const std::string& name, std::vector<Value>& args) {
     last_exec_result_.value = std_lib_.CallOutStreamHandlingFunc(
         *output_, 
-        name, args, 
+        name,
+        args, 
         current_token_, 
         call_stack_
     );
@@ -229,7 +230,8 @@ void Evaluator::CallOutStreamLibraryFunction(const std::string& name, std::vecto
 void Evaluator::CallInStreamLibraryFunction(const std::string& name, std::vector<Value>& args) {
     last_exec_result_.value = std_lib_.CallInStreamHandlingFunc(
         *input_, 
-        name, args, 
+        name,
+        args, 
         current_token_, 
         call_stack_
     );
@@ -238,7 +240,11 @@ void Evaluator::CallInStreamLibraryFunction(const std::string& name, std::vector
 
 Value Evaluator::CallFunction(std::string name, const Function& func, std::vector<Value>& args) {
     if (args.size() != func.parameters().size()) {
-        ThrowRuntimeError<lang_exceptions::ParametersCountError>(func.parameters().size(), args.size());
+        ThrowRuntimeError<lang_exceptions::ParametersCountError>(
+            name,
+            func.parameters().size(),
+            args.size()
+        );
     }
 
     PushEnv();
@@ -562,6 +568,11 @@ void Evaluator::RegisterTypeConversions() {
             return static_cast<Int>(value); 
         }
     );
+    type_convertion_system_.RegisterConversion<Bool, Int>(
+        [](Bool value) { 
+            return value ? 1 : 0;
+        }
+    );
 }
 
 void Evaluator::RegisterAriphmeticOps() {
@@ -661,6 +672,7 @@ void Evaluator::RegisterComparisonOps() {
 void Evaluator::RegisterStringOps() {
     RegisterStringMultiplication<Int>();
     RegisterStringMultiplication<Float>();
+    RegisterStringMultiplication<Bool>();
 
     operator_registry_.RegisterBinaryOper<String, String>(
         TokenType::kMinus, 

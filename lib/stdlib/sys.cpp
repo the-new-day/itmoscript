@@ -3,7 +3,7 @@
 #include "StdLib.hpp"
 #include "objects/List.hpp"
 #include "utils.hpp"
-#include "Exception.hpp"
+#include "LangException.hpp"
 
 namespace itmoscript {
 
@@ -12,10 +12,10 @@ namespace stdlib {
 namespace sys {
 
 void RegisterAll(StdLib& lib) {
-    lib.RegisterOutStreamHandlingFunc("print", MakeBuiltin(Print, 1));
-    lib.RegisterOutStreamHandlingFunc("println", MakeBuiltin(PrintLn, 1));
-    lib.RegisterInStreamHandlingFunc("read", MakeBuiltin(Read, 0));
-    lib.Register("stacktrace", MakeBuiltin(Stacktrace, 0));
+    lib.RegisterOutStreamHandlingFunc("print", MakeBuiltin("print", Print, 1));
+    lib.RegisterOutStreamHandlingFunc("println", MakeBuiltin("println", PrintLn, 1));
+    lib.RegisterInStreamHandlingFunc("read", MakeBuiltin("read", Read, 0));
+    lib.Register("stacktrace", MakeBuiltin("stacktrace", Stacktrace, 0));
 }
 
 Value Print(

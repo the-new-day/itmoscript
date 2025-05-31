@@ -22,7 +22,7 @@ static itmoscript::Value Eval(const std::string& input) {
     evaluator.EnableStandardOperators();
     evaluator.EnableStd();
     std::stringstream dummy;
-    evaluator.Interpret(program, dummy, dummy);
+    evaluator.Evaluate(program, dummy, dummy);
     return evaluator.GetLastEvaluatedValue();
 }
 

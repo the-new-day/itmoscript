@@ -15,14 +15,14 @@ namespace stdlib {
 namespace lists {
     
 void RegisterAll(StdLib& lib) {
-    lib.Register("len", MakeBuiltin(Len, 1));
-    lib.Register("push", MakeBuiltin(Push, 2));
-    lib.Register("pop", MakeBuiltin(Pop, 1));
-    lib.Register("insert", MakeBuiltin(Insert, 3));
-    lib.Register("remove", MakeBuiltin(Remove, 2));
-    lib.Register("range", MakeBuiltin(Range, 3));
-    lib.Register("sort", MakeBuiltin(Sort, 1));
-    lib.Register("set", MakeBuiltin(Set, 3));
+    lib.Register("len", MakeBuiltin("len", Len, 1));
+    lib.Register("push", MakeBuiltin("push", Push, 2));
+    lib.Register("pop", MakeBuiltin("pop", Pop, 1));
+    lib.Register("insert", MakeBuiltin("insert", Insert, 3));
+    lib.Register("remove", MakeBuiltin("remove", Remove, 2));
+    lib.Register("range", MakeBuiltin("range", Range, 3));
+    lib.Register("sort", MakeBuiltin("sort", Sort, 1));
+    lib.Register("set", MakeBuiltin("set", Set, 3));
 }
 
 Value Len(const std::vector<Value>& args, Token from, const CallStack& call_stack) {
