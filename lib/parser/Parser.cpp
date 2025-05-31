@@ -54,10 +54,6 @@ Parser::Parser(Lexer& lexer)
 
         if (auto ident = dynamic_cast<ast::Identifier*>(expr->function.get())) {
             expr->function_name = ident->name;
-        } else if (dynamic_cast<ast::FunctionLiteral*>(expr->function.get()) == nullptr) {
-            ThrowError(std::format(
-                "Object {} is not callable. This incident will be reported", token.literal
-            ));
         }
 
         return expr;
@@ -182,6 +178,10 @@ std::shared_ptr<ast::Expression> Parser::ParseExpression(Precedence precedence) 
 std::shared_ptr<ast::ListLiteral> Parser::ParseListLiteral() {
     auto expr = MakeNode<ast::ListLiteral>();
     AdvanceToken();
+
+    while (IsCurrentToken(TokenType::kNewLine)) {
+        AdvanceToken();
+    }
     
     if (IsCurrentToken(TokenType::kRBracket)) {
         return expr;
@@ -192,6 +192,14 @@ std::shared_ptr<ast::ListLiteral> Parser::ParseListLiteral() {
     while (IsPeekToken(TokenType::kComma)) {
         AdvanceToken();
         AdvanceToken();
+
+        while (IsCurrentToken(TokenType::kNewLine)) {
+            AdvanceToken();
+        }
+
+        if (IsCurrentToken(TokenType::kRBracket)) {
+            return expr;
+        }
         
         expr->elements.push_back(ParseExpression());
     }
@@ -266,7 +274,6 @@ std::shared_ptr<ast::Identifier> Parser::ParseIdentifier() {
 }
 
 std::shared_ptr<ast::IntegerLiteral> Parser::ParseIntegerLiteral() {
-    // TODO: parsing with base other than 10
     std::expected<int64_t, std::errc> parsing_result = utils::ParseNumber<int64_t>(current_token_.literal);
 
     if (!parsing_result.has_value()) {

@@ -1,6 +1,4 @@
-
-#include <lib/interpreter.hpp>
-#include <gtest/gtest.h>
+#include "language_test.hpp"
 
 TEST(LoopTestSuit, ForLoop) {
     std::string code = R"(
@@ -28,7 +26,7 @@ TEST(LoopTestSuit, WhileLoop) {
         print(s)
     )";
 
-    std::string expected = "ITMOITMOITMOITMO";
+    std::string expected = "\"ITMOITMOITMOITMO\"";
 
     std::istringstream input(code);
     std::ostringstream output;

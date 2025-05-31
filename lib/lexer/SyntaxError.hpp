@@ -8,7 +8,7 @@ namespace lang_exceptions {
 
 class SyntaxError : public LangException {
 public:
-    SyntaxError(size_t line, size_t col, const std::string& message = "invalid syntax") 
+    SyntaxError(size_t line, size_t col, const std::string& message) 
         : LangException(Token{.line = line, .column = col}, message) {}
 
     std::string error_type() const noexcept override {

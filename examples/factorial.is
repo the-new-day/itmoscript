@@ -1,0 +1,14 @@
+fact = function(n)
+    if n <= 1 then
+        return 1
+    end if
+    return n * fact(n - 1)
+end function
+
+n = parse_num(read())
+while n == nil
+    println("Not a number")
+    n = parse_num(read())
+end while
+
+print(fact(n))

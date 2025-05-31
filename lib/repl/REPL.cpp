@@ -28,7 +28,7 @@ void REPL::Start(std::istream& input, std::ostream& output) {
         } catch (const lang_exceptions::RuntimeError& e) {
             utils::PrintException(output, e, "Runtime error", lang_exceptions::kErrorDetailsIndent);
         } catch (const lang_exceptions::LangException& e) {
-            utils::PrintException(output, e, "Unhandled error", lang_exceptions::kErrorDetailsIndent);
+            utils::PrintException(output, e, "Error", lang_exceptions::kErrorDetailsIndent);
             output << current_line_ << std::endl;
             output << *utils::MultiplyStr(" ", e.column()) << '^' << std::endl;
         }

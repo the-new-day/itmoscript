@@ -65,11 +65,15 @@ private:
 
     Token last_token_{.type = TokenType::kEOF};
     char current_char_ = 0;
+    char prev_char_ = 0;
 
-    size_t current_line_{0};
-    size_t current_col_{0};
+    size_t current_line_ = 1;
+    size_t current_col_ = 1;
 
-    /** @brief Reads the next character from the input and updates current_char_. */
+    /** 
+     * @brief Reads the next character from the input and updates current_char_.
+     * Uupdates current_line_ and current_col_.
+     */
     char ReadChar();
 
     /** @brief Peeks the next character from the input without consuming it. */

@@ -1,31 +1,27 @@
-#include "interpreter.hpp"
+#include "Interpreter.hpp"
 
 #include <fstream>
 #include <stdexcept>
 #include <format>
 
-bool Interpret(std::istream& input, std::ostream& output) {
-    return false;
-}
-
 namespace itmoscript {
 
 bool Interpreter::Interpret(std::istream& code, std::istream& read, std::ostream& write) {
-    Lexer lexer{code};
-    Parser parser{lexer};
-    ast::Program root = parser.ParseProgram();
-    Evaluator evaluator;
-
-    evaluator.EnableStandardOperators();
-    evaluator.EnableStd();
-
     try {
+        Lexer lexer{code};
+        Parser parser{lexer};
+        ast::Program root = parser.ParseProgram();
+        Evaluator evaluator;
+
+        evaluator.EnableStandardOperators();
+        evaluator.EnableStd();
+
         evaluator.Evaluate(root, read, write);
     } catch (const lang_exceptions::RuntimeError& e) {
         utils::PrintException(write, e, "Runtime error", lang_exceptions::kErrorDetailsIndent);
         return false;
     } catch (const lang_exceptions::LangException& e) {
-        utils::PrintException(write, e, "Unhandled error", lang_exceptions::kErrorDetailsIndent);
+        utils::PrintException(write, e, "Error", lang_exceptions::kErrorDetailsIndent);
         return false;
     }
 

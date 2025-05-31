@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "lib/interpreter.hpp"
+#include "lib/Interpreter.hpp"
 
 static itmoscript::ast::Program GetParsedProgram(const std::string& code) {
     itmoscript::Lexer lexer{code};

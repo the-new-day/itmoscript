@@ -1,0 +1,21 @@
+binary_search = function(arr, target)
+    low = 0
+    high = len(arr) - 1
+
+    while low <= high
+        mid = (low + high) / 2
+
+        if arr[mid] == target then
+            return mid
+        elseif arr[mid] < target then
+            low = mid + 1
+        else
+            high = mid - 1
+        end if
+    end while
+
+    return -1
+end function
+
+arr = [-40, -3, 0, 12, 67, 120, 444, 1001]
+print(binary_search(arr, 12)) // prints 3

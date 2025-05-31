@@ -4,7 +4,7 @@
 #include <sstream>
 #include <format>
 
-#include "lib/interpreter.hpp"
+#include "lib/Interpreter.hpp"
 
 using IsValue = itmoscript::Value;
 using IsValueType = itmoscript::ValueType;

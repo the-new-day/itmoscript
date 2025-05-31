@@ -40,7 +40,11 @@ Token Lexer::GetNextToken() {
     } else if (current == '\n') {
         token.type = TokenType::kNewLine;
     } else {
-        throw lang_exceptions::SyntaxError{current_line_, current_col_};
+        throw lang_exceptions::SyntaxError{
+            current_line_, 
+            current_col_,
+            std::string{"illegal token: "} + current
+        };
     }
 
     SetTokenPosition(token);
@@ -55,7 +59,9 @@ bool Lexer::HasNextToken() const {
 }
 
 char Lexer::ReadChar() {
+    prev_char_ = current_char_;
     current_char_ = input_->get();
+
     return current_char_;
 }
 
@@ -137,7 +143,11 @@ Token Lexer::ReadNumber() {
         }
 
         if (!std::isdigit(PeekChar())) {
-            throw lang_exceptions::SyntaxError{current_line_, current_col_ + word.size()};
+            throw lang_exceptions::SyntaxError{
+                current_line_,
+                current_col_ + word.size(),
+                "invalid syntax for scientific float notation"
+            };
         }
 
         while (std::isdigit(PeekChar())) {
@@ -148,7 +158,11 @@ Token Lexer::ReadNumber() {
     }
 
     if (IsIdentifierChar(PeekChar())) {
-        throw lang_exceptions::SyntaxError{current_line_, current_col_ + word.size()};
+        throw lang_exceptions::SyntaxError{
+            current_line_, 
+            current_col_ + word.size(),
+            "unexpected end of a number"
+        };
     }
 
     SetTokenPosition(token);

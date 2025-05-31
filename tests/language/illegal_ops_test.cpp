@@ -2,12 +2,9 @@
 #include <vector>
 #include <sstream>
 
-#include <lib/interpreter.hpp>
-#include <gtest/gtest.h>
-
+#include "language_test.hpp"
 
 std::string kUnreachable = "239";
-
 
 TEST(IllegalOperationsSuite, TypeMixing) {
     std::vector<std::string> values = {
@@ -32,8 +29,6 @@ TEST(IllegalOperationsSuite, TypeMixing) {
             ASSERT_FALSE(output.str().ends_with(kUnreachable));
         }
     }
-
-    ASSERT_FALSE(true); // TODO: remove. This test had passed when interpret hadn't been implemented yet
 }
 
 
@@ -51,6 +46,4 @@ TEST(IllegalOperationsSuite, ArgumentCountMismatch) {
 
     ASSERT_FALSE(Interpret(input, output));
     ASSERT_FALSE(output.str().ends_with(kUnreachable));
-
-    ASSERT_FALSE(true); // TODO: remove. This test had passed when interpret hadn't been implemented yet
 }

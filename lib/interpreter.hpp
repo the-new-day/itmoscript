@@ -6,8 +6,6 @@
 #include "evaluation/Evaluator.hpp"
 #include "LangException.hpp"
 
-bool Interpret(std::istream& input, std::ostream& output);
-
 namespace itmoscript {
 
 class Interpreter {

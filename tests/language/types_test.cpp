@@ -1,6 +1,4 @@
-#include <lib/interpreter.hpp>
-#include <gtest/gtest.h>
-
+#include "language_test.hpp"
 
 TEST(TypesTestSuite, IntTest) {
     std::string code = R"(

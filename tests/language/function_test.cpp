@@ -1,5 +1,4 @@
-#include <lib/interpreter.hpp>
-#include <gtest/gtest.h>
+#include "language_test.hpp"
 
 TEST(FunctionTestSuite, SimpleFunctionTest) {
     std::string code = R"(

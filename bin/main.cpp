@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
 
-#include "lib/interpreter.hpp"
-#include "cli.hpp"
+#include "lib/Interpreter.hpp"
+#include "lib/cli.hpp"
 
 int main(int argc, char** argv) {
     std::vector<std::string> args(argv + 1, argv + argc);

@@ -3,7 +3,7 @@
 
 #include <sstream>
 
-#include "lib/interpreter.hpp"
+#include "lib/Interpreter.hpp"
 
 using TT = itmoscript::TokenType;
 

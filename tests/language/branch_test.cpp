@@ -1,5 +1,4 @@
-#include <lib/interpreter.hpp>
-#include <gtest/gtest.h>
+#include "language_test.hpp"
 
 TEST(BranchTestSuite, SimpleIfTest) {
     std::string code = R"(
@@ -9,7 +8,7 @@ TEST(BranchTestSuite, SimpleIfTest) {
         end if
     )";
 
-    std::string expected = "true";
+    std::string expected = "\"true\"";
 
     std::istringstream input(code);
     std::ostringstream output;
@@ -28,7 +27,7 @@ TEST(BranchTestSuite, SimpleElseIfTest) {
         end if
     )";
 
-    std::string expected = "false";
+    std::string expected = "\"false\"";
 
     std::istringstream input(code);
     std::ostringstream output;
@@ -42,9 +41,9 @@ TEST(BranchTestSuite, ComplexIfTest) {
         v = 100 * 2 + 10 * 3 + 9
         if v == 30 then
             print(30)
-        else if v == 366 then
+        elseif v == 366 then
             print(366)
-        else if v == 239 then
+        elseif v == 239 then
             print(239)
         else
             print(0)
