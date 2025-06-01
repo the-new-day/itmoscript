@@ -1,0 +1,11 @@
+// Replace a word in the file with another word
+
+file = read()
+
+if file_exists(file) then
+    old = read()
+    new = read()
+    file_write(file, replace(file_read(file), old, new))
+else
+    println("File '" + file + "' doesn't exist!")
+end if
