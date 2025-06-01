@@ -204,6 +204,10 @@ std::shared_ptr<ast::ListLiteral> Parser::ParseListLiteral() {
         expr->elements.push_back(ParseExpression());
     }
 
+    while (IsPeekToken(TokenType::kNewLine)) {
+        AdvanceToken();
+    }
+
     Consume(TokenType::kRBracket);
     return expr;
 }
