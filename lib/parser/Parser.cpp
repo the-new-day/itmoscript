@@ -443,14 +443,28 @@ std::vector<std::shared_ptr<ast::Expression>> Parser::ParseCallArguments() {
     if (IsCurrentToken(TokenType::kRParen)) {
         return args;
     }
+
+    while (IsCurrentToken(TokenType::kNewLine)) {
+        AdvanceToken();
+    }
     
     args.push_back(ParseExpression());
 
     while (IsPeekToken(TokenType::kComma)) {
         AdvanceToken();
+
+        while (IsCurrentToken(TokenType::kNewLine)) {
+            AdvanceToken();
+        }
+
         AdvanceToken();
 
         args.push_back(ParseExpression());
+    }
+
+    
+    while (IsPeekToken(TokenType::kNewLine)) {
+        AdvanceToken();
     }
 
     Consume(TokenType::kRParen);
@@ -529,6 +543,10 @@ std::shared_ptr<ast::ContinueStatement> Parser::ParseContinueStatement() {
 std::vector<std::shared_ptr<ast::Identifier>> Parser::ParseFunctionParameters() {
     std::vector<std::shared_ptr<ast::Identifier>> identifiers;
 
+    while (IsPeekToken(TokenType::kNewLine)) {
+        AdvanceToken();
+    }
+
     if (IsPeekToken(TokenType::kRParen)) {
         AdvanceToken();
         return identifiers;
@@ -545,10 +563,19 @@ std::vector<std::shared_ptr<ast::Identifier>> Parser::ParseFunctionParameters() 
         }
 
         AdvanceToken();
+        
+        while (IsPeekToken(TokenType::kNewLine)) {
+            AdvanceToken();
+        }
+
         Consume(TokenType::kIdentifier);
 
         ident = ParseIdentifier();
         identifiers.push_back(std::move(ident));
+    }
+        
+    while (IsPeekToken(TokenType::kNewLine)) {
+        AdvanceToken();
     }
 
     Consume(TokenType::kRParen);

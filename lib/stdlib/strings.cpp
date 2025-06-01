@@ -101,7 +101,7 @@ Value Replace(std::vector<Value>& args, Token from, const CallStack& call_stack)
     const std::string& to = *args[2].Get<String>();
 
     utils::ReplaceAll(original, old, to);
-    return args[0];
+    return NullType{};
 }
 
 } // namespace lists

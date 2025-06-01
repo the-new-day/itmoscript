@@ -66,9 +66,9 @@ enum class ValueType {
     kInt = 1,
     kFloat = 2,
     kBool = 3,
-    kFunction = 4,
-    kString = 5,
-    kList = 6,
+    kString = 4,
+    kList = 5,
+    kFunction = 6,
     kNullType = 7,
 };
 

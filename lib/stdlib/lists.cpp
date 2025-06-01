@@ -102,8 +102,9 @@ Value Pop(std::vector<Value>& args, Token from, const CallStack& call_stack) {
         ThrowError<lang_exceptions::EmptyListPopError>(std::move(from), call_stack);
     }
 
+    Value removed = list->At(list->size() - 1);
     list->Remove(list->size() - 1);
-    return list;
+    return removed;
 }
 
 Value Insert(std::vector<Value>& args, Token from, const CallStack& call_stack) {
