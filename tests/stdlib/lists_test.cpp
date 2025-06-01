@@ -53,9 +53,18 @@ TEST(StdListTestSuite, PushTest) {
 }
 
 TEST(StdListTestSuite, PopTest) {
+    // src, popped, remaining
     std::vector<std::pair<std::string, std::vector<IsValue>>> test_cases = {
-        {R"(pop([1, 2, 3]))", {1, 2}},
-        {R"(pop(["single"]))", {}},
+        {R"(
+            x = [1, 2, 3]
+            pop(x)
+            x
+        )", {1, 2}},
+        {R"(
+            x = ["single"]
+            pop(x)
+            x
+        )", {}},
     };
 
     for (const auto& [input, expected_values] : test_cases) {

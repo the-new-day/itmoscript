@@ -96,12 +96,12 @@ Value Replace(std::vector<Value>& args, Token from, const CallStack& call_stack)
     AssertType<String>(args[1], 1, from, call_stack);
     AssertType<String>(args[2], 2, from, call_stack);
 
-    std::string& original = *args[0].Get<String>();
+    std::string original = *args[0].Get<String>();
     const std::string& old = *args[1].Get<String>();
     const std::string& to = *args[2].Get<String>();
 
     utils::ReplaceAll(original, old, to);
-    return NullType{};
+    return CreateString(original);
 }
 
 } // namespace lists

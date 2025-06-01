@@ -18,4 +18,5 @@ binary_search = function(arr, target)
 end function
 
 arr = [-40, -3, 0, 12, 67, 120, 444, 1001]
-print(binary_search(arr, 12)) // prints 3
+println(binary_search(arr, 12)) // prints 3
+println(binary_search(arr, 10000)) // prints -1

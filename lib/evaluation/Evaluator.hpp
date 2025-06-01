@@ -75,7 +75,7 @@ public:
      * Parser parser{lexer};
      * ast::Program program = parser.ParseProgram();
      * Evaluator evaluator;
-     * evaluator.Evaluate(program, std::cin, std::cout); // outputs 3
+     * evaluator.Evaluate(program, std::cin, std::cout); // outputs 6
      * ```
      */
     void Evaluate(ast::Program& root, std::istream& input, std::ostream& output);
