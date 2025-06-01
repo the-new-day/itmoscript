@@ -9,6 +9,7 @@ void OperatorRegistry::RegisterCommutativeOperatorForAllPairsOfTypes(TokenType o
     RegisterCommutativeOperatorForAllTypes<String>(oper, handler);
     RegisterCommutativeOperatorForAllTypes<Bool>(oper, handler);
     RegisterCommutativeOperatorForAllTypes<Function>(oper, handler);
+    RegisterCommutativeOperatorForAllTypes<List>(oper, handler);
 }
 
 void OperatorRegistry::RegisterUnaryOperatorForAllTypes(TokenType oper, UnaryHandler handler) {
@@ -18,6 +19,7 @@ void OperatorRegistry::RegisterUnaryOperatorForAllTypes(TokenType oper, UnaryHan
     RegisterUnaryOper<String>(oper, handler);
     RegisterUnaryOper<Bool>(oper, handler);
     RegisterUnaryOper<Function>(oper, handler);
+    RegisterUnaryOper<List>(oper, handler);
 }
 
 std::optional<OperatorRegistry::BinaryHandler>

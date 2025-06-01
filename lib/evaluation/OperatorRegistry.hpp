@@ -146,6 +146,7 @@ void OperatorRegistry::RegisterCommutativeOperatorForAllTypes(
     RegisterCommutativeOperator<T, String>(oper, handler);
     RegisterCommutativeOperator<T, Bool>(oper, handler);
     RegisterCommutativeOperator<T, Function>(oper, handler);
+    RegisterCommutativeOperator<T, List>(oper, handler);
 }
 
 template<CoreValueType T>

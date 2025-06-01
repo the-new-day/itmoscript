@@ -22,8 +22,10 @@ enum class Precedence {
     kLessGreater = 4, // < or >
     kSum = 5,         // +
     kProduct = 6,     // *
-    kPrefix = 7,      // -x or !x or x ^ y
-    kCall = 8,        // func(x)
+    kPow = 7,         // x ^ y
+    kPrefix = 8,      // -x or !x
+    kIndexOp = 9,     // arr[i]
+    kCall = 10,       // func(x)
 };
 
 /**
@@ -44,8 +46,8 @@ inline const std::map<TokenType, Precedence> kPrecedences{
     {TokenType::kPercent, Precedence::kSum},
     {TokenType::kAsterisk, Precedence::kProduct},
     {TokenType::kSlash, Precedence::kProduct},
-    {TokenType::kPow, Precedence::kPrefix},
-    {TokenType::kLBracket, Precedence::kPrefix},
+    {TokenType::kPow, Precedence::kPow},
+    {TokenType::kLBracket, Precedence::kIndexOp},
     {TokenType::kLParen, Precedence::kCall},
 };
 
