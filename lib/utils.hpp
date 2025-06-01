@@ -76,20 +76,13 @@ std::string Join(const std::vector<T>& objects, const std::string& glue, const s
     return result.str();
 }
 
-namespace lang_exceptions { class RuntimeError; }
-
 template<typename T>
-void PrintException(std::ostream& output, const T& e, const std::string& label, size_t indent) {
-    if constexpr (std::is_same_v<T, lang_exceptions::RuntimeError>) {
-        output << e.GetCallStackMessage() << std::endl;
-    }
-
+void PrintException(std::ostream& output, const T& e, const std::string& label) {
     output << std::format(
         "{} on line {}, column {}:\n",
         label,
         e.line(),
-        e.column(),
-        *utils::MultiplyStr(" ", indent)
+        e.column()
     );
 
     output << std::format("{}: {}", e.error_type(), e.what()) << std::endl;

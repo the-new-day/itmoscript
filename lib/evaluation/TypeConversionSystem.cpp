@@ -8,9 +8,9 @@ bool TypeConversionSystem::CanConvert(ValueType from, ValueType to) const {
 }
 
 std::optional<Value> TypeConversionSystem::TryConvert(const Value& v, ValueType target) const {
-    if (target == v.type()) return v;
+    if (target == v.GetType()) return v;
 
-    auto key = std::make_pair(v.type(), target);
+    auto key = std::make_pair(v.GetType(), target);
     if (converters_.contains(key)) {
         return std::invoke(converters_.at(key), v);
     }

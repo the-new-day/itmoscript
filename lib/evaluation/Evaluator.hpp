@@ -5,8 +5,6 @@
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
-#include <typeindex>
-#include <stack>
 #include <iostream>
 
 #include "utils.hpp"
@@ -32,10 +30,10 @@ namespace itmoscript {
 
 /**
  * @class Evaluator
- * @brief Walks through the AST and evaluates every node. Controls the flow of evaluation,
+ * @brief Walks through the AST and evaluates every node it reaches. Controls the flow of evaluation,
  * block scopes. Holds registered identifiers and their values.
  * 
- * @details Implements the AstVisitor interface, making walking through the tree easy.
+ * @details Implements the AstVisitor interface.
  * All Visit() methods are private, the Node class is a friend of AstVisitor.
  */
 class Evaluator : public ast::AstVisitor {
@@ -111,7 +109,7 @@ private:
     };
 
     CallStack call_stack_;
-    std::stack<std::shared_ptr<Environment>> env_stack_;
+    std::vector<std::shared_ptr<Environment>> env_stack_;
 
     ExecResult last_exec_result_;
     stdlib::StdLib std_lib_;
@@ -131,6 +129,19 @@ private:
      * @brief "Leaves" the current scope. Erases all identifiers registed inside of it.
      */
     void PopEnv();
+
+    /**
+     * @brief "Enters" function scope, setting the parent of the top environment
+     * to global scope.
+     */
+    void EnterFunctionScope();
+
+    /**
+     * @brief "Leaves" function scope. Erases all identifiers registed inside of it.
+     * @details Just calls PopEnv(). This method is made only for consistency
+     * in function call evaluation.
+     */
+    void LeaveFunctionScope();
 
     /**
      * @brief Evaluates the given node by calling node.Accept(*this).
@@ -158,12 +169,32 @@ private:
     const Value& ResolveIdentifier(const ast::Identifier& ident);
 
     /**
-     * @brief Assigns the identifier with the given value.
+     * @brief Assigns the identifier to the given value.
      * If the identifier exists in the current scope or in any outer scope, changes it's value.
      * 
      * Otherwise, registers the new identifier with the given value.
      */
-    void AssignIdentifier(const ast::Identifier& ident, Value value);
+    void AssignIdentifier(const std::string& name, Value value);
+
+    /**
+     * @brief Assigns a value to an identifier with deep copy semantics for reference types.
+     * 
+     * Unlike AssignIdentifier(), this ensures that for ReferenceValueTypes:
+     * - If the value already exists, its contents are modified (not just the reference).
+     * - Avoids the issue where reassigning a reference only changes the local pointer.
+     * 
+     * Type changes create local copies (original reference remains intact).
+     * Content modifications propagate to all references.
+     * 
+     * @example
+     * x = [1, 2, 3]
+     * clear = function(arr) 
+     *   arr = []  // Without deep copy, this would only change the local 'arr' pointer
+     * end
+     * clear(x)
+     * // Using this function ensures 'x' is actually cleared
+     */
+    void AssignIdentifierWithCopy(const std::string& name, Value value);
 
     /**
      * @brief Calls the function with given arguments.

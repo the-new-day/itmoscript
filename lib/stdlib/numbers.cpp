@@ -28,7 +28,7 @@ void RegisterAll(StdLib& lib) {
 
 void AssertIntOrFloat(const Value& val, size_t idx, Token from, const CallStack& call_stack) {
     if (!val.IsOfType<Int>() && !val.IsOfType<Float>()) {
-        ThrowArgumentTypeError(std::move(from), call_stack, idx, val.type(), "Int or Float");
+        ThrowArgumentTypeError(std::move(from), call_stack, idx, val.GetType(), "Int or Float");
     }
 }
 

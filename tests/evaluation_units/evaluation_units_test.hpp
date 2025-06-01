@@ -30,7 +30,7 @@ template<typename T>
 void TestValue(const IsValue& value, T expected) {
     ASSERT_TRUE(value.IsOfType<T>()) 
         << "real type of " << value.ToString() << 
-        " is: " << itmoscript::GetTypeName(value.type());
+        " is: " << itmoscript::GetTypeName(value.GetType());
     
     ASSERT_EQ(value.Get<T>(), expected);
 }
@@ -39,7 +39,7 @@ template<typename T, typename Inner>
 void TestHeavyValue(const IsValue& value, const std::shared_ptr<Inner>& expected) {
     ASSERT_TRUE(value.IsOfType<T>()) 
         << "real type of " << value.ToString() << 
-        " is: " << itmoscript::GetTypeName(value.type());
+        " is: " << itmoscript::GetTypeName(value.GetType());
     
     ASSERT_EQ(*value.Get<T>(), *expected);
 }

@@ -18,10 +18,11 @@ bool Interpreter::Interpret(std::istream& code, std::istream& read, std::ostream
 
         evaluator.Evaluate(root, read, write);
     } catch (const lang_exceptions::RuntimeError& e) {
-        utils::PrintException(write, e, "Runtime error", lang_exceptions::kErrorDetailsIndent);
+        write << e.GetCallStackMessage() << std::endl;
+        utils::PrintException(write, e, "Runtime error");
         return false;
     } catch (const lang_exceptions::LangException& e) {
-        utils::PrintException(write, e, "Error", lang_exceptions::kErrorDetailsIndent);
+        utils::PrintException(write, e, "Error");
         return false;
     }
 

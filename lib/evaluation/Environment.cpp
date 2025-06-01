@@ -29,4 +29,8 @@ void Environment::SetInLocal(const std::string& name, Value value) {
     storage_[name] = std::move(value);
 }
 
+bool Environment::IsInLocal(const std::string& name) const {
+    return storage_.contains(name);
+}
+
 } // namespace itmoscript

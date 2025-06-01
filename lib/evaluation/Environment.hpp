@@ -59,6 +59,12 @@ public:
      */
     void SetInLocal(const std::string& name, Value value);
 
+    /**
+     * @brief Checks if name is registered in the current scope,
+     * not going up in the scope chain.
+     */
+    bool IsInLocal(const std::string& name) const;
+
 private:
     std::unordered_map<std::string, Value> storage_;
     std::shared_ptr<Environment> parent_;

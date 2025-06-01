@@ -6,7 +6,7 @@
 namespace itmoscript {
 
 bool Value::IsTruphy() const {
-    switch (type()) {
+    switch (GetType()) {
         case ValueType::kNullType:
             return false;
         case ValueType::kInt:
@@ -27,7 +27,7 @@ bool Value::IsTruphy() const {
 }
 
 std::string Value::ToString() const {
-    switch (type()) {
+    switch (GetType()) {
         case ValueType::kNullType:
             return "nil";
         case ValueType::kInt:
@@ -64,36 +64,36 @@ std::string Value::ToString() const {
 }
 
 bool Value::operator==(const Value& other) const {
-    if (type() == ValueType::kList) {
-        return other.type() == ValueType::kList
+    if (GetType() == ValueType::kList) {
+        return other.GetType() == ValueType::kList
             && Get<List>()->data() == other.Get<List>()->data();
-    } else if (type() == ValueType::kString) {
-        return other.type() == ValueType::kString
+    } else if (GetType() == ValueType::kString) {
+        return other.GetType() == ValueType::kString
             && *Get<String>() == *other.Get<String>();
-    } else if (type() == ValueType::kFunction) {
-        return other.type() == ValueType::kFunction
+    } else if (GetType() == ValueType::kFunction) {
+        return other.GetType() == ValueType::kFunction
             && Get<Function>() == other.Get<Function>();
     }
     
-    return type() == other.type() && data_ == other.data_;
+    return GetType() == other.GetType() && data_ == other.data_;
 }
 
 const std::string& Value::GetTypeName() const {
-    return itmoscript::GetTypeName(type());
+    return itmoscript::GetTypeName(GetType());
 }
 
 bool Value::operator<(const Value& other) const {
-    if (type() == ValueType::kInt && other.type() == ValueType::kFloat) {
+    if (GetType() == ValueType::kInt && other.GetType() == ValueType::kFloat) {
         return Get<Int>() < other.Get<Float>();
-    } else if (type() == ValueType::kFloat && other.type() == ValueType::kInt) {
+    } else if (GetType() == ValueType::kFloat && other.GetType() == ValueType::kInt) {
         return Get<Float>() < other.Get<Int>();
     }
     
-    if (type() != other.type()) {
-        return type() < other.type();
+    if (GetType() != other.GetType()) {
+        return GetType() < other.GetType();
     }
 
-    switch (type()) {
+    switch (GetType()) {
         case ValueType::kNullType:
             return false;
         case ValueType::kInt:
@@ -114,12 +114,12 @@ bool Value::operator<(const Value& other) const {
 }
 
 bool Value::IsReferenceType() const {
-    return kReferenceTypes.contains(type());
+    return kReferenceTypes.contains(GetType());
 }
 
 Value Value::GetCopy() const {
     if (IsReferenceType()) {
-        switch (type()) {
+        switch (GetType()) {
             case ValueType::kList:
                 return CreateList(Get<List>()->data());
             case ValueType::kString:
@@ -134,7 +134,7 @@ std::ostream& operator<<(std::ostream& stream, const Value& value) {
     return stream << value.ToString();
 }
 
-ValueType Value::type() const {
+ValueType Value::GetType() const {
     if (IsOfType<Int>()) {
         return ValueType::kInt;
     } else if (IsOfType<Float>()) {

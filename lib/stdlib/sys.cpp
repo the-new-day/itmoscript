@@ -24,7 +24,7 @@ Value Print(
     Token from, 
     const CallStack& call_stack
 ) {
-    os << args[0].ToString();
+    os << (args[0].IsOfType<String>() ? *args[0].Get<String>() : args[0].ToString());
     return NullType{};
 }
 

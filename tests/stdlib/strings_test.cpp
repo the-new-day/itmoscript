@@ -74,7 +74,7 @@ TEST(StdStringTestSuite, JoinTest) {
 
     for (const auto& [input, expected] : expressions) {
         IsValue evaluated = Eval(input);
-        ASSERT_TRUE(evaluated.type() == itmoscript::ValueType::kString);
+        ASSERT_TRUE(evaluated.GetType() == itmoscript::ValueType::kString);
         const std::string& got = *evaluated.Get<itmoscript::String>();
 
         ASSERT_EQ(expected, got);

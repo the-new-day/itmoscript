@@ -17,27 +17,28 @@ namespace itmoscript {
  */
 enum class Precedence {
     kLowest = 1,
-    kEquals = 2,      // ==
-    kLessGreater = 3, // < or >
-    kSum = 4,         // +
-    kProduct = 5,     // *
-    kPrefix = 6,      // -x or !x or x ^ y
-    kCall = 7,        // func(x)
+    kLogicalOp = 2,   // and, or
+    kEquals = 3,      // ==
+    kLessGreater = 4, // < or >
+    kSum = 5,         // +
+    kProduct = 6,     // *
+    kPrefix = 7,      // -x or !x or x ^ y
+    kCall = 8,        // func(x)
 };
 
 /**
  * @brief Mapping of token types to their corresponding precedence levels.
- * Used to resolve ambiguity in expression parsing (e.g., + vs * vs ^).
+ * Used to resolve ambiguity in expression parsing (e.g. + vs * vs ^).
  */
 inline const std::map<TokenType, Precedence> kPrecedences{
     {TokenType::kEqual, Precedence::kEquals},
     {TokenType::kNotEqual, Precedence::kEquals},
+    {TokenType::kAnd, Precedence::kLogicalOp},
+    {TokenType::kOr, Precedence::kLogicalOp},
     {TokenType::kLess, Precedence::kLessGreater},
     {TokenType::kGreater, Precedence::kLessGreater},
     {TokenType::kLessOrEqual, Precedence::kLessGreater},
     {TokenType::kGreaterOrEqual, Precedence::kLessGreater},
-    {TokenType::kAnd, Precedence::kLessGreater},
-    {TokenType::kOr, Precedence::kLessGreater},
     {TokenType::kPlus, Precedence::kSum},
     {TokenType::kMinus, Precedence::kSum},
     {TokenType::kPercent, Precedence::kSum},

@@ -26,11 +26,12 @@ void REPL::Start(std::istream& input, std::ostream& output) {
                 Eval(input, output);
             }
         } catch (const lang_exceptions::RuntimeError& e) {
-            utils::PrintException(output, e, "Runtime error", lang_exceptions::kErrorDetailsIndent);
+            output << e.GetCallStackMessage() << std::endl;
+            utils::PrintException(output, e, "Runtime error");
         } catch (const lang_exceptions::LangException& e) {
-            utils::PrintException(output, e, "Error", lang_exceptions::kErrorDetailsIndent);
+            utils::PrintException(output, e, "Error");
             output << current_line_ << std::endl;
-            output << *utils::MultiplyStr(" ", e.column()) << '^' << std::endl;
+            output << *utils::MultiplyStr(" ", e.column() - 1) << '^' << std::endl;
         }
     }
 }

@@ -136,7 +136,7 @@ void AssertType(
     const CallStack& call_stack
 ) {
     if (!val.IsOfType<T>()) {
-        ThrowArgumentTypeError(std::move(from), call_stack, idx, val.type(), GetTypeName<T>());
+        ThrowArgumentTypeError(std::move(from), call_stack, idx, val.GetType(), GetTypeName<T>());
     }
 }
     

@@ -108,7 +108,7 @@ public:
     Value() = default;
 
     /** @brief Returns the ValueType enum corresponding to the stored type. */
-    ValueType type() const;
+    ValueType GetType() const;
 
     bool IsOfType(ValueType type) const;
     

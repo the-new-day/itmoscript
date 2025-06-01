@@ -15,7 +15,6 @@ namespace lang_exceptions {
  * The error is printed as:
  * 
  * <ErrorType>:
- * 
  * (' ' * kErrorDetailsIndent)<message>
  */
 inline const size_t kErrorDetailsIndent = 4;

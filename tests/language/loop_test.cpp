@@ -26,7 +26,7 @@ TEST(LoopTestSuit, WhileLoop) {
         print(s)
     )";
 
-    std::string expected = "\"ITMOITMOITMOITMO\"";
+    std::string expected = "ITMOITMOITMOITMO";
 
     std::istringstream input(code);
     std::ostringstream output;

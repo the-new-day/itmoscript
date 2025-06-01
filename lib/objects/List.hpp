@@ -6,6 +6,8 @@
 #include <memory>
 #include <algorithm>
 
+#include <iostream>
+
 #include "Value.hpp"
 
 namespace itmoscript {

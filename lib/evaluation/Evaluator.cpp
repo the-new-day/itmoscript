@@ -26,7 +26,7 @@ namespace itmoscript {
 
 Evaluator::Evaluator() {
     RegisterTypeConversions();
-    env_stack_.emplace(std::make_shared<Environment>(nullptr));
+    env_stack_.emplace_back(std::make_shared<Environment>(nullptr));
 }
 
 void Evaluator::Evaluate(ast::Program& root, std::istream& input, std::ostream& output) {
@@ -50,7 +50,7 @@ void Evaluator::EnableStd() {
 }
 
 std::optional<Value> Evaluator::HandleUnaryOper(TokenType oper, const Value& right) {
-    if (auto handler = operator_registry_.FindExactHandler(oper, right.type())) {
+    if (auto handler = operator_registry_.FindExactHandler(oper, right.GetType())) {
         return std::invoke(*handler, right);
     }
 
@@ -58,11 +58,11 @@ std::optional<Value> Evaluator::HandleUnaryOper(TokenType oper, const Value& rig
 }
 
 std::optional<Value> Evaluator::HandleBinaryOper(TokenType oper, const Value& left, const Value& right) {
-    if (auto handler = operator_registry_.FindExactHandler(oper, left.type(), right.type())) {
+    if (auto handler = operator_registry_.FindExactHandler(oper, left.GetType(), right.GetType())) {
         return std::invoke(*handler, left, right);
     }
 
-    if (auto common = type_convertion_system_.FindCommonType(left.type(), right.type())) {
+    if (auto common = type_convertion_system_.FindCommonType(left.GetType(), right.GetType())) {
         auto lhs = type_convertion_system_.TryConvert(left, *common);
         auto rhs = type_convertion_system_.TryConvert(right, *common);
 
@@ -77,15 +77,23 @@ std::optional<Value> Evaluator::HandleBinaryOper(TokenType oper, const Value& le
 }
 
 Environment& Evaluator::env() {
-    return *env_stack_.top();
+    return *env_stack_.back();
 }
 
 void Evaluator::PushEnv() {
-    env_stack_.emplace(std::make_shared<Environment>(env_stack_.top()));
+    env_stack_.emplace_back(std::make_shared<Environment>(env_stack_.back()));
 }
 
 void Evaluator::PopEnv() {
-    env_stack_.pop();
+    env_stack_.pop_back();
+}
+
+void Evaluator::EnterFunctionScope() {
+    env_stack_.emplace_back(std::make_shared<Environment>(env_stack_.front()));
+}
+
+void Evaluator::LeaveFunctionScope() {
+    PopEnv();
 }
 
 const Evaluator::ExecResult& Evaluator::Eval(ast::Node& node) {
@@ -110,14 +118,36 @@ const Value& Evaluator::ResolveIdentifier(const ast::Identifier& ident) {
     return env().Get(ident.name);
 }
 
-void Evaluator::AssignIdentifier(const ast::Identifier& ident, Value value) {
-    if (env().Has(ident.name) && env().Get(ident.name).IsOfType<Function>()) {
+void Evaluator::AssignIdentifier(const std::string& name, Value value) {
+    if (env().Has(name) && env().Get(name).IsOfType<Function>()) {
         ThrowRuntimeError<lang_exceptions::ImmutableAssignmentError>(
-            ident.name, ValueType::kFunction
+            name, value.GetType()
         );
     }
 
-    env().Set(ident.name, std::move(value));
+    env().Set(name, std::move(value));
+}
+
+
+void Evaluator::AssignIdentifierWithCopy(const std::string& name, Value value) {
+    if (!value.IsReferenceType() || !env().Has(name)) {
+        AssignIdentifier(name, std::move(value));
+        return;
+    }
+
+    Value env_val = env().Get(name);
+    if (env_val.GetType() != value.GetType()) {
+        AssignIdentifier(name, std::move(value));
+        return;
+    }
+
+    if (value.IsOfType<List>()) {
+        *env_val.Get<List>() = std::move(*value.GetCopy().Get<List>());
+    } else if (value.IsOfType<String>()) {
+        *env_val.Get<String>() = std::move(*value.GetCopy().Get<String>());
+    } else if (value.IsOfType<Function>()) {
+        AssignIdentifier(name, std::move(value));
+    }
 }
 
 void Evaluator::Visit(ast::Program& program) {
@@ -163,7 +193,12 @@ void Evaluator::Visit(ast::AssignStatement& stmt) {
     }
 
     Eval(*stmt.expr);
-    AssignIdentifier(*stmt.ident, last_exec_result_.value);
+
+    if (!env().Has(stmt.ident->name) || dynamic_cast<ast::Identifier*>(stmt.expr.get())) {
+        AssignIdentifier(stmt.ident->name, last_exec_result_.value);
+    } else {
+        AssignIdentifierWithCopy(stmt.ident->name, last_exec_result_.value);
+    }
 }
 
 void Evaluator::Visit(ast::OperatorAssignStatement& stmt) {
@@ -176,12 +211,12 @@ void Evaluator::Visit(ast::OperatorAssignStatement& stmt) {
 
     if (auto new_value = HandleBinaryOper(kCompoundAssignOperators.at(stmt.oper), ident_value, right_res.value)) {
         last_exec_result_.value = *new_value;
-        AssignIdentifier(*stmt.ident, last_exec_result_.value);
+        AssignIdentifier(stmt.ident->name, last_exec_result_.value);
     } else {
         ThrowRuntimeError<lang_exceptions::OperatorTypeError>(
             kTokenTypeNames.at(stmt.oper),
-            ident_value.type(),
-            right_res.value.type()
+            ident_value.GetType(),
+            right_res.value.GetType()
         );
     }
 }
@@ -208,14 +243,43 @@ void Evaluator::Visit(ast::CallExpression& expr) {
     }
 
     ExecResult func_result = Eval(*expr.function);
-    if (func_result.value.type() != ValueType::kFunction) {
+    if (func_result.value.GetType() != ValueType::kFunction) {
         ThrowRuntimeError<lang_exceptions::UncallableObjectCallError>(expr.function->String());
     }
 
-    Function func = func_result.value.Get<Function>();
+    const Function& func = func_result.value.Get<Function>();
 
     last_exec_result_.value = CallFunction(GetFunctionName(expr.function_name), func, args);
     last_exec_result_.control = ControlFlowState::kNormal;
+}
+
+Value Evaluator::CallFunction(std::string name, const Function& func, std::vector<Value>& args) {
+    if (args.size() != func.parameters().size()) {
+        ThrowRuntimeError<lang_exceptions::ParametersCountError>(
+            name,
+            func.parameters().size(),
+            args.size()
+        );
+    }
+
+    EnterFunctionScope();
+    
+    call_stack_.push_back(CallFrame{.function_name = std::move(name), .entry_token = current_token_});
+
+    for (size_t i = 0; i < func.parameters().size(); ++i) {
+        const std::string& param_name = func.parameters().at(i)->name;
+        env().SetInLocal(param_name, std::move(args[i]));
+    }
+
+    ExecResult res = Eval(*func.body());
+    LeaveFunctionScope();
+    call_stack_.pop_back();
+
+    if (res.control == ControlFlowState::kReturn) {
+        return res.value;
+    } else {
+        return NullType{};
+    }
 }
 
 void Evaluator::CallLibraryFunction(const std::string& name, std::vector<Value>& args) {
@@ -243,35 +307,6 @@ void Evaluator::CallInStreamLibraryFunction(const std::string& name, std::vector
         call_stack_
     );
     last_exec_result_.control = ControlFlowState::kNormal;
-}
-
-Value Evaluator::CallFunction(std::string name, const Function& func, std::vector<Value>& args) {
-    if (args.size() != func.parameters().size()) {
-        ThrowRuntimeError<lang_exceptions::ParametersCountError>(
-            name,
-            func.parameters().size(),
-            args.size()
-        );
-    }
-
-    PushEnv();
-    
-    call_stack_.push_back(CallFrame{.function_name = std::move(name), .entry_token = current_token_});
-
-    for (size_t i = 0; i < func.parameters().size(); ++i) {
-        const std::string& name = func.parameters().at(i)->name;
-        env().SetInLocal(name, std::move(args[i]));
-    }
-
-    ExecResult res = Eval(*func.body());
-    PopEnv();
-    call_stack_.pop_back();
-
-    if (res.control == ControlFlowState::kReturn) {
-        return res.value;
-    } else {
-        return NullType{};
-    }
 }
 
 void Evaluator::Visit(ast::ReturnStatement& stmt) {
@@ -318,7 +353,7 @@ void Evaluator::Visit(ast::ForStatement& stmt) {
 
     ExecResult range_res = Eval(*stmt.range);
 
-    if (range_res.value.type() != ValueType::kList) {
+    if (range_res.value.GetType() != ValueType::kList) {
         ThrowRuntimeError<lang_exceptions::UnsupportedTypeError>(
             "range in the for loop is not of type List"
         );
@@ -364,7 +399,7 @@ void Evaluator::Visit(ast::ListLiteral& list_literal) {
         elements.push_back(Eval(*expr).value);
     }
 
-    last_exec_result_.value = std::make_shared<ListObject>(std::move(elements));
+    last_exec_result_.value = CreateList(std::move(elements));
     last_exec_result_.control = ControlFlowState::kNormal;
 }
 
@@ -438,7 +473,7 @@ void Evaluator::Visit(ast::PrefixExpression& node) {
     } else {
         ThrowRuntimeError<lang_exceptions::OperatorTypeError>(
             kTokenTypeNames.at(node.oper), 
-            right_res.value.type()
+            right_res.value.GetType()
         );
     }
 }
@@ -452,8 +487,8 @@ void Evaluator::Visit(ast::InfixExpression& node) {
     } else {
         ThrowRuntimeError<lang_exceptions::OperatorTypeError>(
             kTokenTypeNames.at(node.oper),
-            left_res.value.type(), 
-            right_res.value.type()
+            left_res.value.GetType(), 
+            right_res.value.GetType()
         );
     }
 }
@@ -465,7 +500,7 @@ void Evaluator::Visit(ast::IndexOperatorExpression& expr) {
     }
 
     ExecResult operand = Eval(*expr.operand);
-    ValueType op_type = operand.value.type();
+    ValueType op_type = operand.value.GetType();
         
     last_exec_result_.control = ControlFlowState::kNormal;
 
@@ -475,8 +510,8 @@ void Evaluator::Visit(ast::IndexOperatorExpression& expr) {
 
     ExecResult index = Eval(*expr.index);
 
-    if (index.value.type() != ValueType::kInt) {
-        ThrowRuntimeError<lang_exceptions::IndexTypeError>(index.value.type());
+    if (index.value.GetType() != ValueType::kInt) {
+        ThrowRuntimeError<lang_exceptions::IndexTypeError>(index.value.GetType());
     }
 
     Int given_pos = index.value.Get<Int>();
@@ -504,7 +539,7 @@ void Evaluator::Visit(ast::IndexOperatorExpression& expr) {
 
 void Evaluator::EvalSliceIndexExpression(ast::IndexOperatorExpression& expr) {
     ExecResult operand = Eval(*expr.operand);
-    ValueType op_type = operand.value.type();
+    ValueType op_type = operand.value.GetType();
 
     if (op_type != ValueType::kString && op_type != ValueType::kList) {
         ThrowRuntimeError<lang_exceptions::IndexOperandTypeError>(op_type);
@@ -516,8 +551,8 @@ void Evaluator::EvalSliceIndexExpression(ast::IndexOperatorExpression& expr) {
     if (expr.index != nullptr) {
         ExecResult index_res = Eval(*expr.index);
         
-        if (index_res.value.type() != ValueType::kInt) {
-            ThrowRuntimeError<lang_exceptions::IndexTypeError>(index_res.value.type());
+        if (index_res.value.GetType() != ValueType::kInt) {
+            ThrowRuntimeError<lang_exceptions::IndexTypeError>(index_res.value.GetType());
         } else if (index_res.value.Get<Int>() < 0) {
             ThrowRuntimeError<lang_exceptions::NegativeIndexError>(index_res.value.Get<Int>());
         }
@@ -528,8 +563,8 @@ void Evaluator::EvalSliceIndexExpression(ast::IndexOperatorExpression& expr) {
     if (expr.second_index != nullptr) {
         ExecResult index_res = Eval(*expr.second_index);
         
-        if (index_res.value.type() != ValueType::kInt) {
-            ThrowRuntimeError<lang_exceptions::IndexTypeError>(index_res.value.type());
+        if (index_res.value.GetType() != ValueType::kInt) {
+            ThrowRuntimeError<lang_exceptions::IndexTypeError>(index_res.value.GetType());
         } else if (index_res.value.Get<Int>() < 0) {
             ThrowRuntimeError<lang_exceptions::NegativeIndexError>(index_res.value.Get<Int>());
         }
@@ -643,7 +678,7 @@ void Evaluator::RegisterComparisonOps() {
     operator_registry_.RegisterCommutativeOperatorForAllTypes<NullType>(
         TokenType::kNotEqual, 
         [](const Value& left, const Value& right) {
-            return left.type() != right.type();
+            return left.GetType() != right.GetType();
         }
     );
 

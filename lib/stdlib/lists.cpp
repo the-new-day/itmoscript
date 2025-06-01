@@ -29,7 +29,7 @@ Value Len(const std::vector<Value>& args, Token from, const CallStack& call_stac
     const Value& arg = args[0];
 
     if (!arg.IsOfType<List>() && !arg.IsOfType<String>()) {
-        ThrowArgumentTypeError(std::move(from), call_stack, 0, arg.type(), "List or String");
+        ThrowArgumentTypeError(std::move(from), call_stack, 0, arg.GetType(), "List or String");
     }
 
     if (arg.IsOfType<List>()) {
