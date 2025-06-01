@@ -35,7 +35,7 @@ Value PrintLn(
     Token from, 
     const CallStack& call_stack
 ) {
-    os << args[0].ToString() << std::endl;
+    os << (args[0].IsOfType<String>() ? *args[0].Get<String>() : args[0].ToString()) << std::endl;
     return NullType{};
 }
 
