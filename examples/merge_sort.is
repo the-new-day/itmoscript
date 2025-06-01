@@ -1,0 +1,69 @@
+merge_sort_impl = function(arr, left, right)
+    merge = function(arr, left, mid, right)
+        n1 = mid - left + 1
+        n2 = right - mid
+
+        L = [0] * n1
+        R = [0] * n2
+
+        for i in range(0, n1, 1)
+            set(L, i, arr[left + i])
+        end for
+
+        for i in range(0, n2, 1)
+            set(R, i, arr[mid + 1 + i])
+        end for
+
+        i = 0
+        j = 0
+        k = left
+
+        while i < n1 and j < n2
+            if L[i] <= R[j] then
+                set(arr, k, L[i])
+                i += 1
+            else
+                set(arr, k, R[j])
+                j += 1
+            end if
+            k += 1
+        end while
+
+        while i < n1
+            set(arr, k, L[i])
+            i += 1
+            k += 1
+        end while
+
+        while j < n2
+            set(arr, k, R[j])
+            j += 1
+            k += 1
+        end while
+    end function
+
+    if right <= left then
+        return
+    end if
+
+    mid = (left + right) / 2
+
+    merge_sort_impl(arr, left, mid)
+    merge_sort_impl(arr, mid + 1, right)
+    merge(arr, left, mid, right)
+end function
+
+merge_sort = function(arr)
+    merge_sort_impl(arr, 0, len(arr) - 1)
+end function
+
+array = []
+
+input = read()
+while input != "end"
+    push(array, parse_num(input))
+    input = read()
+end while
+
+merge_sort(array)
+println(array)

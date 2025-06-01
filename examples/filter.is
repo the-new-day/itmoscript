@@ -1,0 +1,16 @@
+filter = function(array, fn)
+    result = []
+    for elem in array
+        if fn(elem) then
+            push(result, elem)
+        end if
+    end for
+    return result
+end function
+
+array = [1, 5, 0, -4, 16, 2, 2, 2, 324211, -9, -1111]
+is_even = function(x)
+    return x % 2 == 0
+end function
+
+print(filter(array, is_even))
