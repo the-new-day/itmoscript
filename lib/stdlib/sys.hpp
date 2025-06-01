@@ -19,6 +19,7 @@ Value Print(std::ostream& os, const std::vector<Value>& args, Token from, const 
 Value PrintLn(std::ostream& os, const std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value Read(std::istream& is, const std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value Stacktrace(const std::vector<Value>& args, Token from, const CallStack& call_stack);
+Value TypeOf(const std::vector<Value>& args, Token from, const CallStack& call_stack);
     
 } // namespace math
 

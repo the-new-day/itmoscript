@@ -16,6 +16,7 @@ void RegisterAll(StdLib& lib) {
     lib.RegisterOutStreamHandlingFunc("println", MakeBuiltin("println", PrintLn, 1));
     lib.RegisterInStreamHandlingFunc("read", MakeBuiltin("read", Read, 0));
     lib.Register("stacktrace", MakeBuiltin("stacktrace", Stacktrace, 0));
+    lib.Register("type_of", MakeBuiltin("type_of", TypeOf, 1));
 }
 
 Value Print(
@@ -61,6 +62,10 @@ Value Stacktrace(const std::vector<Value>& args, Token from, const CallStack& ca
     }
 
     return CreateList(std::move(result));
+}
+
+Value TypeOf(const std::vector<Value>& args, Token from, const CallStack &call_stack) {
+    return CreateString(args[0].GetTypeName());
 }
 
 } // namespace lists
