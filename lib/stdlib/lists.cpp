@@ -20,7 +20,7 @@ void RegisterAll(StdLib& lib) {
     lib.Register("pop", MakeBuiltin("pop", Pop, 1));
     lib.Register("insert", MakeBuiltin("insert", Insert, 3));
     lib.Register("remove", MakeBuiltin("remove", Remove, 2));
-    lib.Register("range", MakeBuiltin("range", Range, 3));
+    lib.Register("range", Range);
     lib.Register("sort", MakeBuiltin("sort", Sort, 1));
     lib.Register("set", MakeBuiltin("set", Set, 3));
 }
@@ -40,13 +40,28 @@ Value Len(const std::vector<Value>& args, Token from, const CallStack& call_stac
 }
 
 Value Range(const std::vector<Value>& args, Token from, const CallStack& call_stack) {
-    AssertType<Int>(args[0], 0, from, call_stack);
-    AssertType<Int>(args[1], 0, from, call_stack);
-    AssertType<Int>(args[2], 0, from, call_stack);
+    if (args.size() == 0 || args.size() > 3) {
+        throw lang_exceptions::ParametersCountError{from, call_stack, "range", 1, args.size()};
+    }
 
-    Int start = args[0].Get<Int>();
-    Int end = args[1].Get<Int>();
-    Int step = args[2].Get<Int>();
+    for (size_t i = 0; i < args.size(); ++i) {
+        AssertType<Int>(args[i], i, from, call_stack);
+    }
+
+    Int start = 0;
+    Int end;
+    Int step = 1;
+
+    if (args.size() == 1) {
+        end = args[0].Get<Int>();
+    } else if (args.size() == 2) {
+        start = args[0].Get<Int>();
+        end = args[1].Get<Int>();
+    } else if (args.size() == 3) {
+        start = args[0].Get<Int>();
+        end = args[1].Get<Int>();
+        step = args[2].Get<Int>();
+    }
 
     if (step == 0) {
         ThrowError<lang_exceptions::InvalidArgumentError>(

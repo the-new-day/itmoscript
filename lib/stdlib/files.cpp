@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 
 namespace itmoscript {
 
@@ -19,6 +20,7 @@ void RegisterAll(StdLib& lib) {
     lib.Register("file_read_lines", MakeBuiltin("file_read_lines", FileReadLines, 1));
     lib.Register("file_write", MakeBuiltin("file_write", FileWrite, 2));
     lib.Register("file_append", MakeBuiltin("file_append", FileAppend, 2));
+    lib.Register("file_exists", MakeBuiltin("file_exists", FileExists, 1));
 }
 
 Value FileRead(const std::vector<Value>& args, Token from, const CallStack& call_stack) {
@@ -92,6 +94,11 @@ Value FileAppend(const std::vector<Value>& args, Token from, const CallStack& ca
     }
     
     return NullType{};
+}
+
+Value FileExists(const std::vector<Value>& args, Token from, const CallStack& call_stack) {
+    AssertType<String>(args[0], 0, from, call_stack);
+    return std::filesystem::exists(*args[0].Get<String>());
 }
 
 } // namespace files

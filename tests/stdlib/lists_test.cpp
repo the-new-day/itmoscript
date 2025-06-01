@@ -4,12 +4,13 @@ using IsValue = itmoscript::Value;
 
 TEST(StdListTestSuite, RangeTest) {
     std::vector<std::pair<std::string, std::vector<itmoscript::Int>>> test_cases = {
-        {R"(range(1, 5, 1))", {1, 2, 3, 4}},
+        {R"(range(5))", {0, 1, 2, 3, 4}},
+        {R"(range(1, 5))", {1, 2, 3, 4}},
         {R"(range(5, 1, -1))", {5, 4, 3, 2}},
         {R"(range(1, 10, 3))", {1, 4, 7}},
         {R"(range(0, 5, 2))", {0, 2, 4}},
         {R"(range(5, 5, 1))", {}},
-        {R"(range(0, 3, 1))", {0, 1, 2}},
+        {R"(range(0, 3))", {0, 1, 2}},
         {R"(range(10, 0, -3))", {10, 7, 4, 1}}
     };
 

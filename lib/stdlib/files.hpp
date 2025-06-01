@@ -17,6 +17,7 @@ Value FileRead(const std::vector<Value>& args, Token from, const CallStack& call
 Value FileReadLines(const std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value FileWrite(const std::vector<Value>& args, Token from, const CallStack& call_stack);
 Value FileAppend(const std::vector<Value>& args, Token from, const CallStack& call_stack);
+Value FileExists(const std::vector<Value>& args, Token from, const CallStack& call_stack);
     
 } // namespace files
 
