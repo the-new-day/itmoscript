@@ -121,7 +121,7 @@ const Value& Evaluator::ResolveIdentifier(const ast::Identifier& ident) {
 void Evaluator::AssignIdentifier(const std::string& name, Value value) {
     if (env().Has(name) && env().Get(name).IsOfType<Function>()) {
         ThrowRuntimeError<lang_exceptions::ImmutableAssignmentError>(
-            name, value.GetType()
+            name, GetType<Function>()
         );
     }
 
